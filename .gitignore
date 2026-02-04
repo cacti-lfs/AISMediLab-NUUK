@@ -1,0 +1,15 @@
+# --- TERRAFORM ---
+terraform/*.tfstate
+terraform/*.tfstate.backup
+.terraform*
+*.tfvars
+
+# --- MACOS ---
+.DS_Store
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.iml   
+
+# --- ANSIBLE ---
