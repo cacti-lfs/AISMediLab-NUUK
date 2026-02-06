@@ -16,7 +16,7 @@ variable "vm_name" {
     description = "Nom de la VM DHCP"
 }
 
-variable "target_node" {
+variable "node_name" {
     type        = string
     description = "Nom du nœud Proxmox cible"
 }

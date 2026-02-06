@@ -1,6 +1,6 @@
-resource "proxmox_virtual_environment" "linux_vm" {
+resource "proxmox_virtual_environment_vm" "linux_vm" {
     name = var.vm_name
-    target_node = var.target_node
+    node_name = var.node_name
     vm_id = var.vm_id
 
     # Configuration CPU & RAM
@@ -10,24 +10,24 @@ resource "proxmox_virtual_environment" "linux_vm" {
     }
 
     memory {
-        size = var.memory_size
+        dedicated = var.memory
     }
 
     # Clonage depuis le template TPL-DEB-13-BASE ou TPL-DEB-13-DOCK
     clone {
-        source = var.template_id
+        vm_id = var.template_id
         full = true
     }
 
     # Réseau : Bridge vmbr0 et VLAN éventuel, à adapater selon ta config
     network_device {
         bridge = var.network_bridge
-        vlan = var.vlan_id
+        vlan_id = var.vlan_id
     }
 
     # Stockage sur NFS
     disk {
-        datastore = var.datastore_id
+        datastore_id = var.datastore_id
         interface = "scsi"
         size = var.disk_size
     }
@@ -49,7 +49,7 @@ resource "proxmox_virtual_environment" "linux_vm" {
 
 }
 
-# Export de l'ID pour que le main.tf puisse l'utiliser dans le groupe HA
 output "vm_id" {
+  # Assure-toi que le nom correspond exactement à la ressource déclarée au début
   value = proxmox_virtual_environment_vm.linux_vm.vm_id
 }

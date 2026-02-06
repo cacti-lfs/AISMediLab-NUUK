@@ -1,7 +1,7 @@
 variable "vm_name"        { 
     type = string
 }
-variable "target_node"    { 
+variable "node_name"    { 
     type = string 
 }
 variable "vm_id"          {
