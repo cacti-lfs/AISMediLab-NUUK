@@ -18,7 +18,7 @@ module "bastions" {
     # Ici, tu DOIS utiliser le nom défini dans variables.tf du module
     node_name  = var.node_name
     
-    template_id  = 9000
+    template_id  = 9001
     datastore_id = "TN-TN1"
 
     ipv4_address = each.value

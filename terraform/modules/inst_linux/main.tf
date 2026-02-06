@@ -28,7 +28,7 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
     # Stockage sur NFS
     disk {
         datastore_id = var.datastore_id
-        interface = "scsi"
+        interface = "scsi0"
         size = var.disk_size
     }
 
