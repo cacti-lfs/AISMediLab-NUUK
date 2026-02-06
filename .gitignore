@@ -2,7 +2,7 @@
 terraform/*.tfstate
 terraform/*.tfstate.backup
 .terraform*
-*.tfvars
+*.tfvars*
 
 # --- MACOS ---
 .DS_Store
