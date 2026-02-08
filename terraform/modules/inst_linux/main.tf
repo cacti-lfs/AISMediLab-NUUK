@@ -16,7 +16,7 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
     # Clonage depuis le template TPL-DEB-13-BASE ou TPL-DEB-13-DOCK
     clone {
         vm_id = var.template_id
-        full = true
+        full = false
     }
 
     # Réseau : Bridge vmbr0 et VLAN éventuel, à adapater selon ta config
@@ -32,6 +32,11 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
         size = var.disk_size
     }
 
+    # Cloud-init utilise le lecteur CD (désactiver après initialisation)
+    cdrom {
+        file_id = "none"
+    }
+
     # Cloud-Init pour config réseau et autres paramètres à l'init
     initialization {
         datastore_id = var.datastore_id
@@ -39,13 +44,12 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
         ip_config {
             ipv4 {}
         }
+        
+        user_account {
+            keys     = var.ssh_public_keys
+            username = "cloudadm"
+        }
     }
-
-    # Ajout de clef SSH pour qu'Ansible puisse se connecter
-    # user_account {
-    #     ssh_keys = [var.ssh_public_key]
-    #     username = "cloudadm"
-    # }
 
 }
 

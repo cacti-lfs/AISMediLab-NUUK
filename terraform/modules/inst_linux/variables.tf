@@ -41,3 +41,10 @@ variable "disk_size"      {
     type = number
     default = 10 
 }
+
+variable "ssh_public_keys" {
+  description = "SSH public keys for cloud-init user"
+  type        = list(string)
+  sensitive   = true
+}
+
