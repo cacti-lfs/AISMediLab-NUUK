@@ -23,11 +23,43 @@ variable "datastore_id" {
 variable "gateway_vlan10" {
     type        = string
     description = "Passerelle réseau pour le VLAN 10 (Bastions)"
+    default     = ""
 }
 
-variable "gateway_vlan80" {
+variable "gateway_vlan40" {
     type        = string
-    description = "Passerelle réseau pour le VLAN 80 (DHCP)"
+    description = "Passerelle réseau pour le VLAN 40 (Bastion)"
+    default     = ""
+}
+
+variable "gateway_vlan50" {
+    type        = string
+    description = "Passerelle réseau pour le VLAN 50 (Monitoring)"
+    default     = ""
+}
+
+variable "gateway_vlan70" {
+    type        = string
+    description = "Passerelle réseau pour le VLAN 70 (DHCP)"
+    default     = ""
+}
+
+variable "gateway_vlan120" {
+    type        = string
+    description = "Passerelle réseau pour le VLAN 120 (LB)"
+    default     = ""
+}
+
+variable "gateway_vlan130" {
+    type        = string
+    description = "Passerelle réseau pour le VLAN 130 (DMZ)"
+    default     = ""
+}
+
+variable "gateway_vlan140" {
+    type        = string
+    description = "Passerelle réseau pour le VLAN 140 (BDD)"
+    default     = ""
 }
 
 variable "cpu_cores" {

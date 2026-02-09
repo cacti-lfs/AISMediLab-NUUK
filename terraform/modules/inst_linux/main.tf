@@ -32,17 +32,15 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
         size = var.disk_size
     }
 
-    # Cloud-init utilise le lecteur CD (désactiver après initialisation)
-    cdrom {
-        file_id = "none"
-    }
-
     # Cloud-Init pour config réseau et autres paramètres à l'init
     initialization {
         datastore_id = var.datastore_id
 
         ip_config {
-            ipv4 {}
+            ipv4 {
+                address = "${var.ipv4_address}${var.cidr}"
+                gateway = var.gateway
+            }
         }
         
         user_account {
