@@ -45,7 +45,7 @@ locals {
     ha_vms = {
         "01" = {
             ipv4_address = "192.168.32.X"
-            vlan_id = 
+            vlan_id = ""
             gateway = var.gateway_vlan
         }
         "02" = {
