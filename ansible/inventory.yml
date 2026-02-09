@@ -1,0 +1,57 @@
+---
+# Inventaire Ansible généré automatiquement
+# À générer avec: terraform output -json ansible_inventory | jq . > ansible/inventory_generated.json
+
+all:
+  children:
+    
+    # --- BASTIONS (VLAN 40) ---
+    bastions:
+      hosts:
+        bastion-01:
+          ansible_host: 192.168.32.49
+          ansible_user: cloudadm
+          vm_id: 401
+          vlan_id: 40
+          
+        bastion-02:
+          ansible_host: 192.168.32.50
+          ansible_user: cloudadm
+          vm_id: 402
+          vlan_id: 40
+          
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+        ansible_become: yes
+        ansible_become_method: sudo
+    
+    # --- DHCP SERVERS (VLAN 70) ---
+    dhcp:
+      hosts:
+        dhcp-01:
+          ansible_host: 192.168.32.193
+          ansible_user: cloudadm
+          vm_id: 501
+          vlan_id: 70
+          
+        dhcp-02:
+          ansible_host: 192.168.32.194
+          ansible_user: cloudadm
+          vm_id: 502
+          vlan_id: 70
+          
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+        ansible_become: yes
+        ansible_become_method: sudo
+    
+    # --- GROUPES LOGIQUES ---
+    security:
+      children:
+        - bastions
+      
+    services:
+      children:
+        - dhcp

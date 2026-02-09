@@ -13,3 +13,4 @@ terraform/*.tfstate.backup
 *.iml   
 
 # --- ANSIBLE ---
+ansible/.venv
