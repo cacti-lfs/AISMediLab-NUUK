@@ -1,0 +1,13 @@
+---
+- name: Restart Keepalived
+  service:
+    name: keepalived
+    state: restarted
+    enabled: yes
+
+- name: Restart SSH
+  service:
+    name: ssh
+    state: restarted
+
+    

@@ -1,0 +1,37 @@
+---
+- name: Installation des paquets nécessaires (bastion)
+  apt:
+    name:
+      - keepalived
+      - iproute2
+    state: present
+    update_cache: yes
+
+- name: Activer le binding IP non-local (Sysctl)
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Configuration de Keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    mode: '0644'
+  notify: Restart Keepalived
+
+- name: Durcissement SSH (Hardening)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
+  loop:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^X11Forwarding', line: 'X11Forwarding no' }
+    # AllowTcpForwarding est vital pour le mode Bastion/Jump
+    - { regexp: '^AllowTcpForwarding', line: 'AllowTcpForwarding yes' } 
+  notify: Restart SSH
+
