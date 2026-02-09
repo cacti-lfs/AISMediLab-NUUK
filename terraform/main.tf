@@ -91,3 +91,10 @@ module "dhcp_vms" {
     memory          = var.memory
     disk_size       = var.disk_size
 }
+
+module "ha_vms" {
+    for_each = local.ha_vms
+    source = "./modules/inst_linux"
+
+    vm_name = 
+}
