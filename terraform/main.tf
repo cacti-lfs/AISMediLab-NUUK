@@ -4,12 +4,12 @@
 locals {
     bastion_vms = {
         "01" = {
-            ipv4_address = "192.168.10.49"
+            ipv4_address = "192.168.32.49"
             vlan_id      = 10
             gateway      = var.gateway_vlan10
         }
         "02" = {
-            ipv4_address = "192.168.10.50"
+            ipv4_address = "192.168.32.50"
             vlan_id      = 10
             gateway      = var.gateway_vlan10
         }
@@ -20,12 +20,12 @@ locals {
         "01" = {
             ipv4_address = null
             vlan_id      = 80
-            gateway      = var.gateway_vlan80
+            gateway      = var.gateway_vlan70
         }
         "02" = {
             ipv4_address = null
             vlan_id      = 80
-            gateway      = var.gateway_vlan80
+            gateway      = var.gateway_vlan70
         }
     }
 }
@@ -34,12 +34,12 @@ module "bastions" {
     for_each = local.bastion_vms
     source   = "./modules/inst_linux"
 
-    vm_name      = "DEB-BAS-${each.key}"
+    vm_name      = "DEB-BAST-${each.key}"
     vm_id        = 400 + tonumber(each.key)
     
     node_name  = var.node_name
     
-    template_id  = 9001
+    template_id  = 9000
     datastore_id = "TN-TN1"
 
     ipv4_address = each.value.ipv4_address
@@ -47,7 +47,7 @@ module "bastions" {
     gateway      = each.value.gateway
     vlan_id      = each.value.vlan_id
 
-    network_bridge = "vmbr0"
+    network_bridge = "vmbr40"
     
     ssh_public_keys = var.ssh_public_keys
     cpu_cores       = var.cpu_cores
@@ -64,7 +64,7 @@ module "dhcp_vms" {
     
     node_name  = var.node_name
     
-    template_id  = 9001
+    template_id  = 9000
     datastore_id = "TN-TN1"
 
     ipv4_address = each.value.ipv4_address
@@ -72,7 +72,7 @@ module "dhcp_vms" {
     gateway      = each.value.gateway
     vlan_id      = each.value.vlan_id
 
-    network_bridge = "vmbr0"
+    network_bridge = "vmbr2"
     
     ssh_public_keys = var.ssh_public_keys
     cpu_cores       = var.cpu_cores
