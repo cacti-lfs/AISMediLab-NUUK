@@ -243,7 +243,7 @@ module "doc_vms" {
   source   = "./modules/inst_linux"
 
   vm_name = "DEB-DOC-${each.key}"
-  vm_id   = 500 + tonumber(each.key)
+  vm_id   = 510 + tonumber(each.key)
 
   node_name = each.value.node_name
 
