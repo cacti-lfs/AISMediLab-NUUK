@@ -4,10 +4,12 @@
     name: keepalived
     state: restarted
     enabled: yes
+  become: yes
 
 - name: Restart SSH
   service:
     name: ssh
     state: restarted
+  become: yes
 
-    
+  

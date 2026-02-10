@@ -16,7 +16,7 @@ resource "proxmox_virtual_environment_vm" "linux_vm" {
     # Clonage depuis le template TPL-DEB-13-BASE ou TPL-DEB-13-DOCK
     clone {
         vm_id = var.template_id
-        full = false
+        full = true
     }
 
     # Réseau : Bridge vmbr0 et VLAN éventuel, à adapater selon ta config

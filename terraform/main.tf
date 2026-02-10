@@ -2,132 +2,146 @@
 
 # --- MAPPING VLAN -> BRIDGE ---
 locals {
-    vlan_bridge_map = {
-        10  = "vmbr0"   # VLAN 10 (accès non documenté, garder sur vmbr0)
-        40  = "vmbr1"   # VLAN 40 - Bastion (Sécurité)
-        50  = "vmbr1"   # VLAN 50 - Monitoring (Sécurité)
-        70  = "vmbr2"   # VLAN 70 - DHCP (LAN interne)
-        110 = "vmbr1"   # VLAN 110 - (Sécurité)
-        120 = "vmbr2"   # VLAN 120 - LB (LAN interne)
-        130 = "vmbr3"   # VLAN 130 - DMZ
-        140 = "vmbr2"   # VLAN 140 - BDD (LAN interne)
-        80  = "vmbr2"   # VLAN 80 - DHCP (LAN interne)
-    }
+  vlan_bridge_map = {
+    10  = "vmbr0" # VLAN 10 (accès non documenté, garder sur vmbr0)
+    40  = "vmbr1" # VLAN 40 - Bastion (Sécurité)
+    50  = "vmbr1" # VLAN 50 - Monitoring (Sécurité)
+    70  = "vmbr2" # VLAN 70 - DHCP (LAN interne)
+    110 = "vmbr1" # VLAN 110 - (Sécurité)
+    120 = "vmbr2" # VLAN 120 - LB (LAN interne)
+    130 = "vmbr3" # VLAN 130 - DMZ
+    140 = "vmbr2" # VLAN 140 - BDD (LAN interne)
+    80  = "vmbr2" # VLAN 80 - DHCP (LAN interne)
+  }
+  # --- ASSOCIATION NOEUD -> TEMPLATE ID ---
+  # Un template doit exister sur le nœud cible (ex: 9000 sur PVE1, 9001 sur PVE2).
+  node_template_map = {
+    (var.node_name_1) = 9000
+    (var.node_name_2) = 9001
+  }
 
-    bastion_vms = {
-        "01" = {
-            ipv4_address = "192.168.32.49"
-            vlan_id      = 40
-            gateway      = var.gateway_vlan40
-        }
-        "02" = {
-            ipv4_address = "192.168.32.50"
-            vlan_id      = 40
-            gateway      = var.gateway_vlan40
-        }
+  # --- VMs BASTION (VLAN 40) ---
+  bastion_vms = {
+    "01" = {
+      ipv4_address = "192.168.32.49"
+      vlan_id      = 40
+      gateway      = var.gateway_vlan40
+      node_name    = var.node_name_1
     }
-    
-    # VMs DHCP (VLAN 70)
-    dhcp_vms = {
-        "01" = {
-            ipv4_address = "192.168.32.193"
-            vlan_id      = 70
-            gateway      = var.gateway_vlan70
-        }
-        "02" = {
-            ipv4_address = "192.168.32.194"
-            vlan_id      = 70
-            gateway      = var.gateway_vlan70
-        }
+    "02" = {
+      ipv4_address = "192.168.32.50"
+      vlan_id      = 40
+      gateway      = var.gateway_vlan40
+      node_name    = var.node_name_2
     }
+  }
 
-    # VMs HA 
-    ha_vms = {
-        "01" = {
-            ipv4_address = "192.168.32.X"
-            vlan_id = ""
-            gateway = var.gateway_vlan
-        }
-        "02" = {
-            ipv4_address = "192.168.32.X"
-            vlan_id = 
-            gateway = var.gateway_vlan
-        }
+  # --- VMs DHCP (VLAN 70) ---
+  dhcp_vms = {
+    "01" = {
+      ipv4_address = "192.168.32.193"
+      vlan_id      = 70
+      gateway      = var.gateway_vlan70
+      node_name    = var.node_name_1
     }
+    "02" = {
+      ipv4_address = "192.168.32.194"
+      vlan_id      = 70
+      gateway      = var.gateway_vlan70
+      node_name    = var.node_name_2
+    }
+  }
+
+  # --- VMs HA (VLAN 120) ---
+  ha_vms = {
+    "01" = {
+      ipv4_address = "192.168.32.97"
+      vlan_id      = 120
+      gateway      = var.gateway_vlan120
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.32.98"
+      vlan_id      = 120
+      gateway      = var.gateway_vlan120
+      node_name    = var.node_name_2
+    }
+  }
 }
 
+# --- MODULES ---
 module "bastions" {
-    for_each        = local.bastion_vms
-    source          = "./modules/inst_linux"
+  for_each = local.bastion_vms
+  source   = "./modules/inst_linux"
 
-    vm_name         = "DEB-BAST-${each.key}"
-    vm_id           = 400 + tonumber(each.key)
-    
-    node_name  = var.node_name
-    
-    template_id     = 9000
-    datastore_id    = "TN-TN1"
+  vm_name = "DEB-BAST-${each.key}"
+  vm_id   = 400 + tonumber(each.key)
 
-    ipv4_address    = each.value.ipv4_address
-    cidr            = "/24"
-    gateway         = each.value.gateway
-    vlan_id         = each.value.vlan_id
+  node_name = each.value.node_name
 
-    network_bridge = local.vlan_bridge_map[each.value.vlan_id]
-    
-    ssh_public_keys = var.ssh_public_keys
-    cpu_cores       = var.cpu_cores
-    memory          = var.memory
-    disk_size       = var.disk_size
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/24"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
 }
 
 module "dhcp_vms" {
-    for_each        = local.dhcp_vms
-    source          = "./modules/inst_linux"
+  for_each = local.dhcp_vms
+  source   = "./modules/inst_linux"
 
-    vm_name         = "DEB-DHCP-${each.key}"
-    vm_id           = 500 + tonumber(each.key)
-    
-    node_name       = var.node_name
-    
-    template_id     = 9000
-    datastore_id    = "TN-TN1"
+  vm_name = "DEB-DHCP-${each.key}"
+  vm_id   = 500 + tonumber(each.key)
 
-    ipv4_address    = each.value.ipv4_address
-    cidr            = "/24"
-    gateway         = each.value.gateway
-    vlan_id         = each.value.vlan_id
+  node_name = each.value.node_name
 
-    network_bridge  = local.vlan_bridge_map[each.value.vlan_id]
-    
-    ssh_public_keys = var.ssh_public_keys
-    cpu_cores       = var.cpu_cores
-    memory          = var.memory
-    disk_size       = var.disk_size
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/24"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
 }
 
 module "ha_vms" {
-    for_each        = local.ha_vms
-    source          = "./modules/inst_linux"
+  for_each = local.ha_vms
+  source   = "./modules/inst_linux"
 
-    vm_name         = "DEB-HA-${each.key}"
-    vm_id           = 
+  vm_name = "DEB-HA-${each.key}"
+  vm_id   = 1200 + tonumber(each.key)
 
-    node_name       = var.node_name
+  node_name = each.value.node_name
 
-    template_id     = 9000
-    datastore_id    = "TN-TN1"
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
 
-    ipv4_address    = each.value.ipv4_address
-    cidr = "/24"
-    gateway = each.value.gateway
-    vlan_id = each.value.vlan_id
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/24"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
 
-    network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
 
-    ssh_public_keys = var.ssh_public_keys
-    cpu_cores = var.cpu_cores
-    memory = var.memory
-    disk_size = var.disk_size
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
 
 }

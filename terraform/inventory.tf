@@ -2,8 +2,9 @@
 
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/../ansible/inventory/inventory_generated.yml"
-  
+
   content = templatefile("${path.module}/inventory.tpl", {
+    bastion_vip = var.bastion_vip
     bastions = {
       for name, vm in module.bastions : "bastion-${name}" => {
         ip      = local.bastion_vms[name].ipv4_address

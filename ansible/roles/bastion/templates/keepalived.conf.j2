@@ -1,3 +1,7 @@
+global_defs {
+    router_id {{ inventory_hostname }}
+}
+
 vrrp_script chk_sshd {
     script "pidof sshd"
     interval 2
@@ -13,7 +17,7 @@ vrrp_instance VI_1 {
 
     authentication {
         auth_type PASS
-        auth_pass 1111 # Change ça pour la prod
+        auth_pass {{ keepalived_auth_pass }}
     }
 
     virtual_ipaddress {
@@ -24,3 +28,4 @@ vrrp_instance VI_1 {
         chk_sshd
     }
 }
+

@@ -1,6 +1,0 @@
----
-
-keepalived_interface: eth0       
-keepalived_auth_pass: "secret"   
-keepalived_vrid: 51              
-vip_address: 192.168.32.51       
