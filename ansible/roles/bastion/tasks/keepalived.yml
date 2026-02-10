@@ -1,0 +1,24 @@
+---
+- name: Installation de Keepalived et iproute2
+  apt:
+    name: ['keepalived', 'iproute2']
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Autoriser le binding IP non-local (Sysctl)
+  sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: '1'
+    state: present
+    reload: yes
+  become: yes
+
+- name: Configuration du fichier Keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    mode: '0644'
+  notify: Restart Keepalived
+  become: yes
+

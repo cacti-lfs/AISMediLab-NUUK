@@ -1,0 +1,17 @@
+---
+- name: Sécurisation et Config Bastion SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
+  loop:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^X11Forwarding', line: 'X11Forwarding no' }
+    # C'est cette ligne qui permet le ProxyJump via la VIP :
+    - { regexp: '^AllowTcpForwarding', line: 'AllowTcpForwarding yes' }
+  notify: Restart SSH
+  become: yes
+
+  

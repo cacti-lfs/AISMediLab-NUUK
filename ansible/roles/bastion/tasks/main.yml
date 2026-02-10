@@ -1,0 +1,15 @@
+---
+- name: Définir Bastion 01 comme MASTER
+  set_fact:
+    keepalived_state: "MASTER"
+    keepalived_priority: 101
+  when: "'bastion-01' in inventory_hostname"
+
+- name: Définir Bastion 02 comme BACKUP
+  set_fact:
+    keepalived_state: "BACKUP"
+    keepalived_priority: 100
+  when: "'bastion-02' in inventory_hostname"
+
+- include_tasks: keepalived.yml
+- include_tasks: hardening.yml
