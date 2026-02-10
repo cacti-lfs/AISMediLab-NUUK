@@ -111,7 +111,7 @@ module "ha_vms" {
     source          = "./modules/inst_linux"
 
     vm_name         = "DEB-HA-${each.key}"
-    vm_id           = 
+    vm_id           = 1200 + tonumber(each.key)
 
     node_name       = var.node_name
 
