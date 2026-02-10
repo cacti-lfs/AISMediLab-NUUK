@@ -67,6 +67,15 @@ locals {
       node_name    = var.node_name_2
     }
   }
+
+  ipam_vm = {
+    "01" = {
+      ipv4_address = "192.168.32.197"
+      vlan_id      = 70
+      gateway      = var.gateway_vlan70
+      node_name    = var.node_name_1
+    }
+  }
 }
 
 # --- MODULES ---
@@ -144,4 +153,29 @@ module "ha_vms" {
   memory          = var.memory
   disk_size       = var.disk_size
 
+}
+
+module "ipam_vm" {
+  for_each = local.ipam_vm
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-IPAM-${each.key}"
+  vm_id   = 700 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/26"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
 }
