@@ -32,6 +32,12 @@ variable "gateway_vlan40" {
     default     = ""
 }
 
+variable "bastion_vip" {
+    type        = string
+    description = "VIP (Virtual IP) du cluster Bastion pour ProxyJump Ansible"
+    default     = ""
+}
+
 variable "gateway_vlan50" {
     type        = string
     description = "Passerelle réseau pour le VLAN 50 (Monitoring)"
