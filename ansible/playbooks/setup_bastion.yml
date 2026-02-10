@@ -1,9 +1,0 @@
----
-- name: Déploiement du Cluster de Bastions
-  hosts: bastions
-  become: yes
-  
-  roles:
-    - ../roles/bastion-ha
-
-    
