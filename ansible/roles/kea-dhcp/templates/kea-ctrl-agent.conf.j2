@@ -1,0 +1,25 @@
+{
+"Control-agent": {
+    "http-host": "{{ ansible_host }}",
+    "http-port": {{ ha_port }},
+    "control-sockets": {
+        "dhcp4": {
+            "socket-type": "unix",
+            "socket-name": "/tmp/kea4-ctrl-socket"
+        }
+    },
+    "loggers": [
+        {
+            "name": "kea-ctrl-agent",
+            "output_options": [
+                {
+                    "output": "stdout",
+                    "pattern": "%-5p %m\n"
+                }
+            ],
+            "severity": "INFO",
+            "debuglevel": 0
+        }
+    ]
+}
+}
