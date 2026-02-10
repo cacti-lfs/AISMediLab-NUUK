@@ -44,14 +44,14 @@ locals {
     # VMs HA 
     ha_vms = {
         "01" = {
-            ipv4_address = "192.168.32.X"
-            vlan_id = "192.168.32.193"
-            gateway = var.gateway_vlan70
+            ipv4_address = "192.168.32.97"
+            vlan_id = 120
+            gateway = var.gateway_vlan120
         }
         "02" = {
-            ipv4_address = "192.168.32.X"
-            vlan_id = "192.168.32.194"
-            gateway = var.gateway_vlan70
+            ipv4_address = "192.168.32.98"
+            vlan_id = 120
+            gateway = var.gateway_vlan120
         }
     }
 }
