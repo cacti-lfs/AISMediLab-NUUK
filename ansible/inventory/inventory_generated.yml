@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 # Inventaire Ansible - Généré automatiquement par Terraform
 # Ne pas éditer manuellement !
@@ -57,3 +58,64 @@ all:
         dhcp:
       vars:
         zone: "Services"
+=======
+---
+# Inventaire Ansible - Généré automatiquement par Terraform
+# Ne pas éditer manuellement !
+
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+    ansible_become: yes
+    ansible_become_method: sudo
+    ansible_user: cloudadm
+  
+  children:
+    
+    # --- GROUPES PAR FONCTION ---
+    bastions:
+      hosts:
+        bastion-01:
+          ansible_host: 192.168.32.49
+          vm_id: 401
+          vlan_id: 40
+        bastion-02:
+          ansible_host: 192.168.32.50
+          vm_id: 402
+          vlan_id: 40
+      vars:
+        group_name: "Bastions"
+        role: "bastion"
+        vlan: "40"
+    
+    dhcp:
+      hosts:
+        dhcp-01:
+          ansible_host: 192.168.32.193
+          vm_id: 501
+          vlan_id: 70
+          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.49 -o StrictHostKeyChecking=no"
+        dhcp-02:
+          ansible_host: 192.168.32.194
+          vm_id: 502
+          vlan_id: 70
+          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.49 -o StrictHostKeyChecking=no"
+      vars:
+        group_name: "DHCP Servers"
+        role: "dhcp"
+        vlan: "70"
+    
+    # --- GROUPES PAR ZONE DE SÉCURITÉ ---
+    security:
+      children:
+        bastions:
+      vars:
+        zone: "Sécurité"
+    
+    services:
+      children:
+        dhcp:
+      vars:
+        zone: "Services"
+>>>>>>> a0523ecf125095177bb52ffe0d373c4251cc9eae

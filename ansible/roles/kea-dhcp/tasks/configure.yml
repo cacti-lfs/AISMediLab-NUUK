@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 # 1. FIX SYSTÈME (AppArmor & Permissions)
 # On force l'exécution de la commande AppArmor à chaque fois pour être sûr
@@ -89,4 +90,86 @@
     name: kea-dhcp4-server
     state: restarted
     enabled: yes
+=======
+# 1. PRÉPARATION APPARMOR
+- name: "FIX : aa-complain"
+  command: "aa-complain /usr/sbin/{{ item }}"
+  loop:
+    - kea-dhcp4
+    - kea-ctrl-agent
+  become: yes
+  ignore_errors: yes
+
+# 2. DÉPLOIEMENT CONFIG
+- name: Créer dossier /etc/kea
+  file:
+    path: /etc/kea
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Créer dossier /run/kea avec bons droits
+  file:
+    path: /run/kea
+    state: directory
+    owner: _kea
+    group: _kea
+    mode: '0750'
+  become: yes
+
+- name: Copier mot de passe API
+  copy:
+    dest: /etc/kea/kea-api-password
+    content: "password"
+    mode: '0600'
+    owner: _kea
+    group: _kea
+  become: yes
+
+- name: Template DHCP4
+  template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: yes
+  notify: restart kea-dhcp4
+
+- name: Template Agent
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: yes
+  notify: restart kea-ctrl-agent
+
+# 3. DÉMARRAGE DES SERVICES
+- name: S'assurer que kea-dhcp4 est démarré
+  service:
+    name: kea-dhcp4-server
+    state: started
+    enabled: yes
+  become: yes
+
+- name: S'assurer que kea-ctrl-agent est démarré
+  service:
+    name: kea-ctrl-agent
+    state: started
+    enabled: yes
+  become: yes
+
+- name: S'assurer que kea-dhcp4 est redémarré
+  service:
+    name: kea-dhcp4-server
+    state: restarted
+  become: yes
+
+- name: S'assurer que kea-ctrl-agent est redémarré
+  service:
+    name: kea-ctrl-agent
+    state: restarted
+>>>>>>> a0523ecf125095177bb52ffe0d373c4251cc9eae
   become: yes
