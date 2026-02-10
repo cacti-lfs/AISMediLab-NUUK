@@ -13,7 +13,14 @@ locals {
     140 = "vmbr2" # VLAN 140 - BDD (LAN interne)
     80  = "vmbr2" # VLAN 80 - DHCP (LAN interne)
   }
+  # --- ASSOCIATION NOEUD -> TEMPLATE ID ---
+  # Un template doit exister sur le nœud cible (ex: 9000 sur PVE1, 9001 sur PVE2).
+  node_template_map = {
+    (var.node_name_1) = 9000
+    (var.node_name_2) = 9001
+  }
 
+  # --- VMs BASTION (VLAN 40) ---
   bastion_vms = {
     "01" = {
       ipv4_address = "192.168.32.49"
@@ -29,7 +36,7 @@ locals {
     }
   }
 
-  # VMs DHCP (VLAN 70)
+  # --- VMs DHCP (VLAN 70) ---
   dhcp_vms = {
     "01" = {
       ipv4_address = "192.168.32.193"
@@ -45,7 +52,7 @@ locals {
     }
   }
 
-  # VMs HA 
+  # --- VMs HA (VLAN 120) ---
   ha_vms = {
     "01" = {
       ipv4_address = "192.168.32.97"
@@ -62,6 +69,7 @@ locals {
   }
 }
 
+# --- MODULES ---
 module "bastions" {
   for_each = local.bastion_vms
   source   = "./modules/inst_linux"
@@ -71,8 +79,8 @@ module "bastions" {
 
   node_name = each.value.node_name
 
-  template_id  = 9000
-  datastore_id = "TN-TN1"
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
   cidr         = "/24"
@@ -96,8 +104,8 @@ module "dhcp_vms" {
 
   node_name = each.value.node_name
 
-  template_id  = 9000
-  datastore_id = "TN-TN1"
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
   cidr         = "/24"
@@ -121,8 +129,8 @@ module "ha_vms" {
 
   node_name = each.value.node_name
 
-  template_id  = 9000
-  datastore_id = "TN-TN1"
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
   cidr         = "/24"
