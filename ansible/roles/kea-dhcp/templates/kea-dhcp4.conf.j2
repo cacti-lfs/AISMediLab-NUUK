@@ -6,7 +6,7 @@
     },
     "control-socket": {
         "socket-type": "unix",
-        "socket-name": "/run/kea/kea4-ctrl-socket"
+        "socket-name": "/run/kea/kea-dhcp4-ctrl.sock"
     },
     "lease-database": {
         "type": "memfile",
@@ -23,8 +23,10 @@
     "valid-lifetime": 4000,
     "renew-timer": 1000,
     "rebind-timer": 2000,
-
     "hooks-libraries": [
+        {
+            "library": "/usr/lib/x86_64-linux-gnu/kea/hooks/libdhcp_lease_cmds.so"
+        },
         {
             "library": "/usr/lib/x86_64-linux-gnu/kea/hooks/libdhcp_ha.so",
             "parameters": {
@@ -39,13 +41,13 @@
                         "peers": [
                             {
                                 "name": "dhcp-01",
-                                "url": "http://{{ primary_ip }}:{{ ha_port }}/",
+                                "url": "http://{{ primary_ip }}:8001/",
                                 "role": "primary",
                                 "auto-failover": true
                             },
                             {
                                 "name": "dhcp-02",
-                                "url": "http://{{ secondary_ip }}:{{ ha_port }}/",
+                                "url": "http://{{ secondary_ip }}:8001/",
                                 "role": "standby",
                                 "auto-failover": true
                             }
@@ -55,7 +57,6 @@
             }
         }
     ],
-
     "subnet4": [
         {% for net in dhcp_subnets %}
         {
@@ -83,7 +84,6 @@
         }{% if not loop.last %},{% endif %}
         {% endfor %}
     ],
-
     "loggers": [
     {
         "name": "kea-dhcp4",

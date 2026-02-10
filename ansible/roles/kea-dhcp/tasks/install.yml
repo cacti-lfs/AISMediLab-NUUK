@@ -6,6 +6,7 @@
       - kea-ctrl-agent
       - kea-common
       - apparmor-utils 
+      - curl
     state: present
     update_cache: yes
   become: yes

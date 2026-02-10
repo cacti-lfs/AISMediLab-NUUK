@@ -1,20 +1,19 @@
----
-- name: Reload Systemd
-  systemd:
-    daemon_reload: yes
+- name: Template DHCP4
+  template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
   become: yes
-  listen: "Restart Kea DHCP4" 
+  notify: Restart Kea DHCP4  # ← Majuscules comme dans handlers
 
-- name: Restart Kea DHCP4
-  service:
-    name: kea-dhcp4-server
-    state: restarted
-    enabled: yes
+- name: Template Agent
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
   become: yes
-
-- name: Restart Kea Ctrl Agent
-  service:
-    name: kea-ctrl-agent
-    state: restarted
-    enabled: yes
-  become: yes
+  notify: Restart Kea Ctrl Agent  # ← Majuscules comme dans handlers

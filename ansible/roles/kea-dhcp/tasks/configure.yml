@@ -1,12 +1,21 @@
----
-# 1. FIX SYSTÈME (AppArmor & Permissions)
-# On force l'exécution de la commande AppArmor à chaque fois pour être sûr
-- name: Appliquer le profil AppArmor 'complain' pour Kea
-  command: aa-complain /usr/sbin/kea-dhcp4
+# 1. PRÉPARATION APPARMOR
+- name: "FIX : aa-complain"
+  command: "aa-complain /usr/sbin/{{ item }}"
+  loop:
+    - kea-dhcp4
+    - kea-ctrl-agent
   become: yes
   ignore_errors: yes
 
-- name: Configurer le dossier /run/kea (Mode Strict 0750)
+# 2. DÉPLOIEMENT CONFIG
+- name: Créer dossier /etc/kea
+  file:
+    path: /etc/kea
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Créer dossier /run/kea avec bons droits
   file:
     path: /run/kea
     state: directory
@@ -15,42 +24,7 @@
     mode: '0750'
   become: yes
 
-# 2. FIX SYSTEMD
-- name: Créer dossier override Systemd DHCP4
-  file:
-    path: /etc/systemd/system/kea-dhcp4-server.service.d
-    state: directory
-    mode: '0755'
-  become: yes
-
-- name: Appliquer Override Systemd (RuntimeDirectoryMode=0750)
-  copy:
-    dest: /etc/systemd/system/kea-dhcp4-server.service.d/override.conf
-    content: |
-      [Service]
-      User=_kea
-      Group=_kea
-      RuntimeDirectory=kea
-      RuntimeDirectoryMode=0750
-  become: yes
-  register: systemd_override
-
-# On recharge systemd immédiatement si l'override a changé
-- name: Recharger Systemd
-  systemd:
-    daemon_reload: yes
-  become: yes
-  when: systemd_override.changed
-
-# 3. CONFIGURATION KEA
-- name: Créer le dossier /etc/kea
-  file:
-    path: /etc/kea
-    state: directory
-    mode: '0755'
-  become: yes
-
-- name: Créer le fichier mot de passe API
+- name: Copier mot de passe API
   copy:
     dest: /etc/kea/kea-api-password
     content: "password"
@@ -59,16 +33,7 @@
     group: _kea
   become: yes
 
-- name: Déployer Config Agent
-  template:
-    src: kea-ctrl-agent.conf.j2
-    dest: /etc/kea/kea-ctrl-agent.conf
-    owner: _kea
-    group: _kea
-    mode: '0644'
-  become: yes
-
-- name: Déployer Config DHCP4
+- name: Template DHCP4
   template:
     src: kea-dhcp4.conf.j2
     dest: /etc/kea/kea-dhcp4.conf
@@ -76,17 +41,41 @@
     group: _kea
     mode: '0644'
   become: yes
+  notify: restart kea-dhcp4
 
-- name: DÉMARRAGE FORCÉ Kea Control Agent
+- name: Template Agent
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: yes
+  notify: restart kea-ctrl-agent
+
+# 3. DÉMARRAGE DES SERVICES
+- name: S'assurer que kea-dhcp4 est démarré
   service:
-    name: kea-ctrl-agent
-    state: restarted
+    name: kea-dhcp4-server
+    state: started
     enabled: yes
   become: yes
 
-- name: DÉMARRAGE FORCÉ Kea DHCP4 Server
+- name: S'assurer que kea-ctrl-agent est démarré
+  service:
+    name: kea-ctrl-agent
+    state: started
+    enabled: yes
+  become: yes
+
+- name: S'assurer que kea-dhcp4 est redémarré
   service:
     name: kea-dhcp4-server
     state: restarted
-    enabled: yes
+  become: yes
+
+- name: S'assurer que kea-ctrl-agent est redémarré
+  service:
+    name: kea-ctrl-agent
+    state: restarted
   become: yes
