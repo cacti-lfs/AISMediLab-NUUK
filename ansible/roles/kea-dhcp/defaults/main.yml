@@ -79,7 +79,7 @@ dhcp_subnets:
 
   # --- VLAN 110 : NAS / Stockage ---
   - id: 110
-    subnet: "192.168.35.32/26"
+    subnet: "192.168.35.32/27"
     router: "192.168.35.62"
     pool_start: "192.168.35.35"
     pool_end: "192.168.35.60"

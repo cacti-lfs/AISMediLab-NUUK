@@ -1,4 +1,10 @@
 ---
+- name: Reload Systemd
+  systemd:
+    daemon_reload: yes
+  become: yes
+  listen: "Restart Kea DHCP4" 
+
 - name: Restart Kea DHCP4
   service:
     name: kea-dhcp4-server
