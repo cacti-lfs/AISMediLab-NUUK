@@ -114,14 +114,14 @@ locals {
   web_vms = {
     "01" = {
       ipv4_address = "192.168.35.129"
-      vlan_id      = 30
-      gateway      = var.gateway_vlan30
+      vlan_id      = 130
+      gateway      = var.gateway_vlan130
       node_name    = var.node_name_1
     }
     "02" = {
       ipv4_address = "192.168.35.130"
-      vlan_id      = 30
-      gateway      = var.gateway_vlan30
+      vlan_id      = 130
+      gateway      = var.gateway_vlan130
       node_name    = var.node_name_1
     }
   }
