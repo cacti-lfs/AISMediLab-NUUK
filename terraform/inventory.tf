@@ -2,7 +2,7 @@
 
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/../ansible/inventory/inventory_generated.yml"
-  
+
   content = templatefile("${path.module}/inventory.tpl", {
     bastion_vip = var.bastion_vip
     bastions = {
