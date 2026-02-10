@@ -34,12 +34,12 @@ all:
           ansible_host: 192.168.32.193
           vm_id: 1701
           vlan_id: 70
-          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.49 -o StrictHostKeyChecking=no"
+          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.51 -o StrictHostKeyChecking=no"
         dhcp-02:
           ansible_host: 192.168.32.194
           vm_id: 1702
           vlan_id: 70
-          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.49 -o StrictHostKeyChecking=no"
+          ansible_ssh_common_args: "-o ProxyJump=cloudadm@192.168.32.51 -o StrictHostKeyChecking=no"
       vars:
         group_name: "DHCP Servers"
         role: "dhcp"
