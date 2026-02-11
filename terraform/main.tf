@@ -67,6 +67,86 @@ locals {
       node_name    = var.node_name_2
     }
   }
+
+  # --- VM IPAM (VLAN 70) ---
+  ipam_vm = {
+    "01" = {
+      ipv4_address = "192.168.32.197"
+      vlan_id      = 70
+      gateway      = var.gateway_vlan70
+      node_name    = var.node_name_1
+    }
+  }
+
+  # --- VM MONITORING (VLAN 50) ---
+  mon_vms = {
+    "01" = {
+      ipv4_address = "192.168.32.65"
+      vlan_id      = 50
+      gateway      = var.gateway_vlan50
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.32.66"
+      vlan_id      = 50
+      gateway      = var.gateway_vlan50
+      node_name    = var.node_name_1
+    }
+  }
+
+  # --- VM DOCUMENTATION (VLAN 50) ---
+  doc_vms = {
+    "01" = {
+      ipv4_address = "192.168.32.67"
+      vlan_id      = 50
+      gateway      = var.gateway_vlan50
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.32.68"
+      vlan_id      = 50
+      gateway      = var.gateway_vlan50
+      node_name    = var.node_name_1
+    }
+  }
+
+  # --- VM WEB (VLAN 130) ---
+  web_vms = {
+    "01" = {
+      ipv4_address = "192.168.35.129"
+      vlan_id      = 130
+      gateway      = var.gateway_vlan130
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.35.130"
+      vlan_id      = 130
+      gateway      = var.gateway_vlan130
+      node_name    = var.node_name_1
+    }
+  }
+
+  # --- VM WEB (VLAN 140) ---
+  dbsql_vms = {
+    "01" = {
+      ipv4_address = "192.168.35.193"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.35.194"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
+      node_name    = var.node_name_1
+    }
+    "03" = {
+      ipv4_address = "192.168.35.195"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
+      node_name    = var.node_name_1
+    }
+  }
 }
 
 # --- MODULES ---
@@ -83,7 +163,7 @@ module "bastions" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24"
+  cidr         = "/24" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -100,7 +180,7 @@ module "dhcp_vms" {
   source   = "./modules/inst_linux"
 
   vm_name = "DEB-DHCP-${each.key}"
-  vm_id   = 500 + tonumber(each.key)
+  vm_id   = 1700 + tonumber(each.key)
 
   node_name = each.value.node_name
 
@@ -108,7 +188,7 @@ module "dhcp_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24"
+  cidr         = "/24" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -133,7 +213,7 @@ module "ha_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24"
+  cidr         = "/24" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -144,4 +224,129 @@ module "ha_vms" {
   memory          = var.memory
   disk_size       = var.disk_size
 
+}
+
+module "ipam_vm" {
+  for_each = local.ipam_vm
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-IPAM-${each.key}"
+  vm_id   = 700 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/26"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
+}
+
+module "mon_vms" {
+  for_each = local.mon_vms
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-MON-${each.key}"
+  vm_id   = 500 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/27"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
+}
+
+module "doc_vms" {
+  for_each = local.doc_vms
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-DOC-${each.key}"
+  vm_id   = 510 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/27"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
+}
+
+module "web_vms" {
+  for_each = local.web_vms
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-WEB-${each.key}"
+  vm_id   = 1300 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/26"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
+}
+
+module "dbsql_vms" {
+  for_each = local.dbsql_vms
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-DB-SQL-${each.key}"
+  vm_id   = 1400 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/26"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
 }

@@ -1,0 +1,7 @@
+---
+- name: Déploiement Kea DHCP HA
+  hosts: dhcp
+  become: no 
+  roles:
+    - ../roles/kea-dhcp
+

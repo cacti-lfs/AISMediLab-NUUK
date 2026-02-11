@@ -1,0 +1,73 @@
+# 1. PRÉPARATION APPARMOR
+- name: "FIX : aa-complain"
+  command: "aa-complain /usr/sbin/{{ item }}"
+  loop:
+    - kea-dhcp4
+    - kea-ctrl-agent
+  become: yes
+  ignore_errors: yes
+  changed_when: false # Empêche de marquer "changed" à chaque exécution
+
+# 2. DÉPLOIEMENT CONFIG
+- name: Créer dossier /etc/kea
+  file:
+    path: /etc/kea
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Configurer la persistance de /run/kea via tmpfiles.d
+  copy:
+    dest: /etc/tmpfiles.d/kea.conf
+    content: "d /run/kea 0750 _kea _kea -"
+    mode: '0644'
+  become: yes
+
+- name: Appliquer la configuration tmpfiles immédiatement
+  command: systemd-tmpfiles --create /etc/tmpfiles.d/kea.conf
+  become: yes
+  changed_when: false
+
+- name: Copier mot de passe API
+  copy:
+    dest: /etc/kea/kea-api-password
+    content: "password" # À terme, utilise Ansible Vault ici
+    mode: '0600'
+    owner: _kea
+    group: _kea
+  become: yes
+
+- name: Template DHCP4
+  template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: yes
+  notify: restart kea-dhcp4
+
+- name: Template Agent
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: yes
+  notify: restart kea-ctrl-agent
+
+# 3. DÉMARRAGE DES SERVICES
+- name: S'assurer que kea-dhcp4 est démarré et activé
+  service:
+    name: kea-dhcp4-server
+    state: started
+    enabled: yes
+  become: yes
+
+- name: S'assurer que kea-ctrl-agent est démarré et activé
+  service:
+    name: kea-ctrl-agent
+    state: started
+    enabled: yes
+  become: yes
