@@ -78,56 +78,60 @@ locals {
     }
   }
 
-  # --- VM MONITORING (VLAN 50) ---
+  # --- VM MONITORING (VLAN 60) ---
   mon_vms = {
     "01" = {
-      ipv4_address = "192.168.32.65"
-      vlan_id      = 50
+      ipv4_address = "192.168.35.225"
+      vlan_id      = 60
       gateway      = var.gateway_vlan50
       node_name    = var.node_name_1
     }
     "02" = {
-      ipv4_address = "192.168.32.66"
-      vlan_id      = 50
+      ipv4_address = "192.168.35.226"
+      vlan_id      = 60
       gateway      = var.gateway_vlan50
       node_name    = var.node_name_1
     }
   }
 
   # --- VM DOCUMENTATION (VLAN 50) ---
-  doc_vms = {
+  adm_vms = {
     "01" = {
-      ipv4_address = "192.168.32.67"
+      ipv4_address = "192.168.32.209"
       vlan_id      = 50
       gateway      = var.gateway_vlan50
       node_name    = var.node_name_1
     }
     "02" = {
-      ipv4_address = "192.168.32.68"
+      ipv4_address = "192.168.32.210"
       vlan_id      = 50
       gateway      = var.gateway_vlan50
       node_name    = var.node_name_1
     }
   }
 
-  # --- VM WEB (VLAN 130) ---
+  # --- VM WEB (VLAN 140) ---
   web_vms = {
     "01" = {
-      ipv4_address = "192.168.35.129"
-      vlan_id      = 130
-      gateway      = var.gateway_vlan130
+      ipv4_address = "192.168.35.193"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
       node_name    = var.node_name_1
     }
     "02" = {
-      ipv4_address = "192.168.35.130"
-      vlan_id      = 130
-      gateway      = var.gateway_vlan130
+      ipv4_address = "192.168.35.194"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
+      node_name    = var.node_name_1
+    }
+     "03" = {
+      ipv4_address = "192.168.35.195"
+      vlan_id      = 140
+      gateway      = var.gateway_vlan140
       node_name    = var.node_name_1
     }
   }
 
-
-  # A CORRIGER ! (Pareil pour le module)
   # --- VM DBSQL (VLAN 140) ---
   dbsql_vms = {
     "01" = {
@@ -149,7 +153,7 @@ locals {
       node_name    = var.node_name_1
     }
   }
-  # A CORRIGER ! (Pareil pour le module)
+  
   # --- VM DB VM (VLAN 160) ---
   dbvm_vms = {
     "01" = {
@@ -160,6 +164,22 @@ locals {
     }
     "02" = {
       ipv4_address = "192.168.35.226"
+      vlan_id      = 160
+      gateway      = var.gateway_vlan160
+      node_name    = var.node_name_1
+    }
+  }
+
+   # --- VM DB LOKI (VLAN 160) ---
+  dbloki_vms = {
+    "01" = {
+      ipv4_address = "192.168.35.227"
+      vlan_id      = 160
+      gateway      = var.gateway_vlan160
+      node_name    = var.node_name_1
+    }
+    "02" = {
+      ipv4_address = "192.168.35.228"
       vlan_id      = 160
       gateway      = var.gateway_vlan160
       node_name    = var.node_name_1
@@ -273,8 +293,8 @@ module "mon_vms" {
   for_each = local.mon_vms
   source   = "./modules/inst_linux"
 
-  vm_name = "DEB-MON-${each.key}"
-  vm_id   = 500 + tonumber(each.key)
+  vm_name = "DEB-DB-MON-${each.key}"
+  vm_id   = 600 + tonumber(each.key)
 
   node_name = each.value.node_name
 
@@ -282,7 +302,7 @@ module "mon_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/27"
+  cidr         = "/28"
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -294,11 +314,11 @@ module "mon_vms" {
   disk_size       = var.disk_size
 }
 
-module "doc_vms" {
-  for_each = local.doc_vms
+module "adm_vms" {
+  for_each = local.adm_vms
   source   = "./modules/inst_linux"
 
-  vm_name = "DEB-DOC-${each.key}"
+  vm_name = "DEB-DB-ADM-${each.key}"
   vm_id   = 510 + tonumber(each.key)
 
   node_name = each.value.node_name
@@ -307,7 +327,7 @@ module "doc_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/27"
+  cidr         = "/28"
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -323,8 +343,8 @@ module "web_vms" {
   for_each = local.web_vms
   source   = "./modules/inst_linux"
 
-  vm_name = "DEB-WEB-${each.key}"
-  vm_id   = 1300 + tonumber(each.key)
+  vm_name = "DEB-DB-WEB-${each.key}"
+  vm_id   = 1400 + tonumber(each.key)
 
   node_name = each.value.node_name
 
@@ -374,6 +394,31 @@ module "dbvm_vms" {
   source   = "./modules/inst_linux"
 
   vm_name = "DEB-DB-VM-${each.key}"
+  vm_id   = 1600 + tonumber(each.key)
+
+  node_name = each.value.node_name
+
+  template_id  = local.node_template_map[each.value.node_name]
+  datastore_id = var.datastore_id
+
+  ipv4_address = each.value.ipv4_address
+  cidr         = "/28"
+  gateway      = each.value.gateway
+  vlan_id      = each.value.vlan_id
+
+  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+
+  ssh_public_keys = var.ssh_public_keys
+  cpu_cores       = var.cpu_cores
+  memory          = var.memory
+  disk_size       = var.disk_size
+}
+
+module "dbloki_vms" {
+  for_each = local.dbloki_vms
+  source   = "./modules/inst_linux"
+
+  vm_name = "DEB-DB-LOKI-${each.key}"
   vm_id   = 1600 + tonumber(each.key)
 
   node_name = each.value.node_name
