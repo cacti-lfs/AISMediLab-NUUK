@@ -437,4 +437,4 @@ module "dbloki_vms" {
   cpu_cores       = var.cpu_cores
   memory          = var.memory
   disk_size       = var.disk_size
-}
+} 
