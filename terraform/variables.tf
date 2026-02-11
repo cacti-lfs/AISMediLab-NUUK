@@ -73,6 +73,12 @@ variable "gateway_vlan140" {
   default     = ""
 }
 
+variable "gateway_vlan160" {
+  type        = string
+  description = "Passerelle réseau pour le VLAN 160 (SQL Monitoring)"
+  default     = ""
+}
+
 variable "cpu_cores" {
   type        = number
   description = "Nombre de cœurs CPU"
