@@ -1,39 +1,3 @@
-<<<<<<< HEAD
-{
-"Control-agent": {
-    "http-host": "{{ ansible_host }}",
-    "http-port": {{ ha_port }},
-    "control-sockets": {
-        "dhcp4": {
-            "socket-type": "unix",
-            "socket-name": "/run/kea/kea4-ctrl-socket"
-        }
-    },
-    "authentication": {
-        "type": "basic",
-        "realm": "Kea Control Agent",
-        "clients": [
-            {
-                "user": "admin",
-                "password": "password"
-            }
-        ]
-    },
-    "loggers": [
-        {
-            "name": "kea-ctrl-agent",
-            "output_options": [
-                {
-                    "output": "stdout",
-                    "pattern": "%-5p %m\n"
-                }
-            ],
-            "severity": "INFO",
-            "debuglevel": 0
-        }
-    ]
-}
-=======
 {
 "Control-agent": {
     "http-host": "0.0.0.0",
@@ -66,5 +30,4 @@
         }
     ]
 }
->>>>>>> a0523ecf125095177bb52ffe0d373c4251cc9eae
 }

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 - name: Installer Kea DHCP et dépendances
   apt:
@@ -6,23 +5,8 @@
       - kea-dhcp4-server
       - kea-ctrl-agent
       - kea-common
-      - apparmor-utils 
-    state: present
-    update_cache: yes
-  become: yes
-
-=======
----
-- name: Installer Kea DHCP et dépendances
-  apt:
-    name:
-      - kea-dhcp4-server
-      - kea-ctrl-agent
-      - kea-common
-      - apparmor-utils 
+      - apparmor-utils
       - curl
     state: present
     update_cache: yes
   become: yes
-
->>>>>>> a0523ecf125095177bb52ffe0d373c4251cc9eae
