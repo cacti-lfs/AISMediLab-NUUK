@@ -1,9 +1,9 @@
-proxmox_api_url          = "https://XX.XX.XX.XX:8006/api2/json" # A personnaliser
+proxmox_api_url          = "https://192.168.32.131:8006/api2/json" # A personnaliser
 proxmox_api_token_id     = "terraform-prov@pve!terraform" # A personnaliser
-proxmox_api_token_secret = "" # A personnaliser
+proxmox_api_token_secret = "db910ca2-de79-4acb-a1ec-28cc742c5c8e" # A personnaliser
 
-proxmox_node = "" # A personnaliser par son nom de noeud
-vm_name      = "" # A personnaliser par le nom de la VM
+proxmox_node = "HYP-PVE1" # A personnaliser par son nom de noeud
+vm_name      = "TPL-DEB-13-BASE" # A personnaliser par le nom de la VM
 ssh_password = "throughtpolice123+" # Mot de passe temporaire de l'utilisateur
 
 iso_url      = "https://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/debian-testing-amd64-netinst.iso" # A personnaliser par l'URL de l'ISO

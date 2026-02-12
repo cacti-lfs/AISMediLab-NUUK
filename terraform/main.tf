@@ -3,21 +3,23 @@
 # --- MAPPING VLAN -> BRIDGE ---
 locals {
   vlan_bridge_map = {
-    10  = "vmbr0" # VLAN 10 (accès non documenté, garder sur vmbr0)
-    40  = "vmbr1" # VLAN 40 - Bastion (Sécurité)
-    50  = "vmbr1" # VLAN 50 - Monitoring (Sécurité)
-    70  = "vmbr2" # VLAN 70 - DHCP (LAN interne)
-    110 = "vmbr1" # VLAN 110 - (Sécurité)
-    120 = "vmbr2" # VLAN 120 - LB (LAN interne)
-    130 = "vmbr3" # VLAN 130 - DMZ
-    140 = "vmbr2" # VLAN 140 - BDD (LAN interne)
-    80  = "vmbr2" # VLAN 80 - DHCP (LAN interne)
+    "10"  = "vmbr0" # VLAN 10 (accès non documenté, garder sur vmbr0)
+    "40"  = "vmbr1" # VLAN 40 - Bastion (Sécurité)
+    "50"  = "vmbr1" # VLAN 50 - Monitoring (Sécurité)
+    "60"  = "vmbr1" # VLAN 60 - Monitoring (Sécurité)
+    "70"  = "vmbr2" # VLAN 70 - DHCP (LAN interne)
+    "80"  = "vmbr2" # VLAN 80 - DHCP (LAN interne)
+    "110" = "vmbr4" # VLAN 110 - (Sécurité)
+    "120" = "vmbr2" # VLAN 120 - LB (LAN interne)
+    "130" = "vmbr3" # VLAN 130 - DMZ
+    "140" = "vmbr2" # VLAN 140 - BDD (LAN interne)
+    "160" = "vmbr2" # VLAN 160 - DB (LAN interne)
   }
   # --- ASSOCIATION NOEUD -> TEMPLATE ID ---
   # Un template doit exister sur le nœud cible (ex: 9000 sur PVE1, 9001 sur PVE2).
   node_template_map = {
-    (var.node_name_1) = 9000
-    (var.node_name_2) = 9001
+    (var.node_name_1) = 9001
+    (var.node_name_2) = 9000
   }
 
   # --- VMs BASTION (VLAN 40) ---
@@ -74,7 +76,7 @@ locals {
       ipv4_address = "192.168.32.197"
       vlan_id      = 70
       gateway      = var.gateway_vlan70
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
   }
 
@@ -90,7 +92,7 @@ locals {
       ipv4_address = "192.168.35.226"
       vlan_id      = 60
       gateway      = var.gateway_vlan50
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
   }
 
@@ -106,7 +108,7 @@ locals {
       ipv4_address = "192.168.32.210"
       vlan_id      = 50
       gateway      = var.gateway_vlan50
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
   }
 
@@ -122,14 +124,14 @@ locals {
       ipv4_address = "192.168.35.194"
       vlan_id      = 140
       gateway      = var.gateway_vlan140
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
-     "03" = {
-      ipv4_address = "192.168.35.195"
-      vlan_id      = 140
-      gateway      = var.gateway_vlan140
-      node_name    = var.node_name_1
-    }
+#     "03" = {
+#      ipv4_address = "192.168.35.195"
+#      vlan_id      = 140
+#      gateway      = var.gateway_vlan140
+#      node_name    = var.node_name_2
+#    }
   }
 
   # --- VM DBSQL (VLAN 140) ---
@@ -144,14 +146,14 @@ locals {
       ipv4_address = "192.168.35.194"
       vlan_id      = 140
       gateway      = var.gateway_vlan140
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
-    "03" = {
-      ipv4_address = "192.168.35.195"
-      vlan_id      = 140
-      gateway      = var.gateway_vlan140
-      node_name    = var.node_name_1
-    }
+#    "03" = {
+#      ipv4_address = "192.168.35.195"
+#      vlan_id      = 140
+#      gateway      = var.gateway_vlan140
+#      node_name    = var.node_name_2
+#    }
   }
   
   # --- VM DB VM (VLAN 160) ---
@@ -166,7 +168,7 @@ locals {
       ipv4_address = "192.168.35.226"
       vlan_id      = 160
       gateway      = var.gateway_vlan160
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
   }
 
@@ -182,7 +184,7 @@ locals {
       ipv4_address = "192.168.35.228"
       vlan_id      = 160
       gateway      = var.gateway_vlan160
-      node_name    = var.node_name_1
+      node_name    = var.node_name_2
     }
   }
 }
@@ -205,7 +207,7 @@ module "bastions" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -230,7 +232,7 @@ module "dhcp_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -255,7 +257,7 @@ module "ha_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -281,7 +283,7 @@ module "ipam_vm" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -306,7 +308,7 @@ module "mon_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -331,7 +333,7 @@ module "adm_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -356,7 +358,7 @@ module "web_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
@@ -381,7 +383,7 @@ module "dbsql_vms" {
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[each.value.vlan_id]
+  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
