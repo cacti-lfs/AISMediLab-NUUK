@@ -1,25 +1,3 @@
-<<<<<<< HEAD
----
-- name: Template DHCP4
-  template:
-    src: kea-dhcp4.conf.j2
-    dest: /etc/kea/kea-dhcp4.conf
-    owner: _kea
-    group: _kea
-    mode: '0644'
-  become: yes
-  notify: Restart Kea DHCP4
-
-- name: Template Agent
-  template:
-    src: kea-ctrl-agent.conf.j2
-    dest: /etc/kea/kea-ctrl-agent.conf
-    owner: _kea
-    group: _kea
-    mode: '0644'
-  become: yes
-  notify: Restart Kea Ctrl Agent 
-=======
 ---
 - name: Template DHCP4
   template:
@@ -40,4 +18,3 @@
   service:
     name: kea-ctrl-agent
     state: restarted
->>>>>>> a04b817de0833db0ae5b0e2d7c83fc9ab6ba5b68

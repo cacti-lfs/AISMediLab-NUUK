@@ -1,0 +1,7 @@
+- name: Préparation commune des serveurs Debian
+  hosts: all
+  become: yes
+  tasks:
+    - name: Appliquer la configuration commune
+      ansible.builtin.include_role:
+        name: ../roles/common  # On remonte d'un dossier

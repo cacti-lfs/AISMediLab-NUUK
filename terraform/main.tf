@@ -203,7 +203,7 @@ module "bastions" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24" # A modifier
+  cidr         = "/28" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -228,7 +228,7 @@ module "dhcp_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24" # A modifier
+  cidr         = "/26" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
@@ -253,7 +253,7 @@ module "ha_vms" {
   datastore_id = var.datastore_id
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/24" # A modifier
+  cidr         = "/28" # A modifier
   gateway      = each.value.gateway
   vlan_id      = each.value.vlan_id
 
