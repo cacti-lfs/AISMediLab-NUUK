@@ -13,6 +13,7 @@ locals {
     "120" = "vmbr2" # VLAN 120 - LB (LAN interne)
     "130" = "vmbr3" # VLAN 130 - DMZ
     "140" = "vmbr2" # VLAN 140 - BDD (LAN interne)
+    "150" = "vmbr2" # VLAN 140 - BDD (LAN interne)
     "160" = "vmbr2" # VLAN 160 - DB (LAN interne)
   }
   # --- ASSOCIATION NOEUD -> TEMPLATE ID ---
@@ -96,7 +97,7 @@ locals {
     }
   }
 
-  # --- VM DOCUMENTATION (VLAN 50) ---
+  # --- VM DOCUMENTATION (VLAN 150) ---
   adm_vms = {
     "01" = {
       ipv4_address = "192.168.32.209"
@@ -157,17 +158,17 @@ locals {
   }
   
   # --- VM DB VM (VLAN 160) ---
-  dbvm_vms = {
+  dbadm_vms = {
     "01" = {
       ipv4_address = "192.168.35.225"
-      vlan_id      = 160
-      gateway      = var.gateway_vlan160
+      vlan_id      = 150
+      gateway      = var.gateway_vlan150
       node_name    = var.node_name_1
     }
     "02" = {
       ipv4_address = "192.168.35.226"
-      vlan_id      = 160
-      gateway      = var.gateway_vlan160
+      vlan_id      = 150
+      gateway      = var.gateway_vlan150
       node_name    = var.node_name_2
     }
   }
@@ -391,12 +392,12 @@ module "dbsql_vms" {
   disk_size       = var.disk_size
 }
 
-module "dbvm_vms" {
-  for_each = local.dbvm_vms
+module "dbadm_vms" {
+  for_each = local.dbadm_vms
   source   = "./modules/inst_linux"
 
-  vm_name = "DEB-DB-VM-${each.key}"
-  vm_id   = 1600 + tonumber(each.key)
+  vm_name = "DEB-DB-ADM-${each.key}"
+  vm_id   = 1500 + tonumber(each.key)
 
   node_name = each.value.node_name
 

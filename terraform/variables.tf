@@ -72,6 +72,11 @@ variable "gateway_vlan140" {
   description = "Passerelle réseau pour le VLAN 140 (BDD)"
   default     = ""
 }
+variable "gateway_vlan150" {
+  type        = string
+  description = "Passerelle réseau pour le VLAN 140 (BDD)"
+  default     = ""
+}
 
 variable "gateway_vlan160" {
   type        = string
