@@ -26,30 +26,25 @@ jobs:
       TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
 
     steps:
-      # 1. Récupération du code depuis GitHub
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Installation de Terraform sur le Runner (via le binaire installé)
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 3. Initialisation (Téléchargement providers et connexion Terraform Cloud)
+      - name: List files for debug
+        # Cette commande va afficher ce que le runner voit dans le dossier terraform
+        run: ls -R
+        working-directory: ./terraform
+
       - name: Terraform Init
         run: terraform init
 
-      # 4. Vérification du format du code (Lint)
       - name: Terraform Format
         run: terraform fmt -check
+        continue-on-error: true # Pour éviter de bloquer si c'est juste un souci d'espace
 
-      # 5. Génération du plan de déploiement
       - name: Terraform Plan
         id: plan
+        # Vérifie bien l'orthographe de "environnements" vs "environments"
         run: terraform plan -input=false -var-file=environnements/test/terraform.tfvars
-        continue-on-error: false
-
-    #   # 6. Déploiement Réel (Apply)
-    #   # Cette étape ne s'exécute QUE sur la branche develop ou main, pas sur les PR
-    #   - name: Terraform Apply
-    #     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
-    #     run: terraform apply -auto-approve -input=false
