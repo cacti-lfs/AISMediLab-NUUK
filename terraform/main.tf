@@ -127,12 +127,12 @@ locals {
       gateway      = var.gateway_vlan140
       node_name    = var.node_name_2
     }
-#     "03" = {
-#      ipv4_address = "192.168.35.195"
-#      vlan_id      = 140
-#      gateway      = var.gateway_vlan140
-#      node_name    = var.node_name_2
-#    }
+    #     "03" = {
+    #      ipv4_address = "192.168.35.195"
+    #      vlan_id      = 140
+    #      gateway      = var.gateway_vlan140
+    #      node_name    = var.node_name_2
+    #    }
   }
 
   # --- VM DBSQL (VLAN 140) ---
@@ -149,14 +149,14 @@ locals {
       gateway      = var.gateway_vlan140
       node_name    = var.node_name_2
     }
-#    "03" = {
-#      ipv4_address = "192.168.35.195"
-#      vlan_id      = 140
-#      gateway      = var.gateway_vlan140
-#      node_name    = var.node_name_2
-#    }
+    #    "03" = {
+    #      ipv4_address = "192.168.35.195"
+    #      vlan_id      = 140
+    #      gateway      = var.gateway_vlan140
+    #      node_name    = var.node_name_2
+    #    }
   }
-  
+
   # --- VM DB VM (VLAN 160) ---
   dbadm_vms = {
     "01" = {
@@ -173,7 +173,7 @@ locals {
     }
   }
 
-   # --- VM DB LOKI (VLAN 160) ---
+  # --- VM DB LOKI (VLAN 160) ---
   dbloki_vms = {
     "01" = {
       ipv4_address = "192.168.35.227"
