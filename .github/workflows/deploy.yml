@@ -40,6 +40,9 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Find tfvars
+        run: find . -name "*.tfvars"
+
       - name: Terraform Format
         run: terraform fmt -check
         continue-on-error: true # Pour éviter de bloquer si c'est juste un souci d'espace
