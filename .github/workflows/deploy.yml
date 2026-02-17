@@ -1,0 +1,52 @@
+name: "AISMediLab Infrastructure Deployment"
+
+on:
+  push:
+    branches:
+      - feature
+      - develop
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: "Terraform Execution"
+    runs-on: self-hosted
+    
+    # Définition des variables d'environnement globales pour le job
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+
+    steps:
+      # 1. Récupération du code depuis GitHub
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Installation de Terraform sur le Runner (via le binaire installé)
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # 3. Initialisation (Téléchargement providers et connexion Terraform Cloud)
+      - name: Terraform Init
+        run: terraform init
+
+      # 4. Vérification du format du code (Lint)
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # 5. Génération du plan de déploiement
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false
+        continue-on-error: false
+
+    #   # 6. Déploiement Réel (Apply)
+    #   # Cette étape ne s'exécute QUE sur la branche develop ou main, pas sur les PR
+    #   - name: Terraform Apply
+    #     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main')
+    #     run: terraform apply -auto-approve -input=false
