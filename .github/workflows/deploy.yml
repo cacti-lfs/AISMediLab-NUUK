@@ -42,7 +42,7 @@ jobs:
       # 5. Génération du plan de déploiement
       - name: Terraform Plan
         id: plan
-        run: terraform plan -input=false -var-file=environnements/test/terraform.tfvars
+        run: terraform plan -input=false -var-file=terraform/environnements/test/terraform.tfvars
         continue-on-error: false
 
     #   # 6. Déploiement Réel (Apply)
