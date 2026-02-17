@@ -18,3 +18,7 @@ ansible/setup_env.sh
 
 # --- PACKER ---
 packer/*
+
+# Un jour peut-être
+.$schema_architecture_infra.drawio.bkp
+schema_architecture_infra.drawio
