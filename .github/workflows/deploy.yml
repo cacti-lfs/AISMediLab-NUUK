@@ -1,4 +1,4 @@
-name: "AISMediLab Infrastructure Deployment"
+name: "Déploiement Terraform"
 
 on:
   push:
@@ -31,14 +31,14 @@ jobs:
 
       - name: List files for debug
         # Cette commande va afficher ce que le runner voit dans le dossier terraform
-        run: ls -R
-        working-directory: ./terraform
+        # run: ls -R
+        # working-directory: ./terraform
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Find tfvars
-        run: find . -name "*.tfvars"
+      # - name: Find tfvars
+      #   run: find . -name "*.tfvars"
 
       - name: Terraform Format
         run: terraform fmt -check
@@ -46,5 +46,4 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        # Vérifie bien l'orthographe de "environnements" vs "environments"
-        run: terraform plan -input=false
+        run: terraform plan
