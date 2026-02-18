@@ -6,8 +6,10 @@ variable "proxmox_api_token_id" {
 
 variable "proxmox_api_url" {
   type        = string
-  sensitive   = false
   description = "URL de l'API Proxmox"
+  sensitive   = true
+  # Remplacer cette valeur par l'URL réelle de l'API Proxmox si besoin
+  default     = "https://proxmox.example.com:8006/api2/json"
 }
 
 variable "datastore_id" {
