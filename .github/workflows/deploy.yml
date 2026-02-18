@@ -3,8 +3,6 @@ name: "AISMediLab Infrastructure Deployment"
 on:
   push:
     branches:
-      - feature
-      - develop
       - main
   pull_request:
     branches:
@@ -22,7 +20,7 @@ jobs:
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }} # Token accès Terraform Cloud
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }} # API Endpoint
-      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }} # User + token
 
     steps:
       - name: Checkout Code
