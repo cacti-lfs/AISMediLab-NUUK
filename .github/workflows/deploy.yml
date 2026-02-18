@@ -29,7 +29,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: List files for debug
+      # - name: List files for debug
         # Cette commande va afficher ce que le runner voit dans le dossier terraform
         # run: ls -R
         # working-directory: ./terraform
