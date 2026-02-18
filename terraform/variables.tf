@@ -1,99 +1,96 @@
-variable "api_token_id" {
+variable "proxmox_api_token_id" {
   type        = string
   description = "ID du token API Proxmox"
   sensitive   = true
 }
 
-
-variable "endpoint" {
+variable "proxmox_api_url" {
   type        = string
   sensitive   = false
-  description = "URL de Proxmox"
+  description = "URL de l'API Proxmox"
+}
+
+variable "datastore_id" {
+  type = string
+  description = "ID du datastore des VMs"
+  default = "TN-TN1"
 }
 
 variable "node_name_1" {
   type        = string
   description = "Nom du premier nœud Proxmox"
+  default = "node1"
 }
 
 variable "node_name_2" {
   type        = string
   description = "Nom du second nœud Proxmox"
-}
-
-variable "datastore_id" {
-  type = string
-}
-
-variable "gateway_vlan10" {
-  type        = string
-  description = "Passerelle réseau pour le VLAN 10 (Bastions)"
-  default     = ""
+  default = "node2"
 }
 
 variable "gateway_vlan40" {
   type        = string
   description = "Passerelle réseau pour le VLAN 40 (Bastion)"
-  default     = ""
-}
-
-variable "bastion_vip" {
-  type        = string
-  description = "VIP (Virtual IP) du cluster Bastion pour ProxyJump Ansible"
-  default     = ""
+  default     = "192.168.40.1"
 }
 
 variable "gateway_vlan50" {
   type        = string
   description = "Passerelle réseau pour le VLAN 50 (Monitoring)"
-  default     = ""
+  default     = "192.168.50.1"
 }
 
 variable "gateway_vlan70" {
   type        = string
   description = "Passerelle réseau pour le VLAN 70 (DHCP)"
-  default     = ""
+  default     = "192.168.70.1"
 }
 
 variable "gateway_vlan120" {
   type        = string
   description = "Passerelle réseau pour le VLAN 120 (LB)"
-  default     = ""
+  default     = "192.168.120.1"
 }
 
 variable "gateway_vlan130" {
   type        = string
   description = "Passerelle réseau pour le VLAN 130 (DMZ)"
-  default     = ""
+  default     = "192.168.130.1"
 }
 
 variable "gateway_vlan140" {
   type        = string
   description = "Passerelle réseau pour le VLAN 140 (BDD)"
-  default     = ""
+  default     = "192.168.140.1"
 }
 variable "gateway_vlan150" {
   type        = string
   description = "Passerelle réseau pour le VLAN 140 (BDD)"
-  default     = ""
+  default     = "192.168.150.1"
 }
 
 variable "gateway_vlan160" {
   type        = string
   description = "Passerelle réseau pour le VLAN 160 (SQL Monitoring)"
-  default     = ""
+  default     = "192.168.160.1"
+}
+
+variable "bastion_vip" {
+  type        = string
+  description = "VIP (Virtual IP) du cluster Bastion pour ProxyJump Ansible"
+  default     = "192.168.1.51"
 }
 
 variable "cpu_cores" {
   type        = number
   description = "Nombre de cœurs CPU"
-  default     = 2
+  default     = 1
 }
 
 variable "memory" {
   type        = number
   description = "Mémoire RAM en MB"
-  default     = 2048
+  default     = 1024
 }
 
 variable "disk_size" {
@@ -106,4 +103,9 @@ variable "ssh_public_keys" {
   type        = list(string)
   description = "Clefs SSH publiques pour cloud-init"
   sensitive   = true
+  default = [
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb/IgQB8Fc20tSxyVtIX9wHbNOhvTZkytMQjlCKCoen ldutour",
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb/IgQB8Fc20tSxyVtIX9wHbNOhvTZkytMQjlCKCoen aboulinguiez",
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI JBFUHhJY3dxvu367nEWbHBNwoEH0I5hnmHKCVbHcobE aliazid"
+  ]
 }

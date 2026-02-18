@@ -20,8 +20,8 @@ jobs:
     
     # Définition des variables d'environnement globales pour le job
     env:
-      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }} # Token accès Terraform Cloud
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }} # API Endpoint
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
       TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
 
