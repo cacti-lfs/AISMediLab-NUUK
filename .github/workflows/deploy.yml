@@ -50,4 +50,4 @@ jobs:
       - name: Terraform Plan
         id: plan
         # Vérifie bien l'orthographe de "environnements" vs "environments"
-        run: terraform plan -input=false -var-file=terraform/environnements/test/terraform.tfvars
+        run: terraform plan -input=false
