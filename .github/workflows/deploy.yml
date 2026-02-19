@@ -63,7 +63,10 @@ jobs:
 
       - name: Set var file
         run: |
-          if [ "${{ github.event.inputs.environment }}" == "test" ]; then
+          ENV="${{ github.event.inputs.environment }}"
+          if [ -z "$ENV" ]; then ENV="test"; fi
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          if [ "$ENV" == "test" ]; then
             echo "VAR_FILE=terraform.tfvars" >> $GITHUB_ENV
           else
             echo "VAR_FILE=formations.tfvars" >> $GITHUB_ENV
@@ -71,10 +74,13 @@ jobs:
 
       - name: Set working directory
         run: |
-          if [ "${{ github.event.inputs.component }}" == "all" ]; then
+          COMP="${{ github.event.inputs.component }}"
+          if [ -z "$COMP" ]; then COMP="01_bastion"; fi
+          echo "COMP=$COMP" >> $GITHUB_ENV
+          if [ "$COMP" == "all" ]; then
             echo "WORKING_DIR=./terraform" >> $GITHUB_ENV
           else
-            echo "WORKING_DIR=./terraform/composants/${{ github.event.inputs.component }}" >> $GITHUB_ENV
+            echo "WORKING_DIR=./terraform/composants/$COMP" >> $GITHUB_ENV
           fi
 
       - name: Terraform Init
@@ -82,11 +88,11 @@ jobs:
         working-directory: $WORKING_DIR
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environnements/${{ github.event.inputs.environment }}/$VAR_FILE"
+        run: terraform plan -var-file="environnements/$ENV/$VAR_FILE"
         continue-on-error: true
         working-directory: $WORKING_DIR
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
-        run: terraform apply -var-file="environnements/${{ github.event.inputs.environment }}/$VAR_FILE" -auto-approve
+        run: terraform apply -var-file="environnements/$ENV/$VAR_FILE" -auto-approve
         working-directory: $WORKING_DIR
