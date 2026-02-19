@@ -18,6 +18,25 @@ on:
           - test
           - nuuk
           - prod
+      component:
+        description: "Composant à déployer"
+        required: true
+        default: "01_bastion"
+        type: choice
+        options:
+          - all
+          - 01_bastion
+          - 02_dhcp
+          - 03_ha_web
+          - 04_gestion
+          - 05_web
+          - 06_db_web
+          - 07_db_monitoring
+          - 08_db_gestion
+          - 09_win_rodc
+          - 10_win_addnsntp
+          - 11_ha_infra
+          - 11_monitoring
       action:
         description: "Action à exécuter"
         required: true
@@ -33,7 +52,7 @@ jobs:
     runs-on: self-hosted
     defaults:
       run:
-        working-directory: ./terraform
+        working-directory: ${{ github.event.inputs.component == 'all' && './terraform' || format('./terraform/composants/{0}', github.event.inputs.component) }}
 
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
@@ -45,9 +64,21 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Set var file
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "test" ]; then
+            echo "VAR_FILE=terraform.tfvars" >> $GITHUB_ENV
+          else
+            echo "VAR_FILE=formations.tfvars" >> $GITHUB_ENV
+          fi
+
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var-file="environnements/test/terraform.tfvars"
+        run: terraform plan -var-file="environnements/${{ github.event.inputs.environment }}/$VAR_FILE"
         continue-on-error: true
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -var-file="environnements/${{ github.event.inputs.environment }}/$VAR_FILE" -auto-approve
