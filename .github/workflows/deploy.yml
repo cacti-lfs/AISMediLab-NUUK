@@ -39,8 +39,6 @@ jobs:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
-      ENVIRONMENT: ${{ github.event.inputs.environment || 'test' }}
-      TF_ACTION: ${{ github.event.inputs.action || 'plan' }}
 
     steps:
       - name: Checkout Code
@@ -50,11 +48,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Display Configuration
+        if: github.event_name == 'workflow_dispatch'
         run: |
           echo "🔧 Configuration du déploiement:"
-          echo "  • Environnement: ${{ env.ENVIRONMENT }}"
-          echo "  • Action: ${{ env.TF_ACTION }}"
-          echo "  • Trigger: ${{ github.event_name }}"
+          echo "  • Environnement: ${{ github.event.inputs.environment }}"
+          echo "  • Action: ${{ github.event.inputs.action }}"
 
       - name: Terraform Init
         run: terraform init
@@ -63,10 +61,15 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Plan
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'plan'
-        run: terraform plan -var-file="environnements/${{ env.ENVIRONMENT }}/terraform.tfvars"
+      - name: Terraform Plan (Manual Dispatch)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan'
+        run: terraform plan -var-file="environnements/${{ github.event.inputs.environment }}/terraform.tfvars"
+
+      - name: Terraform Plan (Push/PR)
+        if: github.event_name != 'workflow_dispatch'
+        run: terraform plan -var-file="environnements/test/terraform.tfvars"
+        continue-on-error: true
 
       - name: Terraform Apply
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-        run: terraform apply -var-file="environnements/${{ env.ENVIRONMENT }}/terraform.tfvars" -auto-approve
+        run: terraform apply -var-file="environnements/${{ github.event.inputs.environment }}/terraform.tfvars" -auto-approve
