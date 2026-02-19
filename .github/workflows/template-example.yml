@@ -1,0 +1,47 @@
+name: "Template Workflow"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environnement"
+        required: true
+        default: "test"
+        type: choice
+        options:
+          - test
+          - nuuk
+          - prod
+      action:
+        description: "Action"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - plan
+          - apply
+
+jobs:
+  build:
+    name: "Exécution"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Display Inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "📋 Inputs reçus:"
+          echo "  • Environment: ${{ github.event.inputs.environment }}"
+          echo "  • Action: ${{ github.event.inputs.action }}"
+
+      - name: Run Tests
+        run: echo "✅ Workflow fonctionne!"
