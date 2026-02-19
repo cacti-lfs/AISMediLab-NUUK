@@ -2,23 +2,22 @@ name: "Déploiement Terraform"
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  # C'est cette ligne qui active le bouton "Run workflow"
   workflow_dispatch:
     inputs:
-      environment:
-        description: "Environnement"
+      action:
+        description: 'Action Terraform à exécuter'
         required: true
-        default: "test"
+        default: 'plan'
         type: choice
-        options: [test, nuuk, prod]
-      terraform_action:
-        description: "Action"
-        required: true
-        default: "plan"
-        type: choice
-        options: [plan, apply]
+        options:
+          - plan
+          - apply
 
 jobs:
   terraform:
@@ -32,9 +31,6 @@ jobs:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
-      # Correction ici : Utilisation directe de github.event.inputs ou valeur par défaut
-      ENV_TARGET: ${{ github.event.inputs.environment || 'test' }}
-      TF_ACTION: ${{ github.event.inputs.terraform_action || 'plan' }}
 
     steps:
       - name: Checkout Code
@@ -42,8 +38,6 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: true # Crucial pour capturer les sorties stdout
 
       - name: Terraform Init
         run: terraform init
@@ -53,40 +47,11 @@ jobs:
         continue-on-error: true
 
       - name: Terraform Plan
-        id: plan
-        # On génère un fichier plan pour le apply ultérieur
-        run: |
-          terraform plan \
-          -var-file="environnements/${{ env.ENV_TARGET }}/terraform.tfvars" \
-          -out=tfplan
-
-      - name: Comment PR with Plan
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
-            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
-            
-            <details><summary>Show Plan</summary>
-            
-            \`\`\`hcl
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-            
-            </details>`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+        # On lance le plan si c'est un push/PR OU si l'utilisateur a choisi 'plan' manuellement
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'plan'
+        run: terraform plan
 
       - name: Terraform Apply
-        # On n'applique que si l'action est 'apply' ET qu'on est sur main (ou déclenchement manuel)
-        if: |
-          env.TF_ACTION == 'apply' && 
-          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        run: terraform apply "tfplan"
+        # On ne lance l'apply QUE si l'utilisateur l'a demandé via le bouton
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve
