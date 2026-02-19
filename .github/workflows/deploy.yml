@@ -10,18 +10,18 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environnement à déployer'
+        description: "Environnement à déployer"
         required: true
-        default: 'test'
+        default: "test"
         type: choice
         options:
           - test
           - nuuk
           - prod
       action:
-        description: 'Action Terraform à exécuter'
+        description: "Action à exécuter"
         required: true
-        default: 'plan'
+        default: "plan"
         type: choice
         options:
           - plan
@@ -29,47 +29,25 @@ on:
 
 jobs:
   terraform:
-    name: "Terraform Execution"
+    name: "Terraform"
     runs-on: self-hosted
     defaults:
       run:
         working-directory: ./terraform
-    
+
     env:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Display Configuration
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "🔧 Configuration du déploiement:"
-          echo "  • Environnement: ${{ github.event.inputs.environment }}"
-          echo "  • Action: ${{ github.event.inputs.action }}"
+      - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Format
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Plan (Manual Dispatch)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan'
-        run: terraform plan -var-file="environnements/${{ github.event.inputs.environment }}/terraform.tfvars"
-
-      - name: Terraform Plan (Push/PR)
-        if: github.event_name != 'workflow_dispatch'
+      - name: Terraform Plan
         run: terraform plan -var-file="environnements/test/terraform.tfvars"
         continue-on-error: true
-
-      - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-        run: terraform apply -var-file="environnements/${{ github.event.inputs.environment }}/terraform.tfvars" -auto-approve
