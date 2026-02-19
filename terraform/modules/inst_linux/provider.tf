@@ -6,3 +6,6 @@ terraform {
     }
   }
 }
+
+# Le provider est passé par l'appelant (configuration au niveau parent)
+# Cela permet l'utilisation de for_each et depends_on
