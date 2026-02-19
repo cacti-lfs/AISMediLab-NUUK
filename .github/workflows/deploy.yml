@@ -85,14 +85,14 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: $WORKING_DIR
+        working-directory: ${{ env.WORKING_DIR }}
 
       - name: Terraform Plan
         run: terraform plan -var-file="environnements/$ENV/$VAR_FILE"
         continue-on-error: true
-        working-directory: $WORKING_DIR
+        working-directory: ${{ env.WORKING_DIR }}
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
         run: terraform apply -var-file="environnements/$ENV/$VAR_FILE" -auto-approve
-        working-directory: $WORKING_DIR
+        working-directory: ${{ env.WORKING_DIR }}
