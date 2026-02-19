@@ -7,9 +7,17 @@ on:
   pull_request:
     branches:
       - main
-  # C'est cette ligne qui active le bouton "Run workflow"
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environnement à déployer'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - nuuk
+          - prod
       action:
         description: 'Action Terraform à exécuter'
         required: true
@@ -31,6 +39,8 @@ jobs:
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      ENVIRONMENT: ${{ github.event.inputs.environment || 'test' }}
+      TF_ACTION: ${{ github.event.inputs.action || 'plan' }}
 
     steps:
       - name: Checkout Code
@@ -38,6 +48,13 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Display Configuration
+        run: |
+          echo "🔧 Configuration du déploiement:"
+          echo "  • Environnement: ${{ env.ENVIRONMENT }}"
+          echo "  • Action: ${{ env.TF_ACTION }}"
+          echo "  • Trigger: ${{ github.event_name }}"
 
       - name: Terraform Init
         run: terraform init
@@ -47,11 +64,9 @@ jobs:
         continue-on-error: true
 
       - name: Terraform Plan
-        # On lance le plan si c'est un push/PR OU si l'utilisateur a choisi 'plan' manuellement
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'plan'
-        run: terraform plan
+        run: terraform plan -var-file="environnements/${{ env.ENVIRONMENT }}/terraform.tfvars"
 
       - name: Terraform Apply
-        # On ne lance l'apply QUE si l'utilisateur l'a demandé via le bouton
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve
+        run: terraform apply -var-file="environnements/${{ env.ENVIRONMENT }}/terraform.tfvars" -auto-approve
