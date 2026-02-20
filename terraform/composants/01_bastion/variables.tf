@@ -21,13 +21,11 @@ variable "proxmox_api_url" {
 variable "node_name_1" {
   type        = string
   description = "Nom du premier nœud Proxmox"
-  default     = "node1"
 }
 
 variable "node_name_2" {
   type        = string
   description = "Nom du second nœud Proxmox"
-  default     = "node2"
 }
 
 variable "template_id_node1" {
@@ -82,11 +80,6 @@ variable "ssh_public_keys" {
   type        = list(string)
   description = "Clés publiques SSH pour l'accès aux VMs"
   sensitive   = true
-  default = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb/IgQB8Fc20tSxyVtIX9wHbNOhvTZkytMQjlCKCoen ldutour",
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb/IgQB8Fc20tSxyVtIX9wHbNOhvTZkytMQjlCKCoen aboulinguiez",
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI JBFUHhJY3dxvu367nEWbHBNwoEH0I5hnmHKCVbHcobE aliazid"
-  ]
 }
 
 variable "bastion_vip" {
@@ -100,4 +93,8 @@ variable "ip_bastion_01" {
 variable "ip_bastion_02" {
   type        = string
   description = "Adresse IP de la VM Bastion 01" 
+}
+variable "network_v1" {
+  type = string
+  description = "Carte Réseau 1"
 }

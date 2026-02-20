@@ -1,6 +1,6 @@
 # locals.tf
 locals {
-    vlan_bridge_map = { "40"  = "vmbr1" } # VLAN 40 - Bastion (Sécurité)
+    vlan_bridge_map = var.network_v1 # VLAN 40 - Bastion (Sécurité)
     
     node_template_map = {
         (var.node_name_1) = var.template_id_node1
