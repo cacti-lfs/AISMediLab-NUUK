@@ -45,13 +45,11 @@ variable "template_id_node2" {
 variable "datastore_id" {
   type        = string
   description = "ID du datastore pour les VMs"
-  default     = "TN-TN1"
 }
 
 variable "gateway_vlan40" {
   type        = string
   description = "Passerelle réseau pour le VLAN 40 (Bastion)"
-  default     = "192.168.32.62"
 }
 
 # ============================================================================
