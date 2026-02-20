@@ -94,5 +94,12 @@ variable "ssh_public_keys" {
 variable "bastion_vip" {
   type        = string
   description = "VIP (Virtual IP) du cluster Bastion pour SSH ProxyJump"
-  default     = "192.168.32.51"
+}
+variable "ip_bastion_01" {
+  type        = string
+  description = "Adresse IP de la VM Bastion 01" 
+}
+variable "ip_bastion_02" {
+  type        = string
+  description = "Adresse IP de la VM Bastion 01" 
 }

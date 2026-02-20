@@ -9,13 +9,13 @@ locals {
 
     bastion_vm = {
         "01" = {
-            ipv4_address = "192.168.32.49"
+            ipv4_address = var.ip_bastion_01
             vlan_id      = 40
             node_name    = var.node_name_1
             gateway      = var.gateway_vlan40
         }
         "02" = {
-            ipv4_address = "192.168.32.50"
+            ipv4_address = var.ip_bastion_02
             vlan_id      = 40
             node_name    = var.node_name_2
             gateway      = var.gateway_vlan40

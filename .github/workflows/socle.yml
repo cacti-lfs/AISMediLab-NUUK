@@ -37,6 +37,9 @@ permissions: # Principe du moindre privilège
 
 env:
   TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  TF_VAR_ip_bastion_01: ${{ env.TF_IP_BASTION_01 }}
+  TF_VAR_ip_bastion_02: ${{ env.TF_IP_BASTION_02 }}
+  TF_VAR_bastion_vip: ${{ env.TF_IP_BASTION_VIP }}
 
 # ===========================================================
 # JOBS (Unités de travai)
