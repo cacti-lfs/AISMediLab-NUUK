@@ -70,6 +70,7 @@ jobs:
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
       TF_VAR_ssh_public_keys: |
         ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-poc"
 
     steps:
       - uses: actions/checkout@v4
