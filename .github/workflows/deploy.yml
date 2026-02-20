@@ -44,16 +44,25 @@ env:
 # JOBS (Unités de travai)
 # ===========================================================
 jobs:
-  # POC
+  # =========================================================
+  # JOB POUR LE POC
+  # =========================================================
   deploy-terra-static-poc:
     name: "Terraform Static POC"
-    runs-on: self-hosted
+    if: github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    runs-on: [self-hosted, poc-runner]
     environment: poc # Utilise les secrets de "poc"
+    env: 
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
     steps:
-      - run: echo "Déploiement complet pour POC"
+      - uses: actions/checkout@v4
+      - run: echo "Déploiement sur le réseau POC via runner dédié"
 
     
-  # Build nuuk
+  # =========================================================
+  # JOB POUR NUUK
+  # =========================================================
   deploy-terra-static-nuuk:
     name: "Terraform Static Nuuk"
     runs-on: self-hosted
