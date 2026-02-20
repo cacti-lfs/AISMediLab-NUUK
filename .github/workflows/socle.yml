@@ -1,0 +1,99 @@
+# ===========================================================
+# METADONNÉES
+# ===========================================================
+name: "Déploiement Terraform 'Socle'"
+run-name: "Déploiement Terraform 'Socle' pour ${{ github.ref_name }}"
+
+# ===========================================================
+# DÉCLENCHEURS
+# ===========================================================
+on:
+  push:
+    branches:
+      - main
+      - feature
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        options:
+          - poc
+          - nuuk
+      action:
+        description: "Action à effectuer"
+        required: true
+        type: choice
+        options:
+          - deploy
+          - recreate
+
+
+# ===========================================================
+# PERMISSIONS
+# ===========================================================
+permissions: # Principe du moindre privilège
+  contents: read
+
+# ===========================================================
+# CONFIGURATION GLOBALE
+# ===========================================================
+
+env:
+  TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+
+# ===========================================================
+# JOBS (Unités de travai)
+# ===========================================================
+jobs:
+  # =========================================================
+  # JOB POUR LE POC
+  # =========================================================
+  deploy-terra-static-poc:
+    name: "Terraform Static POC"
+    if: github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    runs-on: [self-hosted, poc-runner]
+    environment: poc # Utilise les secrets de "poc"
+    env: 
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ssh_public_keys: |
+        ${{ vars.SSH_PUBLIC_KEYS }}
+
+    steps:
+      - uses: actions/checkout@v4
+      # Init
+      - name: Terraform Init (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion init
+
+      # Step de destruction conditionnelle
+      - name: Terraform Destroy (Recreate mode)
+        if: ${{ github.event.inputs.action == 'recreate' }}
+        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
+      # Plan
+      - name: Terraform Plan (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion plan
+      # Apply
+      - name: Terraform Apply (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
+    
+  # =========================================================
+  # JOB POUR NUUK
+  # =========================================================
+  deploy-terra-static-nuuk:
+    name: "Terraform Static Nuuk"
+    runs-on: self-hosted
+    environment: nuuk # Utilise les secrets de "nuuk"
+    steps:
+      - run: echo "Déploiement complet pour Nuuk"
