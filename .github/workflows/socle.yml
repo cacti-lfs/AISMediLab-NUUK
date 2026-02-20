@@ -23,6 +23,13 @@ on:
         options:
           - poc
           - nuuk
+      action:
+        description: "Action à effectuer"
+        required: true
+        type: choice
+        options:
+          - deploy
+          - recreate
 
 
 # ===========================================================
@@ -66,11 +73,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: echo "Déploiement sur le réseau POC via runner dédié"
+      # Init
       - name: Terraform Init (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion init
+
+      # Step de destruction conditionnelle
+      - name: Terraform Destroy (Recreate mode)
+        if: ${{ github.event.inputs.action == 'recreate' }}
+        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
+      # Plan
       - name: Terraform Plan (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion plan
+      # Apply
       - name: Terraform Apply (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
     
