@@ -1,98 +1,62 @@
-name: "Déploiement Terraform"
+# ===========================================================
+# METADONNÉES
+# ===========================================================
+name: "Déploiement Terraform 'Static'"
+run-name: "Déploiement Terraform 'Static' pour ${{ github.ref_name }}"
 
+# ===========================================================
+# DÉCLENCHEURS
+# ===========================================================
 on:
   push:
     branches:
+      - main
       - feature
-  pull_request:
-    branches:
-      - feature
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/*'
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environnement à déployer"
         required: true
-        default: "test"
         type: choice
         options:
-          - test
+          - poc
           - nuuk
-          - prod
-      component:
-        description: "Composant à déployer"
-        required: true
-        default: "01_bastion"
-        type: choice
-        options:
-          - all
-          - 01_bastion
-          - 02_dhcp
-          - 03_ha_web
-          - 04_gestion
-          - 05_web
-          - 06_db_web
-          - 07_db_monitoring
-          - 08_db_gestion
-          - 09_win_rodc
-          - 10_win_addnsntp
-          - 11_ha_infra
-          - 11_monitoring
-      action:
-        description: "Action à exécuter"
-        required: true
-        default: "plan"
-        type: choice
-        options:
-          - plan
-          - apply
 
+
+# ===========================================================
+# PERMISSIONS
+# ===========================================================
+permissions: # Principe du moindre privilège
+  contents: read
+
+# ===========================================================
+# CONFIGURATION GLOBALE
+# ===========================================================
+
+env:
+  TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+  TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+  TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+
+# ===========================================================
+# JOBS (Unités de travai)
+# ===========================================================
 jobs:
-  terraform:
-    name: "Terraform"
+  # POC
+  deploy-terra-static-poc:
+    name: "Terraform Static POC"
     runs-on: self-hosted
-
-    env:
-      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
-      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
-
+    environment: poc # Utilise les secrets de "poc"
     steps:
-      - uses: actions/checkout@v4
+      - run: echo "Déploiement complet pour POC"
 
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Set var file
-        run: |
-          ENV="${{ github.event.inputs.environment }}"
-          if [ -z "$ENV" ]; then ENV="test"; fi
-          echo "ENV=$ENV" >> $GITHUB_ENV
-          if [ "$ENV" == "test" ]; then
-            echo "VAR_FILE=terraform.tfvars" >> $GITHUB_ENV
-          else
-            echo "VAR_FILE=formations.tfvars" >> $GITHUB_ENV
-          fi
-
-      - name: Set working directory
-        run: |
-          COMP="${{ github.event.inputs.component }}"
-          if [ -z "$COMP" ]; then COMP="01_bastion"; fi
-          echo "COMP=$COMP" >> $GITHUB_ENV
-          if [ "$COMP" == "all" ]; then
-            echo "WORKING_DIR=./terraform" >> $GITHUB_ENV
-          else
-            echo "WORKING_DIR=./terraform/composants/$COMP" >> $GITHUB_ENV
-          fi
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Terraform Plan
-        run: terraform plan -var-file="environnements/$ENV/$VAR_FILE"
-        continue-on-error: true
-        working-directory: ${{ env.WORKING_DIR }}
-
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform apply -var-file="environnements/$ENV/$VAR_FILE" -auto-approve
-        working-directory: ${{ env.WORKING_DIR }}
+    
+  # Build nuuk
+  deploy-terra-static-nuuk:
+    name: "Terraform Static Nuuk"
+    runs-on: self-hosted
+    environment: nuuk # Utilise les secrets de "nuuk"
+    steps:
+      - run: echo "Déploiement complet pour Nuuk"
