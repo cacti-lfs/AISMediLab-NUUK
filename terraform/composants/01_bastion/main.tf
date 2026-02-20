@@ -15,7 +15,7 @@ module "bastion" {
   gateway      = var.gateway_vlan40
   vlan_id      = each.value.vlan_id
 
-  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
+  network_bridge = var.network_v1
 
   ssh_public_keys = var.ssh_public_keys
   cpu_cores       = var.cpu_cores
