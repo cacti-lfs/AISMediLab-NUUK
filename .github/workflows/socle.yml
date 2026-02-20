@@ -37,9 +37,6 @@ permissions: # Principe du moindre privilège
 
 env:
   TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-  TF_VAR_ip_bastion_01: ${{ env.TF_IP_BASTION_01 }}
-  TF_VAR_ip_bastion_02: ${{ env.TF_IP_BASTION_02 }}
-  TF_VAR_bastion_vip: ${{ env.TF_IP_BASTION_VIP }}
 
 # ===========================================================
 # JOBS (Unités de travai)
@@ -56,10 +53,13 @@ jobs:
     env: 
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
 
     steps:
-      - run: echo "Déploiement sur le réseau POC via runner dédié"
       - uses: actions/checkout@v4
+      - run: echo "Déploiement sur le réseau POC via runner dédié"
       - name: Terraform Init (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion init
       - name: Terraform Plan (01_bastion)
