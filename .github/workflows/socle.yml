@@ -61,7 +61,8 @@ jobs:
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      TF_ssh_public_keys: ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_VAR_ssh_public_keys: |
+        ${{ vars.SSH_PUBLIC_KEYS }}
 
     steps:
       - uses: actions/checkout@v4
@@ -70,8 +71,8 @@ jobs:
         run: terraform -chdir=terraform/composants/01_bastion init
       - name: Terraform Plan (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion plan
-      - name: Terraform Apply (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
+      # - name: Terraform Apply (01_bastion)
+      #   run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
     
   # =========================================================
   # JOB POUR NUUK
