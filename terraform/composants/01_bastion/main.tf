@@ -12,7 +12,7 @@ module "bastion" {
 
   ipv4_address = each.value.ipv4_address
   cidr         = "/28"
-  gateway      = local.vlan_gateway_map[tostring(each.value.vlan_id)]
+  gateway      = var.gateway_vlan40
   vlan_id      = each.value.vlan_id
 
   network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
