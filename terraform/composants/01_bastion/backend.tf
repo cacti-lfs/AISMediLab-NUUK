@@ -1,8 +1,8 @@
 terraform {
-  backend "remote" {
-    organization = "<env:TF_CLOUD_ORGANIZATION>"
+  cloud {
+    organization = "nuuk"
     workspaces {
-      name = "<env:TF_WORKSPACE>"
+      tags = ["medilab"]
     }
   }
 }
