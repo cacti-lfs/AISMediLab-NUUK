@@ -59,7 +59,7 @@ jobs:
     runs-on: [self-hosted, poc-runner]
     environment: poc # Utilise les secrets de "poc"
     env: 
-      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
       TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
       TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
