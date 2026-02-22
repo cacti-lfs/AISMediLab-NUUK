@@ -1,6 +1,6 @@
 module "bastion" {
   for_each = local.bastion_vm
-  source   = "../../modules/inst_linux"
+  source   = "git::https://github.com/cacti-lfs/AISMediLab-NUUK.git//terraform/modules/inst_linux?ref=feature"
 
   vm_name = "DEB-BAST-${each.key}"
   vm_id   = 400 + tonumber(each.key)
