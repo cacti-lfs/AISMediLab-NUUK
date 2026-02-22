@@ -72,9 +72,11 @@ jobs:
       TF_VAR_ssh_public_keys: |
         ${{ vars.SSH_PUBLIC_KEYS }}
       TF_WORKSPACE: "nuuk-medilab-poc"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: "nuuk"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       # Init
       - name: Terraform Init (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion init
@@ -95,6 +97,8 @@ jobs:
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
     
+
+      
   # =========================================================
   # JOB POUR NUUK
   # =========================================================
