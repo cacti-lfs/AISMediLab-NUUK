@@ -30,6 +30,7 @@ on:
         options:
           - deploy
           - recreate
+          - destroy
 
 
 # ===========================================================
@@ -88,6 +89,11 @@ jobs:
       # Apply
       - name: Terraform Apply (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
+      
+      # Step de destruction de l'infra
+      - name: Terraform Destroy (Destroy mode)
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
     
   # =========================================================
   # JOB POUR NUUK

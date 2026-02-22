@@ -2,7 +2,7 @@ terraform {
   cloud {
     organization = "nuuk"
     workspaces {
-      name = "nuuk-medilab"
+      tags = ["medilab"]
     }
   }
 }
