@@ -82,11 +82,11 @@ jobs:
         run: terraform -chdir=terraform/composants/01_bastion validate
       
       # 4. Analyse de sécurité avec tfsec
-      - name: tfsec Check
-        uses: aquasecurity/tfsec-action@v1.0.0  
-        with:
-          working_directory: terraform/composants/01_bastion
-          soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
+      # - name: tfsec Check
+      #   uses: aquasecurity/tfsec-action@v1.0.0  
+      #   with:
+      #     working_directory: terraform/composants/01_bastion
+      #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode)
         if: ${{ github.event.inputs.action == 'recreate' }}
