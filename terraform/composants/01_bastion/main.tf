@@ -43,11 +43,11 @@ module "bastion" {
   disks = [
     {
       disk_interface = "scsi0"
-      disk_size = "15G"
+      disk_size = 15
       disk_storage_id = var.datastore_id
-      disk_file_format = "qcow2"
-      # disk_iothread =  false par défaut
-      # disk_cache = "none" par défaut
+      disk_file_format = "raw"
+      disk_iothread =  false # par défaut
+      disk_cache = "none" #par défaut
       disk_ssd = true
       disk_discard = true
       disk_type = "disk"
