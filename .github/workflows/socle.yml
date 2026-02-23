@@ -21,8 +21,9 @@ on:
         required: true
         type: choice
         options:
-          - poc
           - nuuk
+          - poc
+          - all
       action:
         description: "Action à effectuer"
         required: true
