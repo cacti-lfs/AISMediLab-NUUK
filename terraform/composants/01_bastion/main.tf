@@ -50,6 +50,7 @@ module "bastion" {
       # disk_cache = "none" par défaut
       disk_ssd = true
       disk_discard = true
+      disk_type = "disk"
     }
   ]
   
