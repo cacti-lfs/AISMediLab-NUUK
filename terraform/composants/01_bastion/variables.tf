@@ -159,8 +159,3 @@ variable "user_account_ssh_public_keys" {
   type        = list(string)
   description = "Clés publiques SSH pour le compte utilisateur de la VM (cloud-init)"
 }
-
-variable "ssh_public_keys" {
-  type        = list(string)
-  description = "Clés publiques SSH pour l'accès aux VMs"
-}
