@@ -49,21 +49,26 @@ module "bastion" {
     }
   ]
 
-  ci_datastore_id = var.datastore_id
-  
-  # ci_datastore_id = null par défaut
-  # ci_meta_data_file_id = null par défaut
-  # ci_network_data_file_id = null par défaut
-  # ci_user_data_file_id = null par défaut
-  # ci_vendor_data_file_id = null par défaut
+  initialization {
+    ci_datastore_id = var.datastore_id
+    ci_meta_data_file_id = null
+    ci_network_data_file_id = null
+    ci_vendor_data_file_id = null
 
-  user_account_username = "cloudadm"
-  user_account_ssh_public_keys = var.ssh_public_keys
+    user_account {
+      username = "cloudadm"
+      ssh_public_keys = var.ssh_public_keys
+    }
 
-  ipv4_address = each.value.ipv4_address
-  ipv4_cidr         = "/28"
-  ipv4_gateway      = var.gateway_vlan40
+    ip_config {
+      ipv4_address = "${each.value.ipv4_address}${var.ipv4_cidr}"
+      ipv4_gateway = var.gateway_vlan40
+    }
 
-  dns_domain = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS internes
+    dns {
+      domain = "nuuk-medilab.lan"
+        dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS internes
+    }
+  }
+
 }
