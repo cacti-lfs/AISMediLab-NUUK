@@ -1,24 +1,71 @@
 module "bastion" {
   for_each = local.bastion_vm
-  source   = "git::https://github.com/cacti-lfs/AISMediLab-NUUK.git//terraform/modules/inst_linux?ref=feature"
-
-  vm_name = "DEB-BAST-${each.key}"
-  vm_id   = 400 + tonumber(each.key)
+  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=v1.0.1"
 
   node_name = each.value.node_name
+  vm_name = "DEB-BAST-${each.key}"
+  vm_id   = 400 + tonumber(each.key)
+  vm_description = "Bastion"
+  vm_tags = ["bastion", "vlan40"]
+  # vm_bios = "seabios" par défaut
+  # vm_machine = "q35" par défaut
+  # vm_tablet_device = false par défaut
 
-  template_id  = local.node_template_map[each.value.node_name]
-  datastore_id = var.datastore_id
+  # vm_os_type = "l26" par défaut
+
+  # vm_agent_enabled = true par défaut
+
+  source_vm_id  = local.node_template_map[each.value.node_name]
+  full_clone    = true # false par défaut
+
+  vm_cpu_cores = 2
+  # vm_cpu_type = "host" par défaut
+  # vm_cpu_numa = false par défaut
+
+  vm_memory_dedicated = "1G"
+  # vm_memory_floating = false par défaut
+
+  #numa = false par défaut
+
+  # vm_vga_type = "std" par défaut
+  # vm_vga_memory = 16M par défaut
+
+  # bios = "seabios" par défaut
+  # efi_disk_storage_id = null par défaut
+  # efi_disk_format = "qcow2" par défaut
+  # efi_disk_type = "disk" par défaut
+  # efi_disk_pre_enrolled_keys = false par défaut
+
+  vnic_model = "virtio" # e1000 par défaut
+  vnic_bridge = var.network_v1
+  vlan_tag = 40
+
+  disks = [
+    {
+      disk_interface = "scsi0"
+      disk_size = "15G"
+      disk_storage_id = var.datastore_id
+      disk_file_format = "qcow2"
+      # disk_iothread =  false par défaut
+      # disk_cache = "none" par défaut
+      disk_ssd = true
+      disk_discard = true
+    }
+  ]
+  
+  # ci_datastore_id = null par défaut
+  # ci_meta_data_file_id = null par défaut
+  # ci_network_data_file_id = null par défaut
+  # ci_user_data_file_id = null par défaut
+  # ci_vendor_data_file_id = null par défaut
+
+  user_account_username = "cloudadm"
+  user_account_ssh_public_keys = var.ssh_public_keys
 
   ipv4_address = each.value.ipv4_address
-  cidr         = "/28"
-  gateway      = var.gateway_vlan40
-  vlan_id      = each.value.vlan_id
+  ipv4_cidr         = "/28"
+  ipv4_gateway      = var.gateway_vlan40
 
-  network_bridge = var.network_v1
-
-  ssh_public_keys = var.ssh_public_keys
-  cpu_cores       = var.cpu_cores
-  memory          = var.memory
-  disk_size       = var.disk_size
+  dns_domain = "nuuk-medilab.lan"
+  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS internes
 }
