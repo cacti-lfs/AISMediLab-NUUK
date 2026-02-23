@@ -55,13 +55,13 @@ module "bastion" {
   ci_vendor_data_file_id = null
 
 
-  username = "cloudadm"
-  ssh_public_keys = var.ssh_public_keys
+  user_account_username = "cloudadm"
+  user_account_ssh_public_keys = var.ssh_public_keys
   
 
   ipv4_address = "${each.value.ipv4_address}${var.ipv4_cidr}"
   ipv4_gateway = var.gateway_vlan40
   
-  domain = "nuuk-medilab.lan"
+  dns_domain = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne    }
 }
