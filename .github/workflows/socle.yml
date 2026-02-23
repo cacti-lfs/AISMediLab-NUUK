@@ -108,7 +108,7 @@ jobs:
   # =========================================================
   deploy-terra-static-nuuk:
     name: "Terraform Static Nuuk"
-    if: github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    if: false && github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push'
     runs-on: [self-hosted, nuuk-runner]
     environment: nuuk # Utilise les secrets de "nuuk"
     env: 
