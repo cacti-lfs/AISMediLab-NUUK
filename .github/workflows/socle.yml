@@ -90,21 +90,60 @@ jobs:
         run: terraform -chdir=terraform/composants/01_bastion plan
       # Apply
       - name: Terraform Apply (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
       
       # Step de destruction de l'infra
       - name: Terraform Destroy (Destroy mode)
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
-    
 
+      # Step lancement Ansible
+
+
+      # Step Etat de réussite ou d'échec du pipeline
       
   # =========================================================
   # JOB POUR NUUK
   # =========================================================
   deploy-terra-static-nuuk:
     name: "Terraform Static Nuuk"
-    runs-on: self-hosted
+    if: github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    runs-on: [self-hosted, nuuk-runner]
     environment: nuuk # Utilise les secrets de "nuuk"
+    env: 
+      TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ssh_public_keys: |
+        ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-prod"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: "nuuk"
     steps:
-      - run: echo "Déploiement complet pour Nuuk"
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      # Init
+      - name: Terraform Init (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion init
+
+      # Step de destruction conditionnelle
+      - name: Terraform Destroy (Recreate mode)
+        if: ${{ github.event.inputs.action == 'recreate' }}
+        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
+      # Plan
+      - name: Terraform Plan (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion plan
+      # Apply
+      - name: Terraform Apply (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
+      
+      # Step de destruction de l'infra
+      - name: Terraform Destroy (Destroy mode)
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
