@@ -1,6 +1,6 @@
 module "bastion" {
   for_each = local.bastion_vm
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=v1.0.1"
+  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   node_name = each.value.node_name
   vm_name = "DEB-BAST-${each.key}"
@@ -22,13 +22,13 @@ module "bastion" {
   # vm_cpu_type = "host" par défaut
   # vm_cpu_numa = false par défaut
 
-  vm_memory_dedicated = "1G"
+  vm_memory_dedicated = 1024
   # vm_memory_floating = false par défaut
 
   #numa = false par défaut
 
   # vm_vga_type = "std" par défaut
-  # vm_vga_memory = 16M par défaut
+  vm_vga_memory = 16
 
   # bios = "seabios" par défaut
   # efi_disk_storage_id = null par défaut
@@ -50,7 +50,6 @@ module "bastion" {
       disk_cache = "none" #par défaut
       disk_ssd = true
       disk_discard = true
-      disk_type = "disk"
     }
   ]
   
