@@ -60,7 +60,7 @@ module "bastion" {
   user_account_ssh_public_keys = var.ssh_public_keys
   
 
-  ipv4_address = ${each.value.ipv4_address}
+  ipv4_address = each.value.ipv4_address
   ipv4_cidr = var.ipv4_cidr
   ipv4_gateway = var.gateway_vlan40
   
