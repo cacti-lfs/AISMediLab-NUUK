@@ -1,6 +1,6 @@
 module "bastion" {
   for_each = local.bastion_vm
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=v1.0.1"
+  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=v1.0.2"
 
   node_name = each.value.node_name
   vm_name = "DEB-BAST-${each.key}"
