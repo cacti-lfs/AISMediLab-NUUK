@@ -50,16 +50,18 @@ module "bastion" {
   ]
 
   ci_datastore_id = var.datastore_id
-  ci_meta_data_file_id = null
-  ci_network_data_file_id = null
-  ci_vendor_data_file_id = null
+  ci_meta_data_file_id = ""
+  ci_network_data_file_id = ""
+  ci_vendor_data_file_id = ""
+  ci_user_data_file_id = ""
 
 
   user_account_username = "cloudadm"
   user_account_ssh_public_keys = var.ssh_public_keys
   
 
-  ipv4_address = "${each.value.ipv4_address}${var.ipv4_cidr}"
+  ipv4_address = ${each.value.ipv4_address}
+  ipv4_cidr = var.ipv4_cidr
   ipv4_gateway = var.gateway_vlan40
   
   dns_domain = "nuuk-medilab.lan"
