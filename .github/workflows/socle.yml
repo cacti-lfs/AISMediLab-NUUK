@@ -9,30 +9,20 @@ run-name: "Déploiement Terraform 'Socle' pour ${{ github.ref_name }}"
 # ===========================================================
 on:
   push:
-    branches:
-      - main
-      - feature
-    paths:
-      - 'terraform/**'
-      - '.github/workflows/*'
+    branches: [main,feature]
+    paths: ['terraform/**', '.github/workflows/*']
   workflow_dispatch:
     inputs:
       environment:
         required: true
         type: choice
-        options:
-          - nuuk
-          - poc
-          - all
+        options: [poc, nuuk, all]
       action:
-        description: "Action à effectuer"
+        description: "Action"
         required: true
+        default: deploy
         type: choice
-        options:
-          - deploy
-          - recreate
-          - destroy
-
+        options: [deploy, recreate, destroy]
 
 # ===========================================================
 # PERMISSIONS
@@ -43,7 +33,6 @@ permissions: # Principe du moindre privilège
 # ===========================================================
 # CONFIGURATION GLOBALE
 # ===========================================================
-
 env:
   TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
 
@@ -56,7 +45,7 @@ jobs:
   # =========================================================
   deploy-terra-static-poc:
     name: "Terraform Static POC"
-    if: github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    if: false && (github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push')
     runs-on: [self-hosted, poc-runner]
     environment: poc # Utilise les secrets de "poc"
     env: 
@@ -79,18 +68,33 @@ jobs:
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      # Init
+      
+      # 1. Vérification du formatage
+      - name: Check Terraform Formatting
+        run: terraform -chdir=terraform/composants/01_bastion fmt -check
+      
+        # 2. Initialisation
       - name: Terraform Init (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion init
+        run: terraform -chdir=terraform/composants/01_bastion init -upgrade
 
+      # 3. Validation de la syntaxe
+      - name: Terraform Validate (01_bastion)
+        run: terraform -chdir=terraform/composants/01_bastion validate
+      
+      # 4. Analyse de sécurité avec tfsec
+      - name: tfsec Check
+        uses: aquasecurity/tfsec-action@v1.0.0  
+        with:
+          working_directory: terraform/composants/01_bastion
+          soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode)
         if: ${{ github.event.inputs.action == 'recreate' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
-      # Plan
+      # 5. Plan
       - name: Terraform Plan (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion plan
-      # Apply
+      # 6. Apply
       - name: Terraform Apply (01_bastion)
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
       
@@ -150,3 +154,43 @@ jobs:
       - name: Terraform Destroy (Destroy mode)
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
+
+    # =========================================================
+    # JOBS POUR LES AUTRES ENVIRONNEMENTS (ex: staging) À VENIR
+    # =========================================================
+  terraform-deploy:
+    # Test de Job unique
+    name: "Deploy to ${{ matrix.target_env }}"
+    runs-on: ${{ matrix.target_env == 'nuuk' && 'nuuk-runner' || 'poc-runner' }}
+    
+    # Matrice pour gérer les différents environnements
+    strategy:
+      fail-fast: true
+      matrix:
+        target_env: [poc, nuuk]
+
+    # Chargement des variables dans l'environnement courant du job
+    environment: ${{ matrix.target_env }}
+
+    env: 
+      TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_ssh_public_keys: ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-${{ matrix.target_env }}"
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Terraform Init
+        run: terraform -chdir=terraform/composants/01_bastion init -upgrade
+
+      - name: Terraform Plan
+        run: terraform -chdir=terraform/composants/01_bastion plan
+
+      - name: Terraform Apply
+        # apply manuel obligatoire
+        if: github.ref == 'refs/heads/main'
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
