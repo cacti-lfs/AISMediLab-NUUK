@@ -44,10 +44,7 @@ variable "template_id_node2" {
   default = 9000
 }
 
-variable "datastore_id" {
-  type        = string
-  description = "ID du stockage pour les disques des VMs"
-}
+
 
 # ============================================================================
 # RÉSEAU (VLAN 40 - BASTION)
@@ -80,4 +77,23 @@ variable "ip_bastion_02" {
 variable "full_clone" {
   type        = bool
   description = "Indique si les VMs doivent être clonées en mode 'full' (true) ou 'linked' (false)"
+}
+
+# ============================================================================
+# STOCKAGE
+# ============================================================================
+variable "disks" {
+	description = "Liste des disques à attacher à la VM"
+	type = list(object({
+		disk_storage_id = string
+		disk_size       = number
+		disk_type       = string
+		disk_interface  = string
+        disk_file_format = optional(string, "qcow2")
+        disk_iothread    = optional(bool, false)
+        disk_cache       = optional(string, "none")
+        disk_ssd         = optional(bool, false)
+        disk_discard     = optional(bool, false)
+	}))
+	default = []
 }
