@@ -74,3 +74,8 @@ variable "ip_bastion_02" {
   type        = string
   description = "IP statique du Bastion 02"
 }
+
+variable "full_clone" {
+  type        = bool
+  description = "Indique si les VMs doivent être clonées en mode 'full' (true) ou 'linked' (false)"
+}

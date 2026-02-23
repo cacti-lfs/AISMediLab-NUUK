@@ -16,7 +16,7 @@ module "bastion" {
   # vm_agent_enabled = true par défaut
 
   source_vm_id  = local.node_template_map[each.value.node_name]
-  full_clone    = true # false par défaut
+  full_clone    = false # false par défaut
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
