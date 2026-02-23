@@ -74,6 +74,7 @@ jobs:
         ${{ vars.SSH_PUBLIC_KEYS }}
       TF_WORKSPACE: "nuuk-medilab-poc"
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_VAR_full_clone: "false"
       TF_CLOUD_ORGANIZATION: "nuuk"
 
     steps:
@@ -108,7 +109,8 @@ jobs:
   # =========================================================
   deploy-terra-static-nuuk:
     name: "Terraform Static Nuuk"
-    if: false && github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push'
+    if: false && (github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push') 
+    # Désactivé pour éviter les déploiements accidentels sur l'environnement de production
     runs-on: [self-hosted, nuuk-runner]
     environment: nuuk # Utilise les secrets de "nuuk"
     env: 

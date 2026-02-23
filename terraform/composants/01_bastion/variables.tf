@@ -35,11 +35,13 @@ variable "node_name_2" {
 variable "template_id_node1" {
   type        = number
   description = "ID du template Debian sur le nœud 1"
+  default = 9001
 }
 
 variable "template_id_node2" {
   type        = number
   description = "ID du template Debian sur le nœud 2"
+  default = 9000
 }
 
 variable "datastore_id" {
