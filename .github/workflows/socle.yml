@@ -45,7 +45,7 @@ jobs:
   # =========================================================
   deploy-terra-static-poc:
     name: "Terraform Static POC"
-    if: false && (github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push')
+    if: github.event.inputs.environment == 'poc' || github.event.inputs.environment == 'all' || github.event_name == 'push'
     runs-on: [self-hosted, poc-runner]
     environment: poc # Utilise les secrets de "poc"
     env: 
@@ -104,7 +104,8 @@ jobs:
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
 
       # Step lancement Ansible
-
+      - name: Lancement Ansible Playbook
+        run: ansible-playbook -i inventory/inventory.proxmox.yml playbooks/bastion.yml
 
       # Step Etat de réussite ou d'échec du pipeline
       
@@ -161,6 +162,7 @@ jobs:
   terraform-deploy:
     # Test de Job unique
     name: "Deploy to ${{ matrix.target_env }}"
+    if: false && (github.event.inputs.environment == 'all' || github.event_name == 'push')
     runs-on: ${{ matrix.target_env == 'nuuk' && 'nuuk-runner' || 'poc-runner' }}
     
     # Matrice pour gérer les différents environnements
