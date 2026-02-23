@@ -48,6 +48,8 @@ module "bastion" {
       disk_type = "disk"
     }
   ]
+
+  ci_datastore_id = var.datastore_id
   
   # ci_datastore_id = null par défaut
   # ci_meta_data_file_id = null par défaut
