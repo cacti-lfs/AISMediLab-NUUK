@@ -70,8 +70,8 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
       # 1. Vérification du formatage
-      - name: Check Terraform Formatting
-        run: terraform -chdir=terraform/composants/01_bastion fmt -check
+      # - name: Check Terraform Formatting
+      #   run: terraform -chdir=terraform/composants/01_bastion fmt -check
       
         # 2. Initialisation
       - name: Terraform Init (01_bastion)

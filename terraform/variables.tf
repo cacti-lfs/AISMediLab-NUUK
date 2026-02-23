@@ -186,8 +186,8 @@ variable "tags" {
   type        = map(string)
   description = "Tags/Labels à appliquer à toutes les ressources"
   default = {
-    "Project"     = "AISMediLab-NUUK"
-    "Terraform"   = "true"
-    "ManagedBy"   = "Terraform"
+    "Project"   = "AISMediLab-NUUK"
+    "Terraform" = "true"
+    "ManagedBy" = "Terraform"
   }
 }
