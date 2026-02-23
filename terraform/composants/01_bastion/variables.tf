@@ -44,7 +44,10 @@ variable "template_id_node2" {
   default = 9000
 }
 
-
+variable "datastore_id" {
+  type        = string
+  description = "ID du stockage pour les disques des VMs"
+}
 
 # ============================================================================
 # RÉSEAU (VLAN 40 - BASTION)
