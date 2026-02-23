@@ -105,7 +105,7 @@ jobs:
 
       # Step lancement Ansible
       - name: Lancement Ansible Playbook
-        run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml playbooks/bastion.yml
+        run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml ansible/playbooks/bastion.yml
 
       # Step Etat de réussite ou d'échec du pipeline
       
