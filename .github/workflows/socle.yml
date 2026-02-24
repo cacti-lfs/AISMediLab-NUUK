@@ -123,7 +123,6 @@ jobs:
     environment: nuuk # Utilise les secrets de "nuuk"
     env: 
       TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
-      TF_VAR_proxmox_api_token_id_all ${{ secrets.PVE_TOKEN_ID_ALL}}
       TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
       TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
       TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
@@ -180,8 +179,6 @@ jobs:
     env: 
       # Variables d'accès
       TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
-      TF_VAR_proxmox_api_token_id_all ${{ secrets.PVE_TOKEN_ID_ALL}}
-
       # Variables spécifiques à l'infrastructure
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
