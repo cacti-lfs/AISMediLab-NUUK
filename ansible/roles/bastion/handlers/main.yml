@@ -11,5 +11,3 @@
     name: ssh
     state: restarted
   become: yes
-
-  

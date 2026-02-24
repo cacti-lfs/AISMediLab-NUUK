@@ -91,20 +91,19 @@ jobs:
       #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode)
-        if: ${{ github.event.inputs.action == 'recreate' }}
+        if: ${{ github.event.inputs.action == 'recreate'  || github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
       # 5. Plan
       - name: Terraform Plan (01_bastion)
+        if: ${{ github.event.inputs.action != 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion plan
       # 6. Apply
       - name: Terraform Apply (01_bastion)
+        if: ${{ github.event.inputs.action != 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
-      
-      # Step de destruction de l'infra
-      - name: Terraform Destroy (Destroy mode)
-        if: ${{ github.event.inputs.action == 'destroy' }}
-        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
 
+      - name: Ping Ansible
+        run: ansible -i ansible/inventory/inventory.proxmox.yml -m ping all
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph

@@ -2,4 +2,3 @@
 keepalived_vip: "192.168.32.51"
 keepalived_interface: "eth0"  # Vérifie avec 'ip a' si c'est eth0 ou ens18
 keepalived_auth_pass: "BastionPass"
-
