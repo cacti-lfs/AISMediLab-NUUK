@@ -52,3 +52,7 @@ variable "ipv4_cidr" {
   type    = string
   default = "/28"
 }
+variable "environnement" {
+  type    = string
+  default = "poc"
+}

@@ -38,7 +38,7 @@ module "bastion" {
 
   vnic_model  = "virtio" # e1000 par défaut
   vnic_bridge = var.network_v1
-  vlan_tag    = 40
+  vlan_tag    = var.environnement == "poc" ? 0 : 40
 
   disks = [
     {
