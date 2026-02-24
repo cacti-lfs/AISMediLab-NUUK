@@ -16,6 +16,3 @@ keyed_groups:
   - prefix: role
     key: proxmox_name.split('-')[1]
     separator: "_"
-groups:
-  role_DEB: "'DEB' in proxmox_name"
-  role_BAST: "'BAST' in proxmox_name"

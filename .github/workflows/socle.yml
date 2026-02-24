@@ -105,9 +105,13 @@ jobs:
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
 
-      # Step lancement Ansible
+      # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
+
+      # Step lancement Ansible Playbook
+      - name: Lancement Ansible Playbook
+        run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml ansible/playbooks/bastion.yml
 
       # Step Etat de réussite ou d'échec du pipeline
 
