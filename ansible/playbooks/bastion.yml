@@ -1,7 +1,6 @@
 ---
 - name: Déploiement Cluster Bastion
-  hosts: bastions
-  become: no  # On désactive le sudo global imposé par l'inventaire
+  hosts: role_BAST
   
   roles:
     - ../roles/bastion
