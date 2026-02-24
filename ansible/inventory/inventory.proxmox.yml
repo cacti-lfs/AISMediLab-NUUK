@@ -1,4 +1,11 @@
 plugin: community.proxmox.proxmox
+
+# Mappage plugin aux variables d'environnement
+url: "{{ lookup('env', 'TF_VAR_proxmox_api_url') }}"
+user: "{{ lookup('env', 'PROXMOX_USER') }}"
+token_id: "{{ lookup('env', 'PROXMOX_TOKEN_ID') }}"
+token_secret: "{{ lookup('env', 'PROXMOX_TOKEN_SECRET') }}"
+
 validate_certs: false
 want_facts: true
 
