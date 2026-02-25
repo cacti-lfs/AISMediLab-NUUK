@@ -1,23 +1,17 @@
 ---
 - name: Forcer la configuration DNS (Resolv.conf)
-  ansible.builtin.copy:
+  ansible.builtin.template:
+    src: resolv.conf.j2
     dest: /etc/resolv.conf
-    content: |
-      nameserver 1.1.1.1
-      nameserver 8.8.8.8
     owner: root
     group: root
     mode: '0644'
   become: true
 
-- name: Configurer les miroirs Debian 13 (Trixie)
-  ansible.builtin.copy:
+- name: Configurer les miroirs Debian
+  ansible.builtin.template:
+    src: sources.list.j2
     dest: /etc/apt/sources.list
-    content: |
-      # Miroirs officiels Debian 13 (Trixie)
-      deb http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-      deb-src http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-      # ... (le reste de ton contenu habituel)
     owner: root
     group: root
     mode: '0644'
