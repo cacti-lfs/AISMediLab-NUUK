@@ -176,7 +176,7 @@ jobs:
 #            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
 
       # Step lancement Ansible inventory
-      - name: Lancement Ansible Playbook
+      - name: Lancement Ansible Inventaire
         if: github.event_name == 'push' || inputs.run_ansible
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
 
