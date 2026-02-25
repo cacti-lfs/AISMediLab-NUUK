@@ -72,6 +72,8 @@ jobs:
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_ssh_public_keys: |
         ${{ vars.SSH_PUBLIC_KEYS }}
       TF_WORKSPACE: "nuuk-medilab-poc"
@@ -118,7 +120,7 @@ jobs:
           echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."
           
           # Utilisation des variables d'inventaire
-          NODES="${{ vars.TF_NAME_NODE_1 }} ${{ vars.TF_NAME_NODE_2 }}"
+          NODES="${{ vars.TF_IP_NODE_1 }} ${{ vars.TF_IP_NODE_2 }}"
           VM_LIST="401 402"
 
           for node in $NODES; do
