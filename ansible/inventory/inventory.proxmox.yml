@@ -12,3 +12,17 @@ filters:
 
 compose:
   ansible_host: proxmox_agent_interfaces[1]['ip-addresses'] | select('search', '\.') | first | split('/') | first
+
+# ==============================================================
+# CREATION DYNAMIQUE DES GROUPES
+# ==============================================================
+keyed_groups:
+ # groupe OS
+  - prefix: OS
+    key: proxmox_name.split('-')[0]
+    separator: ""
+
+  # groupe role
+  - prefix: ROLE
+    key: proxmox_name.split('-')[1]
+    separator: ""
