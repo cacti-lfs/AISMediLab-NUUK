@@ -33,12 +33,6 @@ on:
         required: true
         type: boolean
         default: true
-      action:
-        description: "Action"
-        required: true
-        default: deploy
-        type: choice
-        options: [deploy, recreate, destroy]
 
 # ===========================================================
 # PERMISSIONS
@@ -162,6 +156,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
       - name: Ping Ansible
+        if: github.event_name == 'push' || github.event.inputs.run_ansible == 'true'
         run: |
           export ANSIBLE_HOST_KEY_CHECKING=False
           if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 30; fi
@@ -173,10 +168,12 @@ jobs:
 
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
+        if: github.event_name == 'push' || github.event.inputs.run_ansible == 'true'
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
 
       # Step lancement Ansible Playbook
       - name: Lancement Ansible Playbook
+        if: github.event_name == 'push' || github.event.inputs.run_ansible == 'true'
         run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml ansible/playbooks/bastion.yml
 
       # Step Etat de réussite ou d'échec du pipeline
