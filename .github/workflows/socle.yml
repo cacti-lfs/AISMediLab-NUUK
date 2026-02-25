@@ -94,7 +94,31 @@ jobs:
       - name: Terraform Destroy (Recreate mode)
         if: ${{ github.event.inputs.action == 'recreate'  || github.event.inputs.action == 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
-      # 5. Plan
+      - name: Proxmox Clean Urgence (API Timeout)
+        if: failure()
+        run: |
+          echo "Détection d'une erreur API Proxmox (595/596). Nettoyage forcé des noeuds... "
+
+          NODES="${{ vars.TF_NAME_NODE_1 }} ${{ vars.TF_NAME_NODE_2 }}"
+          VM_IDs="401 402"
+
+          for node in $NODES; do
+            echo "Nettoyage sur $node..."
+            for vm_id in $VM_IDs; do
+              ssh -o StrictHostKeyChecking=no root@$node "
+                echo 'Arrêt forcé de la VM $vmid...'
+                qm stop $vmid --skiplock 2>/dev/null || true
+
+                echo 'Destruction de la configuration...'
+                rm -f /etc/pve/qemu-server/$vmid.conf
+                
+                echo 'Nettoyage ZFS (Volumes restant)...'
+                # On cherche les datasets liés à l'ID de la VM et on les détruit
+                zfs list -H -o name | grep 'vm-$vmid-disk' | xargs -n1 zfs destroy -r 2>/dev/null || true
+              "
+            done
+          done
+        # 5. Plan
       - name: Terraform Plan (01_bastion)
         if: ${{ github.event.inputs.action != 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion plan
@@ -113,7 +137,7 @@ jobs:
           export ANSIBLE_HOST_KEY_CHECKING=False
 
           sleep 30
-          
+
           ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
             -m ping \
             -u cloudadm \
