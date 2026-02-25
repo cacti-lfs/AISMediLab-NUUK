@@ -110,7 +110,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Ping Ansible
         run: |
-          ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' -m ping
+          ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
+            -m ping \
+            -u cloudadm \
+            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph

@@ -1,24 +1,13 @@
 plugin: community.proxmox.proxmox
-
-# Connexion API
 url: "{{ lookup('env', 'TF_VAR_proxmox_api_url') }}"
 user: "{{ lookup('env', 'TF_VAR_proxmox_api_user') }}"
 token_id: "{{ lookup('env', 'TF_VAR_proxmox_api_token_id') }}"
 token_secret: "{{ lookup('env', 'TF_VAR_proxmox_api_token_secret') }}"
-
 validate_certs: false
 want_facts: true
 
-# FILTRES
 filters:
   - "'BAST' in proxmox_name"
 
-# CONFIGURATION DES HOSTS
 compose:
   ansible_host: proxmox_agent_interfaces[1]['ip-addresses'] | select('search', '\.') | first | split('/') | first
-
-# VARIABLES DE CONNEXION (Vérifie bien l'alignement à gauche de 'vars:')
-vars:
-  ansible_user: cloudadm
-  ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-  ansible_python_interpreter: /usr/bin/python3
