@@ -5,4 +5,6 @@
   remote_user: cloudadm
   
   roles:
+    - ../roles/common
     - ../roles/bastion
+ 
