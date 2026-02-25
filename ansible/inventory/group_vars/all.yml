@@ -11,4 +11,4 @@ keepalived_auth_pass: "{{ lookup('env', 'BASTION_PASS') }}"
 keepalived_router_id: "{{ lookup('env', 'BASTION_ROUTER_ID') | default('51', true) }}"
 
 # SYSTÈME
-debian_distro: "{{ lookup('env', 'DEBIAN_DISTRO') || default('trixie', true) }}"
+debian_distro: "{{ lookup('env', 'DEBIAN_DISTRO') | default('trixie', true) }}"
