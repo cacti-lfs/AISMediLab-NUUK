@@ -168,7 +168,7 @@ jobs:
         if: github.event_name == 'push' || inputs.run_ansible
         run: |
           export ANSIBLE_HOST_KEY_CHECKING=False
-          if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 30; fi
+          if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 15; fi
 
           ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
             -m ping \
