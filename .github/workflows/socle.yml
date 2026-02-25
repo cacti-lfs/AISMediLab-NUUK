@@ -92,12 +92,12 @@ jobs:
       
         # 2. Initialisation
       - name: Terraform Init (01_bastion)
-        if: github.event_name == 'push' || github.event.inputs.run_terraform == true
+        if: github.event_name == 'push' || inputs.run_terraform
         run: terraform -chdir=terraform/composants/01_bastion init -upgrade
 
       # 3. Validation de la syntaxe
       - name: Terraform Validate (01_bastion)
-        if: github.event_name == 'push' || github.event.inputs.run_terraform == true
+        if: github.event_name == 'push' || inputs.run_terraform
         run: terraform -chdir=terraform/composants/01_bastion validate
       
       # 4. Analyse de sécurité avec tfsec
@@ -109,7 +109,7 @@ jobs:
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode ou Destroy mode)
       # Se lance si run_terraform=true ET action=recreate ou destroy
-        if: (github.event_name == 'push' || github.event.inputs.run_terraform == true) && (github.event.inputs.action == 'recreate' || github.event.inputs.action == 'destroy')
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'apply')
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
       
       - name: Proxmox Clean Urgence (API Timeout)
@@ -138,11 +138,11 @@ jobs:
           done
       # 5. Plan
       - name: Terraform Plan (01_bastion)
-        if: (github.event_name == 'push' || github.event.inputs.run_terraform == true) && github.event.inputs.action != 'destroy'
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
         run: terraform -chdir=terraform/composants/01_bastion plan
       # 6. Apply
       - name: Terraform Apply (01_bastion)
-        if: (github.event_name == 'push' || github.event.inputs.run_terraform == true) && github.event.inputs.action != 'destroy'
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
 
       # ================================================================
@@ -151,13 +151,13 @@ jobs:
 
       # Ajout de la clef SSH dans le Runner
       - name: Add SSH Key to Runner
-        if: github.event_name == 'push' || github.event.inputs.run_ansible == true
+        if: github.event_name == 'push' || inputs.run_ansible
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
       - name: Ping Ansible
-        if: github.event_name == 'push' || github.event.inputs.run_ansible == true
+        if: github.event_name == 'push' || inputs.run_ansible
         run: |
           export ANSIBLE_HOST_KEY_CHECKING=False
           if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 30; fi
@@ -169,12 +169,12 @@ jobs:
 
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
-        if: github.event_name == 'push' || github.event.inputs.run_ansible == true
+        if: github.event_name == 'push' || inputs.run_ansible
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
 
       # Step lancement Ansible Playbook
       - name: Lancement Ansible Playbook
-        if: github.event_name == 'push' || github.event.inputs.run_ansible == true
+        if: github.event_name == 'push' || inputs.run_ansible
         run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml ansible/playbooks/bastion.yml
 
       # Step Etat de réussite ou d'échec du pipeline
