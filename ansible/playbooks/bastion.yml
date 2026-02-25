@@ -1,7 +1,8 @@
 ---
 - name: Déploiement Cluster Bastion
   hosts: ROLE_BAST
+  become: false
+  remote_user: cloudadm
   
   roles:
     - ../roles/bastion
-  
