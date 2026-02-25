@@ -103,8 +103,17 @@ jobs:
         if: ${{ github.event.inputs.action != 'destroy' }}
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
 
+      # Ajout de la clef SSH dans le Runner
+      - name: Add SSH Key to Runner
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Ping Ansible
-        run: ansible -i ansible/inventory/inventory.proxmox.yml -m ping all
+        run: |
+          ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
+            -m ping \
+            -u cloudadm \
+            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
@@ -126,7 +135,7 @@ jobs:
     runs-on: [self-hosted, nuuk-runner]
     environment: nuuk # Utilise les secrets de "nuuk"
     env: 
-      TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
       TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
       TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
