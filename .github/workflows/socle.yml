@@ -116,34 +116,13 @@ jobs:
       
       - name: Proxmox Clean Urgence (API Timeout)
         if: failure()
+        shell: bash
         run: |
           echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."
-          
-          # Utilisation des variables d'inventaire
-          NODES="${{ vars.TF_IP_NODE_1 }} ${{ vars.TF_IP_NODE_2 }}"
-          VM_LIST="401 402"
 
-          for node in $NODES; do
-            echo "--- Connexion à $node ---"
-            for id in $VM_LIST; do
-              # On passe les commandes en une seule fois pour plus de rapidité
-              ssh -o StrictHostKeyChecking=no root@$node "
-                echo 'Vérification VM $id...'
-                # Arrêt forcé et suppression du lock Proxmox
-                qm stop $id --skiplock 2>/dev/null || true
-                
-                # Suppression propre du fichier de conf si Terraform a laissé des traces
-                if [ -f /etc/pve/qemu-server/$id.conf ]; then
-                  echo 'Suppression du fichier de config $id.conf'
-                  rm -f /etc/pve/qemu-server/$id.conf
-                fi
-
-                # Nettoyage des volumes ZFS orphelins
-                echo 'Recherche de disques ZFS pour la VM $id...'
-                zfs list -H -o name | grep \"vm-$id-disk\" | xargs -n1 zfs destroy -r 2>/dev/null || true
-              "
-            done
-          done
+          export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.251 "qm stop 401 || true"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 402 || true"
       # 5. Plan
       - name: Terraform Plan (01_bastion)
         if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
