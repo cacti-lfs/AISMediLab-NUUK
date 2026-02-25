@@ -14,9 +14,25 @@ on:
   workflow_dispatch:
     inputs:
       environment:
+        description: "Environnement cible"
         required: true
         type: choice
         options: [poc, nuuk, all]
+      run_terraform:
+        description: "Activer la partie Terraform ?"
+        required: true
+        type: boolean
+        default: false
+      terraform_action:
+        description: "Action Terraform (si activé)"
+        required: false
+        type: choice
+        options: [deploy, recreate, destroy]
+      run_ansible:
+        description: "Activer la partie Ansible ?"
+        required: true
+        type: boolean
+        default: true
       action:
         description: "Action"
         required: true
@@ -72,16 +88,21 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
+      # ================================================================
+      # SECTION TERRAFORM (Conditionnelle selon l'input "run_terraform")
+      # ================================================================
       # 1. Vérification du formatage
       # - name: Check Terraform Formatting
       #   run: terraform -chdir=terraform/composants/01_bastion fmt -check
       
         # 2. Initialisation
       - name: Terraform Init (01_bastion)
+        if: github.event_name == 'push' || github.event.inputs.run_terraform == 'true'
         run: terraform -chdir=terraform/composants/01_bastion init -upgrade
 
       # 3. Validation de la syntaxe
       - name: Terraform Validate (01_bastion)
+        if: github.event_name == 'push' || github.event.inputs.run_terraform == 'true'
         run: terraform -chdir=terraform/composants/01_bastion validate
       
       # 4. Analyse de sécurité avec tfsec
@@ -91,9 +112,11 @@ jobs:
       #     working_directory: terraform/composants/01_bastion
       #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
-      - name: Terraform Destroy (Recreate mode)
-        if: ${{ github.event.inputs.action == 'recreate'  || github.event.inputs.action == 'destroy' }}
+      - name: Terraform Destroy (Recreate mode ou Destroy mode)
+      # Se lance si run_terraform=true ET action=recreate ou destroy
+        if: (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && (github.event.inputs.action == 'recreate' || github.event.inputs.action == 'destroy')
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
+      
       - name: Proxmox Clean Urgence (API Timeout)
         if: failure()
         run: |
@@ -118,30 +141,36 @@ jobs:
               "
             done
           done
-        # 5. Plan
+      # 5. Plan
       - name: Terraform Plan (01_bastion)
-        if: ${{ github.event.inputs.action != 'destroy' }}
+        if: (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && github.event.inputs.action != 'destroy'
         run: terraform -chdir=terraform/composants/01_bastion plan
       # 6. Apply
       - name: Terraform Apply (01_bastion)
-        if: ${{ github.event.inputs.action != 'destroy' }}
+        if: (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && github.event.inputs.action != 'destroy'
         run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
+
+      # ================================================================
+      # SECTION ANSIBLE (Conditionnelle par run_ansible)
+      # ================================================================
 
       # Ajout de la clef SSH dans le Runner
       - name: Add SSH Key to Runner
+        if: github.event_name == 'push' || github.event.inputs.run_ansible == 'true'
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
       - name: Ping Ansible
         run: |
           export ANSIBLE_HOST_KEY_CHECKING=False
-
-          sleep 30
+          if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 30; fi
 
           ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
-            -m ping \
-            -u cloudadm \
-            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+            -m ping
+#            -u cloudadm \
+#            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+
       # Step lancement Ansible inventory
       - name: Lancement Ansible Playbook
         run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
