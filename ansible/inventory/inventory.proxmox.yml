@@ -16,12 +16,13 @@ compose:
 # ==============================================================
 # CREATION DYNAMIQUE DES GROUPES
 # ==============================================================
+strict: false
 keyed_groups:
  # groupe OS
   - prefix: OS
-    key: proxmox_name.split('-')[0]
+    key: proxmox_name.split('-')[0] | upper
     separator: "_"
   # groupe role
   - prefix: ROLE
-    key: proxmox_name.split('-')[1]
+    key: proxmox_name.split('-')[1] | upper
     separator: "_"
