@@ -4,7 +4,7 @@
     name: ['keepalived', 'iproute2']
     state: present
     update_cache: yes
-  become: yes
+  become: true
 
 - name: Autoriser le binding IP non-local (Sysctl)
   sysctl:
@@ -12,7 +12,7 @@
     value: '1'
     state: present
     reload: yes
-  become: yes
+  become: true
 
 - name: Configuration du fichier Keepalived
   template:
@@ -20,5 +20,5 @@
     dest: /etc/keepalived/keepalived.conf
     mode: '0644'
   notify: Restart Keepalived
-  become: yes
+  become: true
 
