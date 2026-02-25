@@ -8,7 +8,8 @@ want_facts: true
 
 filters:
   - proxmox_name is defined
-  - "proxmox_name.startswitch('DEB') or proxmox_name.startswith('WIN')"
+  - "proxmox_name.startswith('DEB') or proxmox_name.startswith('WIN')"
+  - not proxmox_template
 
 compose:
   ansible_host: proxmox_agent_interfaces[1]['ip-addresses'] | select('search', '\.') | first | split('/') | first
