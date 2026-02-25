@@ -81,7 +81,6 @@ jobs:
       BASTION_IFACE: ${{ vars.BASTION_IFACE }}
       BASTION_PASS: ${{ secrets.BASTION_PASS }}
       BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
-
       TF_VAR_environnement: "poc"
       TF_VAR_full_clone: "false"
       TF_CLOUD_ORGANIZATION: "nuuk"
