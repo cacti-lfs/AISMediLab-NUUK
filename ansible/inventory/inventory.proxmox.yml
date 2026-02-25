@@ -20,9 +20,8 @@ keyed_groups:
  # groupe OS
   - prefix: OS
     key: proxmox_name.split('-')[0]
-    separator: ""
-
+    separator: "_"
   # groupe role
   - prefix: ROLE
     key: proxmox_name.split('-')[1]
-    separator: ""
+    separator: "_"

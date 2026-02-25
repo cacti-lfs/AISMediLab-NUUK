@@ -1,6 +1,6 @@
 ---
 - name: Déploiement Cluster Bastion
-  hosts: role_BAST
+  hosts: ROLE_BAST
   
   roles:
     - ../roles/bastion
