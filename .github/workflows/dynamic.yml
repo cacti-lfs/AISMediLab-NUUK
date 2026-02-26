@@ -110,7 +110,7 @@ jobs:
       # - name: Check Terraform Formatting
       #   run: terraform -chdir=terraform/composants/02_dhcp fmt -check
       - name: Add SSH Key to Runner
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
