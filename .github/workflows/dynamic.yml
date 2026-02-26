@@ -71,8 +71,11 @@ jobs:
   # JOB POUR LE POC
   # =========================================================
   job-dhcp:
-    name: "Terraform Static POC"
-    if: github.event.inputs.target_scope == 'Tous' || github.event.inputs.deploy_dhcp == true
+    name: "Terraform Dynamic POC"
+    if: |
+      github.event_name == 'push' || 
+      github.event.inputs.target_scope == 'Tous' || 
+      github.event.inputs.deploy_dhcp == 'true'
     runs-on: [self-hosted, poc-runner]
     environment: ${{ github.event.inputs.environment }}
     env: 
@@ -127,7 +130,9 @@ jobs:
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode ou Destroy mode)
       # Se lance si run_terraform=true ET action=recreate ou destroy
-        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'apply')
+        if: >-
+          (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && 
+          (github.event.inputs.terarform_action == 'destroy' || github.event.inputs.terarform_action == 'recreate')
         run: terraform -chdir=terraform/composants/02_dhcp destroy -auto-approve
       
       - name: Proxmox Clean Urgence (API Timeout)
@@ -141,11 +146,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 1702 || true"
       # 5. Plan
       - name: Terraform Plan (02_dhcp)
-        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
+        if: >-
+          (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && 
+          (github.event.inputs.terarform_action == 'deploy' || github.event.inputs.terarform_action == 'recreate')
         run: terraform -chdir=terraform/composants/02_dhcp plan
       # 6. Apply
       - name: Terraform Apply (02_dhcp)
-        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
+        if: >-
+          (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && 
+          (github.event.inputs.terarform_action == 'deploy' || github.event.inputs.terarform_action == 'recreate')
         run: terraform -chdir=terraform/composants/02_dhcp apply -auto-approve -parallelism=1
 
       # ================================================================
