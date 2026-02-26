@@ -77,7 +77,7 @@ jobs:
       github.event.inputs.target_scope == 'Tous' || 
       github.event.inputs.deploy_dhcp == 'true'
     runs-on: [self-hosted, poc-runner]
-    environment: ${{ github.event.inputs.environment }}
+    environment: 'poc'
     env: 
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
