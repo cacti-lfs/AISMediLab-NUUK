@@ -1,8 +1,8 @@
 # ===========================================================
 # METADONNÉES
 # ===========================================================
-name: "Déploiement Terraform 'Socle'"
-run-name: "Déploiement Terraform 'Socle' pour ${{ github.ref_name }}"
+name: "Déploiement Terraform/Ansible 'Socle'"
+run-name: "Déploiement Terraform/Ansible 'Socle' pour ${{ github.ref_name }}"
 
 # ===========================================================
 # DÉCLENCHEURS
