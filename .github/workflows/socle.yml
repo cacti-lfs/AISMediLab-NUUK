@@ -9,28 +9,31 @@ run-name: "Déploiement Terraform 'Socle' pour ${{ github.ref_name }}"
 # ===========================================================
 on:
   push:
-    branches:
-      - main
-      - feature
-    paths:
-      - 'terraform/**'
-      - '.github/workflows/*'
+    branches: [main,feature]
+    paths: ['terraform/**', '.github/workflows/*']
   workflow_dispatch:
     inputs:
       environment:
+        description: "Environnement cible"
         required: true
         type: choice
-        options:
-          - poc
-          - nuuk
-      action:
-        description: "Action à effectuer"
+        options: [poc, nuuk, all]
+      run_terraform:
+        description: "Activer la partie Terraform ?"
         required: true
+        type: boolean
+        default: false
+      terraform_action:
+        description: "Action Terraform (si activé)"
+        required: false
         type: choice
-        options:
-          - deploy
-          - recreate
-
+        options: [deploy, recreate, destroy]
+        default: deploy
+      run_ansible:
+        description: "Activer la partie Ansible ?"
+        required: true
+        type: boolean
+        default: true
 
 # ===========================================================
 # PERMISSIONS
@@ -41,7 +44,6 @@ permissions: # Principe du moindre privilège
 # ===========================================================
 # CONFIGURATION GLOBALE
 # ===========================================================
-
 env:
   TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
 
@@ -59,7 +61,9 @@ jobs:
     environment: poc # Utilise les secrets de "poc"
     env: 
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
       TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
       TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
       TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
@@ -68,32 +72,158 @@ jobs:
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_ssh_public_keys: |
         ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-poc"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      BASTION_IFACE: ${{ vars.BASTION_IFACE }}
+      BASTION_PASS: ${{ secrets.BASTION_PASS }}
+      BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
+      TF_VAR_environnement: "poc"
+      TF_VAR_full_clone: "false"
+      TF_CLOUD_ORGANIZATION: "nuuk"
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      # Init
+      
+      # ================================================================
+      # SECTION TERRAFORM (Conditionnelle selon l'input "run_terraform")
+      # ================================================================
+      # 1. Vérification du formatage
+      # - name: Check Terraform Formatting
+      #   run: terraform -chdir=terraform/composants/01_bastion fmt -check
+      
+        # 2. Initialisation
       - name: Terraform Init (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion init
+        if: github.event_name == 'push' || inputs.run_terraform
+        run: terraform -chdir=terraform/composants/01_bastion init -upgrade
 
+      # 3. Validation de la syntaxe
+      - name: Terraform Validate (01_bastion)
+        if: github.event_name == 'push' || inputs.run_terraform
+        run: terraform -chdir=terraform/composants/01_bastion validate
+      
+      # 4. Analyse de sécurité avec tfsec
+      # - name: tfsec Check
+      #   uses: aquasecurity/tfsec-action@v1.0.0  
+      #   with:
+      #     working_directory: terraform/composants/01_bastion
+      #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
-      - name: Terraform Destroy (Recreate mode)
-        if: ${{ github.event.inputs.action == 'recreate' }}
+      - name: Terraform Destroy (Recreate mode ou Destroy mode)
+      # Se lance si run_terraform=true ET action=recreate ou destroy
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'apply')
         run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
-      # Plan
+      
+      - name: Proxmox Clean Urgence (API Timeout)
+        if: failure()
+        shell: bash
+        run: |
+          echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."
+
+          export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.251 "qm stop 401 || true"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 402 || true"
+      # 5. Plan
       - name: Terraform Plan (01_bastion)
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
         run: terraform -chdir=terraform/composants/01_bastion plan
-      # Apply
+      # 6. Apply
       - name: Terraform Apply (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
+
+      # ================================================================
+      # SECTION ANSIBLE (Conditionnelle par run_ansible)
+      # ================================================================
+
+      # Ajout de la clef SSH dans le Runner
+      - name: Add SSH Key to Runner
+        if: github.event_name == 'push' || inputs.run_ansible
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: Ping Ansible
+        if: github.event_name == 'push' || inputs.run_ansible
+        run: |
+          export ANSIBLE_HOST_KEY_CHECKING=False
+          if [[ "${{ github.event.inputs.run_terraform }}" == "true" ]]; then sleep 15; fi
+
+          ansible -i ansible/inventory/inventory.proxmox.yml 'DEB-BAST*' \
+            -m ping \
+            -u cloudadm
+#            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'"
+
+      # Step lancement Ansible inventory
+      - name: Ansible Inventaire
+        if: github.event_name == 'push' || inputs.run_ansible
+        run: ansible-inventory -i ansible/inventory/inventory.proxmox.yml --graph
+
+      # Step lancement Ansible Playbook
+      - name: Ansible Playbook
+        if: github.event_name == 'push' || inputs.run_ansible
+        run: ansible-playbook -i ansible/inventory/inventory.proxmox.yml ansible/playbooks/bastion.yml
+
+      # Step Etat de réussite ou d'échec du pipeline
+
+      
+  # =========================================================
+  # JOB POUR NUUK (A venir)
+  # =========================================================
+
+    # =========================================================
+    # JOBS POUR LES AUTRES ENVIRONNEMENTS (ex: staging) À VENIR
+    # =========================================================
+  terraform-deploy:
+    # Test de Job unique
+    name: "Deploy to ${{ matrix.target_env }}"
+    if: false && (github.event.inputs.environment == 'all' || github.event_name == 'push')
+    runs-on: ${{ matrix.target_env == 'nuuk' && 'nuuk-runner' || 'poc-runner' }}
     
-  # =========================================================
-  # JOB POUR NUUK
-  # =========================================================
-  deploy-terra-static-nuuk:
-    name: "Terraform Static Nuuk"
-    runs-on: self-hosted
-    environment: nuuk # Utilise les secrets de "nuuk"
+    # Matrice pour gérer les différents environnements
+    strategy:
+      fail-fast: true
+      matrix:
+        target_env: [poc, nuuk]
+
+    # Chargement des variables dans l'environnement courant du job
+    environment: ${{ matrix.target_env }}
+
+    env: 
+      # Variables d'accès
+      TF_VAR_proxmox_api_url: ${{ vars.PVE_API_URL }}
+      # Variables spécifiques à l'infrastructure
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+
+      # Variables de configuration réseau
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+
+      # Sécurité & Workspace
+      TF_VAR_ssh_public_keys: ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-${{ matrix.target_env }}"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: "nuuk"
+      TF_VAR_full_clone: "false"
+
     steps:
-      - run: echo "Déploiement complet pour Nuuk"
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      
+      - name: Terraform Init
+        run: terraform -chdir=terraform/composants/01_bastion init -upgrade
+
+      - name: Terraform Plan
+        run: terraform -chdir=terraform/composants/01_bastion plan
+
+      - name: Terraform Apply
+        # apply manuel obligatoire
+        if: github.ref == 'refs/heads/main'
+        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve

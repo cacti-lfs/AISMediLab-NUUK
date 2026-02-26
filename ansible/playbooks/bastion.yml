@@ -1,8 +1,9 @@
 ---
 - name: Déploiement Cluster Bastion
-  hosts: bastions
-  become: no  # On désactive le sudo global imposé par l'inventaire
+  hosts: ROLE_BAST
+  remote_user: cloudadm
   
   roles:
+    - ../roles/common
     - ../roles/bastion
-  
+ 

@@ -1,0 +1,14 @@
+---
+# RÉSEAU GLOBAL
+dns_servers:
+  - "{{ lookup('env', 'TF_VAR_dns_1') | default('1.1.1.1', true) }}"
+  - "{{ lookup('env', 'TF_VAR_dns_2') | default('8.8.8.8', true) }}"
+
+# KEEPALIVED (BASTION)
+keepalived_vip: "{{ lookup('env', 'TF_VAR_bastion_vip') | default('192.168.32.51', true) }}"
+keepalived_interface: "{{ lookup('env', 'BASTION_IFACE') | default('eth0', true) }}"
+keepalived_auth_pass: "{{ lookup('env', 'BASTION_PASS') }}"
+keepalived_router_id: "{{ lookup('env', 'BASTION_ROUTER_ID') | default('51', true) }}"
+
+# SYSTÈME
+debian_distro: "{{ lookup('env', 'DEBIAN_DISTRO') | default('trixie', true) }}"
