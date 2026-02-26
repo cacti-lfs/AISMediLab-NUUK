@@ -4,14 +4,14 @@ locals {
     (var.node_name_2) = var.template_id_node2
   }
 
-    dhcp_vm = {
+  dhcp_vm = {
     "01" = {
       ipv4_address = var.ip_dhcp_01
-      node_name = var.node_name_1
+      node_name    = var.node_name_1
     }
     "02" = {
       ipv4_address = var.ip_dhcp_01
-      node_name = var.node_name_1
+      node_name    = var.node_name_1
     }
   }
 }

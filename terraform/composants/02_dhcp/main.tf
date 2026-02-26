@@ -1,13 +1,13 @@
 module "dhcp" {
   for_each = local.dhcp_vm
-  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
-  node_name = each.value.node_name
-  vm_name = "DEB-DHCP-$(each.key)"
-  vm_id = 1700 + tonumber(each.key)
+  node_name      = each.value.node_name
+  vm_name        = "DEB-DHCP-$(each.key)"
+  vm_id          = 1700 + tonumber(each.key)
   vm_description = "DHCP"
-  vm_tags = ["dhcp", "vlan170"]
-    # vm_bios = "seabios" par défaut
+  vm_tags        = ["dhcp", "vlan170"]
+  # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
 
@@ -16,7 +16,7 @@ module "dhcp" {
   # vm_agent_enabled = true par défaut
 
   source_vm_id = local.node_template_map[each.value.node_name]
-  full_clone = false
+  full_clone   = false
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
@@ -42,10 +42,10 @@ module "dhcp" {
 
   disks = [
     {
-      disk_interface  = "scsi0"
-      disk_size       = 15
-      disk_storage_id = var.datastore_id
-      disk_type       = "disk"
+      disk_interface   = "scsi0"
+      disk_size        = 15
+      disk_storage_id  = var.datastore_id
+      disk_type        = "disk"
       disk_file_format = "raw"
     }
   ]
@@ -67,4 +67,4 @@ module "dhcp" {
 
   dns_domain  = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
-  }
+}
