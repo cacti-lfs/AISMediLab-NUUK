@@ -1,8 +1,8 @@
 # ===========================================================
 # METADONNÉES
 # ===========================================================
-name: "Déploiement Terraform/Ansible 'Dynamic'"
-run-name: "Déploiement Terraform/Ansible 'Socle' pour ${{ github.ref_name }}"
+name: "TF/Ans. 'Dynamic' 'Dynamic'"
+run-name: "TF/Ans. 'Dynamic' pour ${{ github.ref_name }}"
 
 # ===========================================================
 # DÉCLENCHEURS
@@ -83,10 +83,9 @@ jobs:
       TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
       TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
-      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_DHCP_01 }}
-      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_DHCP_02 }}
-      TF_VAR_bastion_vip: ${{ vars.TF_IP_DHCP_VIP }}
-      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN170 }}
+      TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
+      TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
+      TF_VAR_gateway_vlan70: ${{ vars.TF_GATEWAY_VLAN70 }}
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
@@ -142,8 +141,8 @@ jobs:
           echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."
 
           export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
-          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.251 "qm stop 1701 || true"
-          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 1702 || true"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.251 "qm stop 701 || true"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 702 || true"
       # 5. Plan
       - name: Terraform Plan (02_dhcp)
         if: >-

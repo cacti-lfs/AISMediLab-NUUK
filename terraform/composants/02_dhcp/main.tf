@@ -4,9 +4,9 @@ module "dhcp" {
 
   node_name      = each.value.node_name
   vm_name        = "DEB-DHCP-$(each.key)"
-  vm_id          = 1700 + tonumber(each.key)
+  vm_id          = 700 + tonumber(each.key)
   vm_description = "DHCP"
-  vm_tags        = ["dhcp", "vlan170"]
+  vm_tags        = ["dhcp", "vlan70"]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
