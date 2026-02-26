@@ -45,10 +45,10 @@ on:
         options: [Tous, Sélection]
         default: Sélection
 
-        deploy_dhcp:
-          description: "DHCP"
-          type: boolean
-          default: false
+      deploy_dhcp:
+        description: "DHCP"
+        type: boolean
+        default: false
 
 
 # ===========================================================
