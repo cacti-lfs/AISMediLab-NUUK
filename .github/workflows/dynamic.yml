@@ -109,7 +109,11 @@ jobs:
       # 1. Vérification du formatage
       # - name: Check Terraform Formatting
       #   run: terraform -chdir=terraform/composants/02_dhcp fmt -check
-      
+      - name: Add SSH Key to Runner
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
         # 2. Initialisation
       - name: Terraform Init (02_dhcp)
         if: github.event_name == 'push' || inputs.run_terraform
@@ -128,14 +132,13 @@ jobs:
       #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
       # Step de destruction conditionnelle
       - name: Terraform Destroy (Recreate mode ou Destroy mode)
-      # Se lance si run_terraform=true ET action=recreate ou destroy
+        id: destroy_step
         if: >-
           (github.event_name == 'push' || github.event.inputs.run_terraform == 'true') && 
           (github.event.inputs.terarform_action == 'destroy' || github.event.inputs.terarform_action == 'recreate')
         run: terraform -chdir=terraform/composants/02_dhcp destroy -auto-approve
-      
       - name: Proxmox Clean Urgence (API Timeout)
-        if: failure()
+        if: steps.destroy_step.outcome == 'failure'
         shell: bash
         run: |
           echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."

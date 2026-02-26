@@ -35,7 +35,7 @@ variable "datastore_id" {
 variable "network_v1" {
   type = string
 }
-variable "gateway_vlan170" {
+variable "gateway_vlan70" {
   type = string
 }
 variable "ip_dhcp_01" {
