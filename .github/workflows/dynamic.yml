@@ -1,0 +1,160 @@
+# ===========================================================
+# METADONNÉES
+# ===========================================================
+name: "Déploiement Terraform/Ansible 'Dynamic'"
+run-name: "Déploiement Terraform/Ansible 'Socle' pour ${{ github.ref_name }}"
+
+# ===========================================================
+# DÉCLENCHEURS
+# ===========================================================
+on:
+  push:
+    branches: [main, feature]
+    paths: ['terraform/**', '.github/workflows/*']
+  workflows_dispatch:
+    inputs:
+      environment:
+        description: "Environnement cible pour ce Build"
+        required: true
+        type: choice
+        options: [poc, nuuk]
+        default: poc
+
+      # --- ÉTAPE TERRAFORM ---
+      run_terraform:
+        description: "Exécution Terraform"
+        type: boolean
+        default: false
+
+      terarform_action:
+        description: "Action (si Terraform activé)"
+        type: choice
+        options: [deploy, destroy, recreate]
+        default: deploy
+
+      # --- ÉTAPE ANSIBLE ---
+      run_ansible:
+        description: "Exécution Ansible"
+        type: boolean
+        default: true
+
+      # --- SÉLECTTION DES COMPOSANTS ---
+      target_scope:
+        description: "Composants cibles"
+        type: choice
+        options: [Tous, Sélection]
+        default: Sélection
+
+        deploy_dhcp:
+          description: "DHCP"
+          type: boolean
+          default: false
+
+
+# ===========================================================
+# PERMISSIONS
+# ===========================================================
+permissions:
+  contents: read
+
+# ===========================================================
+# CONFIGURATION GLOBALE
+# ===========================================================
+env:
+  TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+
+# ===========================================================
+# JOBS (Unités de travai)
+# ===========================================================
+jobs:
+  # =========================================================
+  # JOB POUR LE POC
+  # =========================================================
+  job-dhcp:
+    name: "Terraform Static POC"
+    if: github.event.inputs.target_scope == 'Tous' || github.event.inputs.deploy_dhcp == true
+    runs-on: [self-hosted, poc-runner]
+    environment: ${{ github.event.inputs.environment }}
+    env: 
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_DHCP_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_DHCP_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_DHCP_VIP }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN170 }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+      TF_VAR_ssh_public_keys: |
+        ${{ vars.SSH_PUBLIC_KEYS }}
+      TF_WORKSPACE: "nuuk-medilab-poc"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_VAR_environnement: "poc"
+      TF_VAR_full_clone: "false"
+      TF_CLOUD_ORGANIZATION: "nuuk"
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      
+      # ================================================================
+      # SECTION TERRAFORM (Conditionnelle selon l'input "run_terraform")
+      # ================================================================
+      # 1. Vérification du formatage
+      # - name: Check Terraform Formatting
+      #   run: terraform -chdir=terraform/composants/02_dhcp fmt -check
+      
+        # 2. Initialisation
+      - name: Terraform Init (02_dhcp)
+        if: github.event_name == 'push' || inputs.run_terraform
+        run: terraform -chdir=terraform/composants/02_dhcp init -upgrade
+
+      # 3. Validation de la syntaxe
+      - name: Terraform Validate (02_dhcp)
+        if: github.event_name == 'push' || inputs.run_terraform
+        run: terraform -chdir=terraform/composants/02_dhcp validate
+      
+      # 4. Analyse de sécurité avec tfsec
+      # - name: tfsec Check
+      #   uses: aquasecurity/tfsec-action@v1.0.0  
+      #   with:
+      #     working_directory: terraform/composants/02_dhcp
+      #     soft_fail: false # Pipeline échouera si des problèmes de sécurité sont détectés
+      # Step de destruction conditionnelle
+      - name: Terraform Destroy (Recreate mode ou Destroy mode)
+      # Se lance si run_terraform=true ET action=recreate ou destroy
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'apply')
+        run: terraform -chdir=terraform/composants/02_dhcp destroy -auto-approve
+      
+      - name: Proxmox Clean Urgence (API Timeout)
+        if: failure()
+        shell: bash
+        run: |
+          echo "🚨 Erreur API détectée. Nettoyage manuel des verrous et résidus..."
+
+          export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.251 "qm stop 1701 || true"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes root@192.168.1.252 "qm stop 1702 || true"
+      # 5. Plan
+      - name: Terraform Plan (02_dhcp)
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
+        run: terraform -chdir=terraform/composants/02_dhcp plan
+      # 6. Apply
+      - name: Terraform Apply (02_dhcp)
+        if: (github.event_name == 'push' || inputs.run_terraform) && (github.event.inputs.action != 'destroy')
+        run: terraform -chdir=terraform/composants/02_dhcp apply -auto-approve -parallelism=1
+
+      # ================================================================
+      # SECTION ANSIBLE (Conditionnelle par run_ansible)
+      # ================================================================
+
+      # Ajout de la clef SSH dans le Runner
+      - name: Add SSH Key to Runner
+        if: github.event_name == 'push' || inputs.run_ansible
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
