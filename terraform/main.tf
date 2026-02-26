@@ -23,22 +23,6 @@ locals {
     (var.node_name_2) = 9000
   }
 
-  # --- VMs BASTION (VLAN 40) ---
-  bastion_vms = {
-    "01" = {
-      ipv4_address = "192.168.32.49"
-      vlan_id      = 40
-      gateway      = var.gateway_vlan40
-      node_name    = var.node_name_1
-    }
-    "02" = {
-      ipv4_address = "192.168.32.50"
-      vlan_id      = 40
-      gateway      = var.gateway_vlan40
-      node_name    = var.node_name_2
-    }
-  }
-
   # --- VMs DHCP (VLAN 70) ---
   dhcp_vms = {
     "01" = {
@@ -190,31 +174,7 @@ locals {
   }
 }
 
-# --- MODULES ---
-module "bastions" {
-  for_each = local.bastion_vms
-  source   = "./modules/inst_linux"
-
-  vm_name = "DEB-BAST-${each.key}"
-  vm_id   = 400 + tonumber(each.key)
-
-  node_name = each.value.node_name
-
-  template_id  = local.node_template_map[each.value.node_name]
-  datastore_id = var.datastore_id
-
-  ipv4_address = each.value.ipv4_address
-  cidr         = "/28" # A modifier
-  gateway      = each.value.gateway
-  vlan_id      = each.value.vlan_id
-
-  network_bridge = local.vlan_bridge_map[tostring(each.value.vlan_id)]
-
-  ssh_public_keys = var.ssh_public_keys
-  cpu_cores       = var.cpu_cores
-  memory          = var.memory
-  disk_size       = var.disk_size
-}
+# --- MODULES --- 
 
 module "dhcp_vms" {
   for_each = local.dhcp_vms

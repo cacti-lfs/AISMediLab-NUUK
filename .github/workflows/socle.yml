@@ -142,7 +142,7 @@ jobs:
       # Ajout de la clef SSH dans le Runner
       - name: Add SSH Key to Runner
         if: github.event_name == 'push' || inputs.run_ansible
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       
@@ -171,50 +171,8 @@ jobs:
 
       
   # =========================================================
-  # JOB POUR NUUK
+  # JOB POUR NUUK (A venir)
   # =========================================================
-  deploy-terra-static-nuuk:
-    name: "Terraform Static Nuuk"
-    if: false && (github.event.inputs.environment == 'nuuk' || github.event.inputs.environment == 'all' || github.event_name == 'push') 
-    # Désactivé pour éviter les déploiements accidentels sur l'environnement de production
-    runs-on: [self-hosted, nuuk-runner]
-    environment: nuuk # Utilise les secrets de "nuuk"
-    env: 
-      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
-      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
-      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
-      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
-      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
-      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
-      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
-      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
-      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      TF_VAR_ssh_public_keys: |
-        ${{ vars.SSH_PUBLIC_KEYS }}
-      TF_WORKSPACE: "nuuk-medilab-prod"
-      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-      TF_CLOUD_ORGANIZATION: "nuuk"
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      # Init
-      - name: Terraform Init (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion init
-
-      # Step de destruction conditionnelle
-      - name: Terraform Destroy (Recreate mode)
-        if: ${{ github.event.inputs.action == 'recreate' }}
-        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
-      # Plan
-      - name: Terraform Plan (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion plan
-      # Apply
-      - name: Terraform Apply (01_bastion)
-        run: terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
-      
-      # Step de destruction de l'infra
-      - name: Terraform Destroy (Destroy mode)
-        if: ${{ github.event.inputs.action == 'destroy' }}
-        run: terraform -chdir=terraform/composants/01_bastion destroy -auto-approve
 
     # =========================================================
     # JOBS POUR LES AUTRES ENVIRONNEMENTS (ex: staging) À VENIR
@@ -257,7 +215,7 @@ jobs:
       TF_VAR_full_clone: "false"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
       - name: Terraform Init
         run: terraform -chdir=terraform/composants/01_bastion init -upgrade

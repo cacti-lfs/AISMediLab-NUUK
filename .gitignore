@@ -22,3 +22,6 @@ packer/*
 # Un jour peut-être
 .$schema_architecture_infra.drawio.bkp
 schema_architecture_infra.drawio
+
+# Test
+.github/setup_vars_secrets/*
