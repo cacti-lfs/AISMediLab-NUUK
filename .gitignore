@@ -24,4 +24,4 @@ packer/*
 schema_architecture_infra.drawio
 
 # Test
-.github/setup_vars_secrets/*
+.github/setup_vars_secrets/*.env
