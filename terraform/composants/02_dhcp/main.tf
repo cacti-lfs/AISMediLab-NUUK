@@ -3,7 +3,7 @@ module "dhcp" {
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   node_name      = each.value.node_name
-  vm_name        = "DEB-DHCP-$(each.key)"
+  vm_name        = "DEB-DHCP-${each.key}"
   vm_id          = 700 + tonumber(each.key)
   vm_description = "DHCP"
   vm_tags        = ["dhcp", "vlan70"]
