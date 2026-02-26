@@ -63,7 +63,7 @@ module "dhcp" {
 
   ipv4_address = each.value.ipv4_address
   ipv4_cidr    = var.ipv4_cidr
-  ipv4_gateway = var.gateway_vlan170
+  ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
