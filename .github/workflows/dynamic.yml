@@ -11,7 +11,7 @@ on:
   push:
     branches: [main, feature]
     paths: ['terraform/**', '.github/workflows/*']
-  workflows_dispatch:
+  workflow_dispatch:
     inputs:
       environment:
         description: "Environnement cible pour ce Build"
