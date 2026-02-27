@@ -9,6 +9,7 @@
     ha_vip_address: "{{ lookup('env', 'TF_VAR_bastion_vip') }}"
     ha_auth_pass: "{{ lookup('env', 'BASTION_PASS') }}"
     ha_router_id: "{{ lookup('env', 'BASTION_ROUTER_ID') | default(51) | int }}"
+    ha_interface: eth0
   roles:
     - ../roles/common
     - ../roles/keepalived
