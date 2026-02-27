@@ -1,0 +1,81 @@
+name: "01. Socle - Déploiement Bastion"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environnement (poc ou nuuk)"
+        required: true
+        type: choice
+        options: [poc, nuuk]
+      terraform_action:
+        description: "Action Terraform"
+        type: choice
+        options: [apply, plan, destroy]
+        default: apply
+
+jobs:
+  terraform:
+    name: "Terraform ${{ github.event.inputs.terraform_action }}"
+    runs-on: [self-hosted, poc-runner]
+    environment: ${{ github.event.inputs.environment }}
+
+    env:
+      TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+
+      - name: Terraform Init
+        run: terraform -chdir=terraform/composants/01_bastion init
+
+      - name: Terraform Action
+        run: |
+          # On injecte les variables GitHub directement via -var
+          # Cela évite de créer un fichier .tfvars sensible
+          terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} \
+            -var="environnement=${{ github.event.inputs.environment }}" \
+            -var="proxmox_api_url=${{ secrets.PVE_API_URL }}" \
+            -var="proxmox_api_user=${{ secrets.PVE_API_USER }}" \
+            -var="proxmox_api_token_id=${{ secrets.PVE_TOKEN_ID }}" \
+            -var="proxmox_api_token_secret=${{ secrets.PVE_TOKEN_SECRET }}" \
+            -var="ssh_public_keys=${{ vars.SSH_PUBLIC_KEYS }}" \
+            -var="node_name_1=${{ vars.TF_IP_NODE_1 }}" \
+            -var="node_name_2=${{ vars.TF_IP_NODE_2 }}" \
+            -var="datastore_id=${{ vars.TF_DATASTORE_ID }}" \
+            -var="network_v1=${{ vars.TF_NETWORK_V1 }}" \
+            -var="gateway_vlan40=${{ vars.TF_GATEWAY_VLAN40 }}" \
+            -var="ip_bastion_01=${{ vars.TF_IP_BASTION_01 }}" \
+            -var="ip_bastion_02=${{ vars.TF_IP_BASTION_02 }}" \
+            -auto-approve
+
+      - name: Validaton réseau (Ping Bastion)
+        if: github.event.inputs.terraform_action == 'apply'
+        run: |
+          IP1="${{ vars.TF_IP_BASTION_01 }}"
+          IP2="${{ vars.TF_IP_BASTION_02 }}"
+
+          MAX_RETRIES=20
+          RETRY_INTERVAL=15
+
+          echo "Attente du démarrage réseau des Bastions ($IP1 et $IP2)..."
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            ping -c 1 -W 1 $IP1 > /dev/null && P1_OK=true || P1_OK=false
+            ping -c 1 -W 1 $IP2 > /dev/null && P2_OK=true || P2_OK=false
+
+            if [ "$P1_OK" = true ] && [ "$P2_OK" = true ]; then
+              echo "Les deux Bastions répondent au ping !"
+              exit 0
+            fi
+
+            echo "Attempt $i/$MAX_RETRIES: Bastion 1 ($P1_OK), Bastion 2 ($P2_OK). Attente ${RETRY_INTERVAL}s..."
+            sleep $RETRY_INTERVAL
+          done
+
+          echo "Timeout : Les Bastions n'ont pas répondu après $(($MAX_RETRIES * $RETRY_INTERVAL / 60)) minutes."
+          exit 1
