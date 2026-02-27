@@ -23,9 +23,30 @@ jobs:
     env:
       TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_VAR_environnement: ${{ github.event.inputs.environment }}
+      TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
+      TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+      TF_VAR_ssh_public_keys: |
+        ${{ vars.SSH_PUBLIC_KEYS }}
+      BASTION_IFACE: ${{ vars.BASTION_IFACE }}
+      BASTION_PASS: ${{ secrets.BASTION_PASS }}
+      BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
+      TF_CLOUD_ORGANIZATION: "nuuk"
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
@@ -35,23 +56,7 @@ jobs:
 
       - name: Terraform Action
         run: |
-          # On injecte les variables GitHub directement via -var
-          # Cela évite de créer un fichier .tfvars sensible
-          terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} \
-            -var="environnement=${{ github.event.inputs.environment }}" \
-            -var="proxmox_api_url=${{ secrets.PVE_API_URL }}" \
-            -var="proxmox_api_user=${{ secrets.PVE_API_USER }}" \
-            -var="proxmox_api_token_id=${{ secrets.PVE_TOKEN_ID }}" \
-            -var="proxmox_api_token_secret=${{ secrets.PVE_TOKEN_SECRET }}" \
-            -var="ssh_public_keys=${{ vars.SSH_PUBLIC_KEYS }}" \
-            -var="node_name_1=${{ vars.TF_IP_NODE_1 }}" \
-            -var="node_name_2=${{ vars.TF_IP_NODE_2 }}" \
-            -var="datastore_id=${{ vars.TF_DATASTORE_ID }}" \
-            -var="network_v1=${{ vars.TF_NETWORK_V1 }}" \
-            -var="gateway_vlan40=${{ vars.TF_GATEWAY_VLAN40 }}" \
-            -var="ip_bastion_01=${{ vars.TF_IP_BASTION_01 }}" \
-            -var="ip_bastion_02=${{ vars.TF_IP_BASTION_02 }}" \
-            -auto-approve
+          terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
 
       - name: Validaton réseau (Ping Bastion)
         if: github.event.inputs.terraform_action == 'apply'
