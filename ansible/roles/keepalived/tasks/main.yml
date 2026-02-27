@@ -1,0 +1,14 @@
+---
+- name: "Installation de Keepalived"
+  ansible.builtin.apt:
+    name: keepalived
+    state: present
+
+- name: "Configuration de Keepalived via Template"
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Keepalived

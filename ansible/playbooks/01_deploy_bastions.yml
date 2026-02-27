@@ -1,0 +1,12 @@
+- name: "Setup Haute Disponibilité Bastions"
+  hosts: bastions
+  become: true
+  vars:
+    ha_service_name: "bastion"
+    ha_vip_address: "{{ vars.TF_IP_BASTION_VIP }}"
+    ha_router_id: 51
+    ha_role: "{{ 'MASTER' if '01' in inventory_hostname else 'BACKUP' }}"
+
+  roles:
+    - common
+    - keepalived

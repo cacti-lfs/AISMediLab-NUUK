@@ -1,0 +1,16 @@
+vrrp_instance VI_{{ ha_service_name | upper }} {
+    state {{ ha_role }}           # MASTER ou BACKUP
+    interface {{ ha_interface }}  # ex: eth0
+    virtual_router_id {{ ha_router_id }}
+    priority {{ (ha_role == 'MASTER') | ternary(150, 100) }}
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ ha_auth_pass }}
+    }
+
+    virtual_ipaddress {
+        {{ ha_vip_address }}/{{ ha_vip_mask | default('32') }}
+    }
+}
