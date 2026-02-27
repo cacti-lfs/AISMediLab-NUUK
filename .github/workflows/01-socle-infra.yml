@@ -84,3 +84,11 @@ jobs:
 
           echo "Timeout : Les Bastions n'ont pas répondu après $(($MAX_RETRIES * $RETRY_INTERVAL / 60)) minutes."
           exit 1
+
+      - name: Validation SSH (Prêt pour Ansible)
+        if: github.event.inputs.terraform_action == 'apply'
+        run: |
+          for IP in "${{ vars.TF_IP_BASTION_01 }}" "${{ vars.TF_IP_BASTION_02 }}"; do
+            echo "Wait for SSH on $IP..."
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+          done
