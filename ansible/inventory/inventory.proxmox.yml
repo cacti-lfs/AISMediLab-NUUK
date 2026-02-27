@@ -9,7 +9,7 @@ want_facts: true
 # Réduction charge API
 want_proxmox_nodes_ansible_facts: false
 want_lxc: false
-timeout: 60
+timeout: 100
 
 # Cache 
 use_cache: true
