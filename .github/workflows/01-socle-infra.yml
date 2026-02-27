@@ -1,4 +1,4 @@
-name: "01. Socle - Déploiement Bastion"
+name: "01. Socle - Infrastructure"
 
 on:
   workflow_dispatch:
@@ -8,8 +8,12 @@ on:
         required: true
         type: choice
         options: [poc, nuuk]
-      run_terraform:
-        description: "Exécuter Terraform ?"
+      deploy_bastion:
+        description: "Déployer le composant Bastion ?"
+        type: boolean
+        default: true
+      deploy_dhcp:
+        description: "Déployer le composant DHCP (VLAN 70) ?"
         type: boolean
         default: true
       terraform_action:
@@ -17,102 +21,128 @@ on:
         type: choice
         options: [apply, plan, destroy]
         default: apply
-      run_ansible:
-        description: "Exécuter Ansible ?"
-        type: boolean
-        default: true
 
 jobs:
-  deploy:
-    name: "Provisionnement & Configuration"
+  provisioning:
+    name: "Socle Infrastructure"
     runs-on: [self-hosted, poc-runner]
     environment: ${{ github.event.inputs.environment }}
 
     env:
-      # --- TERRAFORM VARS ---
-      TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+      # --- COMMUN ---
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       TF_CLOUD_ORGANIZATION: "nuuk"
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+      BASTION_PASS: ${{ secrets.BASTION_PASS }}
+      
+      # --- TERRAFORM VARS (Shared) ---
       TF_VAR_environnement: ${{ github.event.inputs.environment }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
       TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
-      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
-      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
-      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
-      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_ssh_public_keys: "${{ vars.SSH_PUBLIC_KEYS }}"
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      TF_VAR_ssh_public_keys: |
-        ${{ vars.SSH_PUBLIC_KEYS }}
-      
-      # --- ANSIBLE / SHARED VARS ---
-      BASTION_IFACE: ${{ vars.BASTION_IFACE }}
-      BASTION_PASS: ${{ secrets.BASTION_PASS }}
-      BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
-      ANSIBLE_HOST_KEY_CHECKING: "False"
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add SSH Key to Runner
-        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # ==========================================
-      # SECTION TERRAFORM
-      # ==========================================
+      - name: Setup Python (Ansible)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.12'
+
+      - name: Install Ansible dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core community.proxmox
+
       - name: Setup Terraform
-        if: github.event.inputs.run_terraform == 'true'
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        if: github.event.inputs.run_terraform == 'true'
-        run: terraform -chdir=terraform/composants/01_bastion init
-
-      - name: Terraform Action
-        if: github.event.inputs.run_terraform == 'true'
+      # ============================================================
+      # BLOC 01 : BASTIONS (VLAN 40)
+      # ============================================================
+      - name: Terraform Bastion (Action)
+        if: github.event.inputs.deploy_bastion == 'true'
+        env:
+          TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+          TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+          TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+          TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+          TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
         run: |
+          terraform -chdir=terraform/composants/01_bastion init
           terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
-      - name: Proxmox Clean Urgence (API Timeout)
-        if: failure() 
-        shell: bash
-        run: |
-          echo "🚨 Échec détecté. Nettoyage forcé des verrous et arrêt des résidus sur Proxmox..."
-          
-          echo "Nettoyage Node 1 (${{ vars.TF_IP_NODE_1 }}) - VM 401"
-          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock 401 || true; qm stop 401 || true"
 
-          echo "Nettoyage Node 2 (${{ vars.TF_IP_NODE_2 }}) - VM 402"
-          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock 402 || true; qm stop 402 || true"
-      # ==========================================
-      # HEALTHCHECKS (Validation avant Ansible)
-      # ==========================================
-      - name: Validation réseau (Ping & SSH)
-        if: |
-          github.event.inputs.run_ansible == 'true' || 
-          (github.event.inputs.run_terraform == 'true' && github.event.inputs.terraform_action == 'apply')
+      - name: Auto-Healing Proxmox Bastion (si fail)
+        if: failure() && github.event.inputs.deploy_bastion == 'true'
         run: |
-          IP1="${{ vars.TF_IP_BASTION_01 }}"
-          IP2="${{ vars.TF_IP_BASTION_02 }}"
-          
-          echo "Attente du réseau sur $IP1 et $IP2..."
-          for IP in $IP1 $IP2; do
-            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
-            echo "$IP répond au ping."
-            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
-            echo "$IP est prêt pour SSH."
+          echo "🚨 Nettoyage des verrous Bastions sur Node 1 et Node 2..."
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock 401 || true"
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock 402 || true"
+
+      - name: Healthcheck Bastion
+        if: success() && github.event.inputs.deploy_bastion == 'true' && github.event.inputs.terraform_action == 'apply'
+        run: |
+          for IP in "${{ vars.TF_IP_BASTION_01 }}" "${{ vars.TF_IP_BASTION_02 }}"; do
+            timeout 120s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do sleep 5; done"
+            timeout 60s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "✅ Bastion $IP est prêt."
           done
 
-      # ==========================================
-      # SECTION ANSIBLE
-      # ==========================================
-      - name: Ansible Playbook (Bastion Setup)
-        if: github.event.inputs.run_ansible == 'true'
+      - name: Ansible Bastion
+        if: success() && github.event.inputs.deploy_bastion == 'true' && github.event.inputs.terraform_action == 'apply'
         run: |
-          ansible-playbook -i ansible/inventory/inventory.proxmox.yml \
-          ansible/01_deploy_bastions.yml
+          cd ansible
+          ansible-playbook 01_deploy_bastions.yml -u cloudadm
+
+      # ============================================================
+      # BLOC 02 : DHCP (VLAN 70)
+      # ============================================================
+      - name: Terraform DHCP (Action)
+        if: github.event.inputs.deploy_dhcp == 'true'
+        env:
+          TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
+          TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
+          TF_VAR_gateway_vlan70: ${{ vars.TF_GATEWAY_VLAN70 }}
+        run: |
+          terraform -chdir=terraform/composants/02_core_infra init
+          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+
+      - name: Auto-Healing Proxmox DHCP (si fail)
+        if: failure() && github.event.inputs.deploy_dhcp == 'true'
+        run: |
+          echo "🚨 Nettoyage des verrous DHCP sur Node 1 et Node 2..."
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock 701 || true"
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock 702 || true"
+
+      - name: Healthcheck DHCP (Via Bastion)
+        if: success() && github.event.inputs.deploy_dhcp == 'true' && github.event.inputs.terraform_action == 'apply'
+        run: |
+          # On teste l'accessibilité via le runner (si routage OK) ou via SSH simple
+          for IP in "${{ vars.TF_IP_DHCP_01 }}" "${{ vars.TF_IP_DHCP_02 }}"; do
+            echo "⏳ Attente du DHCP $IP..."
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "✅ DHCP $IP est prêt pour Ansible."
+          done
+
+      - name: Ansible DHCP
+        if: success() && github.event.inputs.deploy_dhcp == 'true' && github.event.inputs.terraform_action == 'apply'
+        env:
+          TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+          TF_VAR_ip_dhcp_vip: ${{ vars.TF_IP_DHCP_VIP }}
+        run: |
+          cd ansible
+          ansible-playbook 02_deploy_dhcp.yml -u cloudadm
