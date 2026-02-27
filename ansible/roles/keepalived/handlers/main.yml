@@ -1,7 +1,10 @@
 ---
 - name: Restart Keepalived
-  service:
+  ansible.builtin.service:
     name: keepalived
     state: restarted
-    enabled: yes
-  become: true
+
+- name: Restart SSH
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
