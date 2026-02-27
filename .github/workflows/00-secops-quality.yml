@@ -64,4 +64,9 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install ansible-lint
-          ansible-lint ansible/playbooks/*.yml
+          # On ne lance le linter que si des fichiers .yml existent
+          if ls ansible/playbooks/*.yml 1> /dev/null 2>&1; then
+            ansible-lint ansible/playbooks/*.yml
+          else
+            echo "ℹAucun playbook trouvé, skip lint."
+          fi
