@@ -1,0 +1,99 @@
+---
+
+# 1. PRÉPARATION APPARMOR
+- name: "FIX : aa-complain"
+  command: "aa-complain /usr/sbin/{{ item }}"
+  loop:
+    - kea-dhcp4
+    - kea-ctrl-agent
+  become: true
+  ignore_errors: true
+  changed_when: false # Empêche de marquer "changed" à chaque exécution
+
+# 2. DÉPLOIEMENT CONFIG
+- name: Créer dossier /etc/kea
+  file:
+    path: /etc/kea
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Configurer la persistance de /run/kea via tmpfiles.d
+  copy:
+    dest: /etc/tmpfiles.d/kea.conf
+    content: "d /run/kea 0750 _kea _kea -"
+    mode: '0644'
+  become: true
+
+- name: Appliquer la configuration tmpfiles immédiatement
+  command: systemd-tmpfiles --create /etc/tmpfiles.d/kea.conf
+  become: true
+  changed_when: false
+
+- name: Copier mot de passe API
+  copy:
+    dest: /etc/kea/kea-api-password
+    content: "password" # À terme, utilise Ansible Vault ici
+    mode: '0600'
+    owner: _kea
+    group: _kea
+  become: true
+
+- name: Template DHCP4
+  template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: true
+  notify: restart kea-dhcp4
+
+- name: Template Agent
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  become: true
+  notify: restart kea-ctrl-agent
+
+# 3. DÉMARRAGE DES SERVICES
+- name: S'assurer que kea-dhcp4 est démarré et activé
+  service:
+    name: kea-dhcp4-server
+    state: started
+    enabled: true
+  become: true
+
+- name: S'assurer que kea-ctrl-agent est démarré et activé
+  service:
+    name: kea-ctrl-agent
+    state: started
+    enabled: true
+  become: true
+
+- name: "Template Agent"
+  template:
+    src: kea-ctrl-agent.conf.j2
+    dest: /etc/kea/kea-ctrl-agent.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  notify: restart kea-ctrl-agent
+
+- name: "Template DHCP4"
+  template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: _kea
+    group: _kea
+    mode: '0644'
+  register: kea_config
+
+- name: "Validation de la configuration Kea"
+  command: kea-dhcp4 -t /etc/kea/kea-dhcp4.conf
+  when: kea_config.changed
+  changed_when: false
+  notify: restart kea-dhcp4
