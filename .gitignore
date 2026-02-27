@@ -28,6 +28,7 @@ ansible.log
 # --- PERSO ---
 .*
 !.gitignore
-*.github/setup_vars_secrets/*
+!.github/
+.github/setup_vars_secrets/
 ansible/*
 packer/*

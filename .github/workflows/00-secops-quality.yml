@@ -1,0 +1,65 @@
+name: "00. SecOps & Quality"
+
+on:
+  push:
+    branches: [ main, feature/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # --- SCAN SECRETS ---
+  gitleaks:
+    name: Gitleaks Scan
+    runs-on: [self-hosted, poc-runner]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks Check
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # --- ANALYSE DE SÉCURITÉ IAC ---
+  trivy-iac:
+    name: Trivy IaC Scan
+    runs-on: [self-hosted, poc-runner]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@1bd062560b422f5944df1de50abd05162bea079e # master
+        with:
+          scan-type: 'config'
+          hide-progress: false
+          format: 'table'
+          exit-code: '1' # Echoue si une faille est trouvée
+          severity: 'CRITICAL,HIGH'
+
+  # --- QUALITÉ TERRAFORM & ANSIBLE ---
+  lint-and-validate:
+    name: Lints & Validation
+    runs-on: [self-hosted, poc-runner]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate (Global modules)
+        run: |
+          for dir in terraform/composants/*; do
+            if [ -d "$dir" ]; then
+              echo "Validating $dir..."
+              terraform -chdir=$dir init -backend=false
+              terraform -chdir=$dir validate
+            fi
+          done
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint-action@1.1.0
+        with:
+          targets: |
+            ansible/playbooks/*.yml
