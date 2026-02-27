@@ -111,22 +111,8 @@ jobs:
       # ==========================================
       # SECTION ANSIBLE
       # ==========================================
-      - name: Python pour Ansible
-        if: github.event.inputs.run_ansible == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.12'
-
-      - name: Installation dépendences Ansible
-        if: github.event.inputs.run_ansible == 'true'
-        run: |
-          python -m pip install --upgrade pip
-          pip install ansible-core community.proxmox
-
       - name: Ansible Playbook (Bastion Setup)
         if: github.event.inputs.run_ansible == 'true'
         run: |
-          # On utilise l'inventaire dynamique pour cibler le groupe ROLE_BAST
           ansible-playbook -i ansible/inventory/inventory.proxmox.yml \
-            ansible/playbooks/01_deploy_bastions.yml \
-            -u cloudadm
+          ansible/playbooks/01_deploy_bastions.yml
