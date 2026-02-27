@@ -12,6 +12,30 @@
     - { regexp: '^PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
   notify: Restart SSH
 
+- name: Forcer la configuration DNS (Resolv.conf)
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Configurer les miroirs Debian
+  ansible.builtin.template:
+    src: sources.list.j2
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Mettre à jour le cache APT
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
 - name: "Installation de Fail2Ban pour la protection Brute Force"
   ansible.builtin.apt:
     name: fail2ban
