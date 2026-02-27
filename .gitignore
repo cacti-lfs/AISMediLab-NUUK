@@ -30,5 +30,5 @@ ansible.log
 !.gitignore
 !.github/
 .github/setup_vars_secrets/
-ansible/*
+ansible/setup_env.sh
 packer/*
