@@ -12,12 +12,7 @@ provider "proxmox" {
   api_token = "${var.proxmox_api_user}!${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
   insecure  = true
 
-  http {
-    timeout = 600
-  }
-
   ssh {
     agent = true
   }
-
 }
