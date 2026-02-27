@@ -8,21 +8,31 @@ on:
         required: true
         type: choice
         options: [poc, nuuk]
+      run_terraform:
+        description: "Exécuter Terraform ?"
+        type: boolean
+        default: true
       terraform_action:
         description: "Action Terraform"
         type: choice
         options: [apply, plan, destroy]
         default: apply
+      run_ansible:
+        description: "Exécuter Ansible ?"
+        type: boolean
+        default: true
 
 jobs:
-  terraform:
-    name: "Terraform ${{ github.event.inputs.terraform_action }}"
+  deploy:
+    name: "Provisionnement & Configuration"
     runs-on: [self-hosted, poc-runner]
     environment: ${{ github.event.inputs.environment }}
 
     env:
+      # --- TERRAFORM VARS ---
       TF_WORKSPACE: "nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: "nuuk"
       TF_VAR_environnement: ${{ github.event.inputs.environment }}
       TF_VAR_proxmox_api_url: ${{ secrets.PVE_API_URL }}
       TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
@@ -36,59 +46,72 @@ jobs:
       TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
       TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
-      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_ssh_public_keys: |
         ${{ vars.SSH_PUBLIC_KEYS }}
+      
+      # --- ANSIBLE / SHARED VARS ---
       BASTION_IFACE: ${{ vars.BASTION_IFACE }}
       BASTION_PASS: ${{ secrets.BASTION_PASS }}
       BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
-      TF_CLOUD_ORGANIZATION: "nuuk"
+      ANSIBLE_HOST_KEY_CHECKING: "False"
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@v4
 
+      # ==========================================
+      # SECTION TERRAFORM
+      # ==========================================
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        if: github.event.inputs.run_terraform == 'true'
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
+        if: github.event.inputs.run_terraform == 'true'
         run: terraform -chdir=terraform/composants/01_bastion init
 
       - name: Terraform Action
+        if: github.event.inputs.run_terraform == 'true'
         run: |
-          terraform -chdir=terraform/composants/01_bastion apply -auto-approve -parallelism=1
+          terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
 
-      - name: Validaton réseau (Ping Bastion)
-        if: github.event.inputs.terraform_action == 'apply'
+      # ==========================================
+      # HEALTHCHECKS (Validation avant Ansible)
+      # ==========================================
+      - name: Validation réseau (Ping & SSH)
+        if: |
+          github.event.inputs.run_ansible == 'true' || 
+          (github.event.inputs.run_terraform == 'true' && github.event.inputs.terraform_action == 'apply')
         run: |
           IP1="${{ vars.TF_IP_BASTION_01 }}"
           IP2="${{ vars.TF_IP_BASTION_02 }}"
-
-          MAX_RETRIES=20
-          RETRY_INTERVAL=15
-
-          echo "Attente du démarrage réseau des Bastions ($IP1 et $IP2)..."
-
-          for i in $(seq 1 $MAX_RETRIES); do
-            ping -c 1 -W 1 $IP1 > /dev/null && P1_OK=true || P1_OK=false
-            ping -c 1 -W 1 $IP2 > /dev/null && P2_OK=true || P2_OK=false
-
-            if [ "$P1_OK" = true ] && [ "$P2_OK" = true ]; then
-              echo "Les deux Bastions répondent au ping !"
-              exit 0
-            fi
-
-            echo "Attempt $i/$MAX_RETRIES: Bastion 1 ($P1_OK), Bastion 2 ($P2_OK). Attente ${RETRY_INTERVAL}s..."
-            sleep $RETRY_INTERVAL
-          done
-
-          echo "Timeout : Les Bastions n'ont pas répondu après $(($MAX_RETRIES * $RETRY_INTERVAL / 60)) minutes."
-          exit 1
-
-      - name: Validation SSH (Prêt pour Ansible)
-        if: github.event.inputs.terraform_action == 'apply'
-        run: |
-          for IP in "${{ vars.TF_IP_BASTION_01 }}" "${{ vars.TF_IP_BASTION_02 }}"; do
-            echo "Wait for SSH on $IP..."
+          
+          echo "Attente du réseau sur $IP1 et $IP2..."
+          for IP in $IP1 $IP2; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            echo "$IP répond au ping."
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH."
           done
+
+      # ==========================================
+      # SECTION ANSIBLE
+      # ==========================================
+      - name: Python pour Ansible
+        if: github.event.inputs.run_ansible == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installation dépendences Ansible
+        if: github.event.inputs.run_ansible == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core community.proxmox
+
+      - name: Ansible Playbook (Bastion Setup)
+        if: github.event.inputs.run_ansible == 'true'
+        run: |
+          # On utilise l'inventaire dynamique pour cibler le groupe ROLE_BAST
+          ansible-playbook -i ansible/inventory/inventory.proxmox.yml \
+            ansible/playbooks/01_deploy_bastions.yml \
+            -u cloudadm
