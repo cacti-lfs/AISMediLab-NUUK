@@ -66,6 +66,7 @@ jobs:
           pip install ansible-lint
           # On ne lance le linter que si des fichiers .yml existent
           if ls ansible/playbooks/*.yml 1> /dev/null 2>&1; then
+            export ANSIBLE_ROLES_PATH=./ansible/roles
             ansible-lint ansible/playbooks/*.yml
           else
             echo "ℹAucun playbook trouvé, skip lint."
