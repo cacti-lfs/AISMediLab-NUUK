@@ -1,6 +1,7 @@
 ---
 - name: "Configuration et Sécurisation des Bastions"
   hosts: ROLE_BAST
+  remote_user: cloudadm
   become: true
   vars:
     ha_role: "{{ 'MASTER' if '01' in inventory_hostname else 'BACKUP' }}"
