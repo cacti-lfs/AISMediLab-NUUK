@@ -30,5 +30,4 @@ ansible.log
 !.gitignore
 *.github/setup_vars_secrets/*
 ansible/*
-terraform/*
 packer/*
