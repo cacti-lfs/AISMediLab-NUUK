@@ -73,7 +73,17 @@ jobs:
         if: github.event.inputs.run_terraform == 'true'
         run: |
           terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+      - name: Proxmox Clean Urgence (API Timeout)
+        if: failure() 
+        shell: bash
+        run: |
+          echo "🚨 Échec détecté. Nettoyage forcé des verrous et arrêt des résidus sur Proxmox..."
+          
+          echo "Nettoyage Node 1 (${{ vars.TF_IP_NODE_1 }}) - VM 401"
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock 401 || true; qm stop 401 || true"
 
+          echo "Nettoyage Node 2 (${{ vars.TF_IP_NODE_2 }}) - VM 402"
+          ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock 402 || true; qm stop 402 || true"
       # ==========================================
       # HEALTHCHECKS (Validation avant Ansible)
       # ==========================================
