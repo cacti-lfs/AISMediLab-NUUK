@@ -115,7 +115,7 @@ jobs:
         if: github.event.inputs.run_ansible == 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.12.12'
 
       - name: Installation dépendences Ansible
         if: github.event.inputs.run_ansible == 'true'
