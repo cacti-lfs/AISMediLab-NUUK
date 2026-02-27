@@ -10,5 +10,5 @@
     ha_auth_pass: "{{ lookup('env', 'BASTION_PASS') }}"
     ha_router_id: "{{ lookup('env', 'BASTION_ROUTER_ID') | default(51) | int }}"
   roles:
-    - common
-    - keepalived
+    - ../roles/common
+    - ../roles/keepalived
