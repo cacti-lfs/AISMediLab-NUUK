@@ -11,5 +11,5 @@
     ha_router_id: "{{ lookup('env', 'BASTION_ROUTER_ID') | default(51) | int }}"
     ha_interface: eth0
   roles:
-    - ../roles/common
-    - ../roles/keepalived
+    - common
+    - keepalived

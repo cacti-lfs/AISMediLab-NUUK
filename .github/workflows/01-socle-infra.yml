@@ -115,4 +115,4 @@ jobs:
         if: github.event.inputs.run_ansible == 'true'
         run: |
           ansible-playbook -i ansible/inventory/inventory.proxmox.yml \
-          ansible/playbooks/01_deploy_bastions.yml
+          ansible/01_deploy_bastions.yml
