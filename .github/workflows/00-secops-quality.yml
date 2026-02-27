@@ -59,7 +59,7 @@ jobs:
           done
 
       - name: Run ansible-lint
-        uses: ansible/ansible-lint-action@1.0.3
+        uses: ansible/ansible-lint-action@v1.1.0
         with:
           targets: |
             ansible/playbooks/*.yml
