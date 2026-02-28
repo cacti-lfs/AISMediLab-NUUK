@@ -64,6 +64,9 @@ jobs:
       TF_VAR_ssh_public_keys: "${{ vars.SSH_PUBLIC_KEYS }}"
       TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      
 
     steps:
       - uses: actions/checkout@v4
