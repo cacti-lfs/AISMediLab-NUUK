@@ -15,7 +15,7 @@ module "dhcp" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = locals.node_template_map[each.value.node_name]
+  source_vm_id = local.node_template_map[each.value.node_name]
   full_clone   = false
 
   vm_cpu_cores = 2
