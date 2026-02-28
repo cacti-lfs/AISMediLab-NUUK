@@ -66,7 +66,9 @@ jobs:
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      
+      TF_VAR_gateway_vlan70: ${{ vars.TF_GATEWAY_VLAN70 }}
+      TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
+      TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
 
     steps:
       - uses: actions/checkout@v4
