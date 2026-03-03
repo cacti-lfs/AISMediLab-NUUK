@@ -1,0 +1,25 @@
+"hooks-libraries": [
+    {
+        "library": "/usr/lib/x86_64-linux-gnu/kea/hooks/libdhcp_ha.so",
+        "parameters": {
+            "high-availability": [{
+                "this-server-name": "{{ inventory_hostname }}",
+                "mode": "hot-standby",
+                "heartbeat-delay": 10,
+                "max-response-delay": 60,
+                "peers": [
+                    {
+                        "name": "{{ kea_peer_primary }}",
+                        "url": "http://{{ kea_primary_ip }}:8000/",
+                        "role": "primary"
+                    },
+                    {
+                        "name": "{{ kea_peer_standby }}",
+                        "url": "http://{{ kea_secondary_ip }}:8000/",
+                        "role": "standby"
+                    }
+                ]
+            }]
+        }
+    }
+]

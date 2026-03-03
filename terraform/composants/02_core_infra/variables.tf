@@ -9,7 +9,10 @@ variable "proxmox_api_token_secret" {
 variable "proxmox_api_user" {
   type = string
 }
-variable "proxmox_api_url" {
+variable "proxmox_api_url_node_1" {
+  type = string
+}
+variable "proxmox_api_url_node_2" {
   type = string
 }
 variable "ssh_public_keys" {

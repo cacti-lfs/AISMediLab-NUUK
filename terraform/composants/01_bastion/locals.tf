@@ -16,3 +16,15 @@ locals {
     }
   }
 }
+
+locals {
+  bastion_node1 = {
+    for k, v in local.bastion_vm :
+    k => v if v.node_name == var.node_name_1
+  }
+
+  bastion_node2 = {
+    for k, v in local.bastion_vm :
+    k => v if v.node_name == var.node_name_2
+  }
+}

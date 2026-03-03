@@ -1,4 +1,6 @@
 name: "00. SecOps & Quality"
+permissions:
+  contents: read
 
 on:
   push:
@@ -27,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@1bd062560b422f5944df1de50abd05162bea079e # master
+        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # 0.34.2 utilisant la 0.69.2
         with:
           scan-type: 'config'
           hide-progress: false
@@ -69,5 +71,5 @@ jobs:
             export ANSIBLE_ROLES_PATH=./ansible/roles
             ansible-lint ansible/playbooks/*.yml
           else
-            echo "ℹAucun playbook trouvé, skip lint."
+            echo "Aucun playbook trouvé, skip lint."
           fi

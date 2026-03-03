@@ -1,0 +1,119 @@
+---
+
+kea_interface: "eth0"
+dns_servers: ["8.8.8.8", "1.1.1.1"]
+domain_name: "nuuk-medilab.lan"
+
+kea_peer_primary: "{{ groups['ROLE_DHCP'][0] }}"
+kea_peer_standby: "{{ groups['ROLE_DHCP'][1] }}"
+kea_primary_ip: "{{ hostvars[kea_peer_primary]['ansible_host'] }}"
+kea_secondary_ip: "{{ hostvars[kea_peer_standby]['ansible_host'] }}"
+
+dhcp_subnets:
+
+  # --- VLAN 10 : Management ---
+  - id: 10
+    subnet: "192.168.32.0/27"
+    router: "192.168.32.30"
+    pool_start: "192.168.32.5"
+    pool_end: "192.168.32.25"
+
+  # --- VLAN 20 : Natif (VLAN par défaut) ---
+  - id: 20
+    subnet: "192.168.32.32/29"
+    router: "192.168.32.38"
+    pool_start: "192.168.32.33"
+    pool_end: "192.168.32.37"
+
+  # Note: VLAN 30 (Interco) sauté car lien technique (pas de clients DHCP)
+
+  # --- VLAN 40 : Bastion ---
+  - id: 40
+    subnet: "192.168.32.48/28"
+    router: "192.168.32.62"
+    pool_start: "192.168.32.52" # IP fixes des bastions (.49, .50, .51)
+    pool_end: "192.168.32.60"
+
+  # --- VLAN 50 : Supervision ---
+  - id: 50
+    subnet: "192.168.32.64/27"
+    router: "192.168.32.94"
+    pool_start: "192.168.32.66"
+    pool_end: "192.168.32.90"
+
+  # --- VLAN 60 : PVE (Proxmox) ---
+  - id: 60
+    subnet: "192.168.32.128/26"
+    router: "192.168.32.190"
+    pool_start: "192.168.32.130"
+    pool_end: "192.168.32.180"
+
+  # --- VLAN 70 : Infra + Proxy ---
+  - id: 70
+    subnet: "192.168.32.192/26"
+    router: "192.168.32.254"
+    pool_start: "192.168.32.200"
+    pool_end: "192.168.32.250"
+
+  # --- VLAN 80 : Utilisateurs Bureaux ---
+  - id: 80
+    subnet: "192.168.33.0/24"
+    router: "192.168.33.254"
+    pool_start: "192.168.33.10"
+    pool_end: "192.168.33.250"
+
+  # --- VLAN 90 : Laborantin (200 pers) ---
+  - id: 90
+    subnet: "192.168.34.0/24"
+    router: "192.168.34.254"
+    pool_start: "192.168.34.10"
+    pool_end: "192.168.34.250"
+
+  # --- VLAN 100 : Direction (VIP) ---
+  - id: 100
+    subnet: "192.168.35.0/27"
+    router: "192.168.35.30"
+    pool_start: "192.168.35.5"
+    pool_end: "192.168.35.25"
+
+  # --- VLAN 110 : NAS / Stockage ---
+  - id: 110
+    subnet: "192.168.35.32/27"
+    router: "192.168.35.62"
+    pool_start: "192.168.35.35"
+    pool_end: "192.168.35.60"
+
+  # --- VLAN 120 : Load Balancer ---
+  - id: 120
+    subnet: "192.168.35.96/28"
+    router: "192.168.35.110"
+    pool_start: "192.168.35.100"
+    pool_end: "192.168.35.108"
+
+  # --- VLAN 130 : DMZ + Web ---
+  - id: 130
+    subnet: "192.168.35.128/26"
+    router: "192.168.35.190"
+    pool_start: "192.168.35.130"
+    pool_end: "192.168.35.185"
+
+  # --- VLAN 140 : BDD (SQL) ---
+  - id: 140
+    subnet: "192.168.35.192/26"
+    router: "192.168.35.254"
+    pool_start: "192.168.35.200"
+    pool_end: "192.168.35.250"
+
+  # --- VLAN 150 : TOIP (Téléphonie) ---
+  - id: 150
+    subnet: "192.168.36.0/27"
+    router: "192.168.36.30"
+    pool_start: "192.168.36.2"
+    pool_end: "192.168.36.25"
+
+  # --- VLAN 160 : Poubelle (Quarantaine) ---
+  - id: 160
+    subnet: "192.168.36.32/27"
+    router: "192.168.36.62"
+    pool_start: "192.168.36.35"
+    pool_end: "192.168.36.60"

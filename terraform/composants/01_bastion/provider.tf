@@ -8,7 +8,19 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint  = var.proxmox_api_url
+  alias     = "provider_node1"
+  endpoint  = var.proxmox_api_url_node_1
+  api_token = "${var.proxmox_api_user}!${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
+  insecure  = true
+
+  ssh {
+    agent = true
+  }
+}
+
+provider "proxmox" {
+  alias     = "provider_node2"
+  endpoint  = var.proxmox_api_url_node_2
   api_token = "${var.proxmox_api_user}!${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
   insecure  = true
 
