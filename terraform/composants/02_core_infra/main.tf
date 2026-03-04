@@ -10,7 +10,7 @@ module "dhcp_node1" {
   vm_name        = "DEB-DHCP-${each.key}"
   vm_id          = 700 + tonumber(each.key)
   vm_description = "DHCP"
-  vm_tags        = ["dhcp", "vlan70"]
+  vm_tags        = ["dhcp", "vlan70", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut

@@ -10,7 +10,7 @@ module "bastion_node1" {
   vm_name        = "DEB-BAST-${each.key}"
   vm_id          = 400 + tonumber(each.key)
   vm_description = "Bastion"
-  vm_tags        = ["bastion", "vlan40"]
+  vm_tags        = ["bastion", "vlan40", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
