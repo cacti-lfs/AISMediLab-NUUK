@@ -39,52 +39,52 @@ variable "network_v1" {
   type = string
 }
 variable "gateway_vlan140" {
-  type = string
+  type        = string
   description = "VLAN BDD WEB"
 }
 variable "gateway_vlan150" {
-  type = string
+  type        = string
   description = "VLAN BDD ADM"
 }
 variable "gateway_vlan160" {
-  type = string
+  type        = string
   description = "VLAN BDD MON"
 }
 variable "ip_bdd_web_01" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_web_02" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_web_03" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_adm_01" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_adm_02" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_adm_03" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_mon_01" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_mon_02" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "ip_bdd_mon_03" {
-  type = string
-  default = dhcp
+  type    = string
+  default = "dhcp"
 }
 variable "full_clone" {
   type    = bool
