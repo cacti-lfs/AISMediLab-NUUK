@@ -52,30 +52,39 @@ variable "gateway_vlan160" {
 }
 variable "ip_bdd_web_01" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_web_02" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_web_03" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_adm_01" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_adm_02" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_adm_03" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_mon_01" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_mon_02" {
   type = string
+  default = dhcp
 }
 variable "ip_bdd_mon_03" {
   type = string
+  default = dhcp
 }
 variable "full_clone" {
   type    = bool
