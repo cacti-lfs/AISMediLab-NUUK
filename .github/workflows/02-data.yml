@@ -1,0 +1,149 @@
+name: "02. Data - Mgmt & Data"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environnement (poc ou nuuk)"
+        required: true
+        type: choice
+        options: [poc, nuuk]
+        default: poc
+      
+
+      # --- CONTRÔLE TERRAFOM ---
+      run_terraform:
+        description: "Exécuter Terraform ?"
+        type: boolean
+        default: true
+      terraform_action:
+        description: "Action Terraform (apply/plan/destroy)"
+        type: choice
+        options: [apply, plan, destroy]
+        default: apply
+      target_scope_tf:
+        description: "Composants à traiter"
+        type: choice
+        options: [Tous, Sélection]
+        default: Tous
+
+      
+      # --- SÉLECTION MANUELLE ---
+      deploy_tf_databases:
+        description: "Galera BDD (WEB, ADM, MON)"
+        type: boolean
+        default: false
+      deploy_tf_management:
+        description: "Gestion et Supervision"
+        type: boolean
+        default: false
+
+      # --- CONTRÔLE ANSIBLE ---
+      run_ansible:
+        description: "Exécuter Ansible ?"
+        type: boolean
+        default: true
+      target_scope_ans:
+        description: "Composants à traiter"
+        type: choice
+        options: [Tous, Sélection]
+        default: Tous
+
+      # --- SÉLECTION MANUELLE ---
+      deploy_ans_databases:
+        description: "Cible: Databases (Web, Adm, Mon)"
+        type: boolean
+        default: false
+      deploy_ans_management:
+        description: "Cible: Gestion&Supervision"
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    name: "Provisionnement & Configuration"
+    runs-on: [self-hosted, poc-runner]
+    environment: ${{ github.event.inputs.environment }}
+
+
+  env:
+    # --- SECRETS ---
+    TF_CLOUD_ORGANISATION: "nuuk"
+    TF_VAR_proxmox_api_url_node_1: ${{ secrets.PVE_API_URL_NODE_1 }}
+    TF_VAR_proxmox_api_url_node_2: ${{ secrets.PVE_API_URL_NODE_2 }}
+    TF_VAR_proxmox_api_url_vip: ${{ secrets.PVE_API_URL_VIP }}
+    TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
+    TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+    TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+    ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+    ANSIBLE_CONFIG: "${{ github.workspace }}/ansible/ansible.cfg"
+    # --- TF VARS ---
+    TF_VAR_environnement: ${{ github.event.inputs.environment }}
+    TF_VAR_ssh_public_keys: "${{ vars.SSH_PUBLIC_KEYS }}"
+    TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+    TF_VAR_gateway_vlan140: ${{ vars.TF_VAR_gateway_vlan140 }}
+    TF_VAR_gateway_vlan150: ${{ vars.TF_VAR_gateway_vlan150 }}
+    TF_VAR_gateway_vlan160: ${{ vars.TF_VAR_gateway_vlan160 }}
+    vip_galera_web: ${{ vars.vip_galera_web }}
+    vip_galera_adm: ${{ vars.vip_galera_adm }}
+    vip_galera_mon: ${{ vars.vip_galera_mon }}
+    TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+    TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+    TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+    TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
+    TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+
+  steps:
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: SSH Agent Setup
+        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Terraform
+        if: github.event.inputs.run_terraform == 'true'
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+
+      # ==========================================
+      # BLOC 01 : BASTION
+      # ==========================================
+      - name: "[TF] Bastion"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_databases == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_bastion
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-03-databases"
+          terraform -chdir=terraform/composants/03_databases init
+          terraform -chdir=terraform/composants/03_databases ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+
+      - name: "[CLEAN] Proxmox Databases (si fail)"
+        if: failure() && steps.tf_bastion.outcome == 'failure'
+        run: |
+          for VMID in 1401 1402 1403 1501 1502 1503 1601 1602 1603; do
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+          done
+      
+      - name: "[HEALTHCHECK] Bastion"
+        id: healthcheck_bastion
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_databases == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_BASTION_01 }}"
+          IP2="${{ vars.TF_IP_BASTION_02 }}"
+
+          echo "Attente du réseau sur $IP1 et $IP2..."
+          for IP in $IP1 $IP2; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
