@@ -66,7 +66,7 @@ module "bdd_web_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_web
   ipv4_gateway = var.gateway_vlan140
 
   dns_domain  = "nuuk-medilab.lan"
@@ -141,7 +141,7 @@ module "bdd_web_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_web
   ipv4_gateway = var.gateway_vlan140
 
   dns_domain  = "nuuk-medilab.lan"
@@ -216,7 +216,7 @@ module "bdd_adm_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_adm
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
@@ -291,7 +291,7 @@ module "bdd_adm_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_adm
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
@@ -366,7 +366,7 @@ module "bdd_mon_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_mon
   ipv4_gateway = var.gateway_vlan160
 
   dns_domain  = "nuuk-medilab.lan"
@@ -441,7 +441,7 @@ module "bdd_mon_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_mon
   ipv4_gateway = var.gateway_vlan160
 
   dns_domain  = "nuuk-medilab.lan"
