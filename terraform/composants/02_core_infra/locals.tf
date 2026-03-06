@@ -15,6 +15,13 @@ locals {
       node_name    = var.node_name_2
     }
   }
+
+  addns_vm = {
+    "02" = {
+      ipv4_address = var.ip_addns_02
+      node_name    = var.node_name_2
+    }
+  }
 }
 
 locals {
@@ -26,5 +33,10 @@ locals {
   dhcp_node2 = {
     for k, v in local.dhcp_vm :
     k => v if v.node_name == var.node_name_2
+  }
+
+  addns_node2 = {
+    for k, v in local.addns_vm :
+    k => v if v.node_name == var.node_name_2 
   }
 }
