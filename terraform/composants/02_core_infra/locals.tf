@@ -37,6 +37,6 @@ locals {
 
   addns_node2 = {
     for k, v in local.addns_vm :
-    k => v if v.node_name == var.node_name_2 
+    k => v if v.node_name == var.node_name_2
   }
 }
