@@ -2,7 +2,7 @@
 locals {
   node_template_map = {
     (var.node_name_1) = var.template_id_node1
-    (var.node_name_1) = var.template_id_node2
+    (var.node_name_2) = var.template_id_node2
   }
 
   bdd_web_vm = {
@@ -53,27 +53,27 @@ locals {
 
 locals {
   bdd_web_node1 = {
-    for k, v in local.local.bdd_web_vm :
-    k => v if v.var.node_name == var.var.node_name_1
+    for k, v in local.bdd_web_vm :
+    k => v if v.node_name == var.node_name_1
   }
   bdd_web_node2 = {
-    for k, v in local.local.bdd_web_vm :
-    k => v if v.var.node_name == var.var.node_name_2
+    for k, v in local.bdd_web_vm :
+    k => v if v.node_name == var.node_name_2
   }
   bdd_adm_node1 = {
-    for k, v in local.local.bdd_adm_vm :
-    k => v if v.var.node_name == var.var.node_name_1
+    for k, v in local.bdd_adm_vm :
+    k => v if v.node_name == var.node_name_1
   }
   bdd_adm_node2 = {
-    for k, v in local.local.bdd_adm_vm :
-    k => v if v.var.node_name == var.var.node_name_2
+    for k, v in local.bdd_adm_vm :
+    k => v if v.node_name == var.node_name_2
   }
   bdd_mon_node1 = {
-    for k, v in local.local.bdd_mon_vm :
-    k => v if v.var.node_name == var.var.node_name_1
+    for k, v in local.bdd_mon_vm :
+    k => v if v.node_name == var.node_name_1
   }
   bdd_mon_node2 = {
-    for k, v in local.local.bdd_mon_vm :
-    k => v if v.var.node_name == var.var.node_name_2
+    for k, v in local.bdd_mon_vm :
+    k => v if v.node_name == var.node_name_2
   }
 }
