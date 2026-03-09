@@ -1,0 +1,4 @@
+# Configuration SSH pour les bastions
+# Désactive le proxyjump car les bastions sont accessibles directement
+
+ansible_ssh_common_args: ''
