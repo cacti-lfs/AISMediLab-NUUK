@@ -35,7 +35,7 @@ variable "template_id_node2" {
 variable "datastore_id" {
   type = string
 }
-variable "network_v1" {
+variable "network_v2" {
   type = string
 }
 variable "gateway_vlan70" {

@@ -41,7 +41,7 @@ module "dhcp_node1" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 70
 
   disks = [
@@ -116,7 +116,7 @@ module "dhcp_node2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 70
 
   disks = [
@@ -189,7 +189,7 @@ module "addns_node2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 70
 
   disks = [
