@@ -156,7 +156,7 @@ module "addns_node2" {
 
   node_name      = var.node_name_2
   vm_name        = "DEB-ADDNS-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
+  vm_id          = 710 + tonumber(each.key)
   vm_description = "ADDNS"
   vm_tags        = ["addns", "vlan70"]
   # vm_bios = "seabios" par défaut
