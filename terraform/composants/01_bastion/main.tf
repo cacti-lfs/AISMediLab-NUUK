@@ -47,7 +47,7 @@ module "bastion_node1" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
