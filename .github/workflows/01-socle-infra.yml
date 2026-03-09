@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options: [poc, nuuk]
-        default: poc
+        default: nuuk
 
       # --- CONTRÔLE TERRAFORM ---
       run_terraform:
