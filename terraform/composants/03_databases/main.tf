@@ -8,7 +8,7 @@ module "bdd_web_node1" {
 
   node_name      = var.node_name_1
   vm_name        = "DEB-BDD-WEB-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
+  vm_id          = 1400 + tonumber(each.key)
   vm_description = "BDD-WEB"
   vm_tags        = ["bdd-web", "vlan140"]
   # vm_bios = "seabios" par défaut
@@ -66,7 +66,7 @@ module "bdd_web_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_web
   ipv4_gateway = var.gateway_vlan140
 
   dns_domain  = "nuuk-medilab.lan"
@@ -83,7 +83,7 @@ module "bdd_web_node2" {
 
   node_name      = var.node_name_2
   vm_name        = "DEB-BDD-WEB-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
+  vm_id          = 1400 + tonumber(each.key)
   vm_description = "BDD WEB"
   vm_tags        = ["bdd-web", "vlan140"]
   # vm_bios = "seabios" par défaut
@@ -141,7 +141,7 @@ module "bdd_web_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_web
   ipv4_gateway = var.gateway_vlan140
 
   dns_domain  = "nuuk-medilab.lan"
@@ -158,7 +158,7 @@ module "bdd_adm_node1" {
 
   node_name      = var.node_name_1
   vm_name        = "DEB-BDD-ADM-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
+  vm_id          = 1500 + tonumber(each.key)
   vm_description = "BDD-ADM"
   vm_tags        = ["BDD-ADM", "vlan150"]
   # vm_bios = "seabios" par défaut
@@ -192,7 +192,7 @@ module "bdd_adm_node1" {
 
   vnic_model  = "virtio" # e1000 par défaut
   vnic_bridge = var.network_v1
-  vlan_tag    = var.environnement == "poc" ? 0 : 140
+  vlan_tag    = var.environnement == "poc" ? 0 : 150
 
   disks = [
     {
@@ -216,7 +216,7 @@ module "bdd_adm_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_adm
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
@@ -233,8 +233,8 @@ module "bdd_adm_node2" {
 
   node_name      = var.node_name_2
   vm_name        = "DEB-BDD-ADM-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
-  vm_description = "BDD WEB"
+  vm_id          = 1500 + tonumber(each.key)
+  vm_description = "BDD ADM"
   vm_tags        = ["BDD-ADM", "vlan150"]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
@@ -267,7 +267,7 @@ module "bdd_adm_node2" {
 
   vnic_model  = "virtio" # e1000 par défaut
   vnic_bridge = var.network_v1
-  vlan_tag    = var.environnement == "poc" ? 0 : 140
+  vlan_tag    = var.environnement == "poc" ? 0 : 150
 
   disks = [
     {
@@ -291,7 +291,7 @@ module "bdd_adm_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_adm
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
@@ -308,7 +308,7 @@ module "bdd_mon_node1" {
 
   node_name      = var.node_name_1
   vm_name        = "DEB-BDD-MON-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
+  vm_id          = 1600 + tonumber(each.key)
   vm_description = "BDD-MON"
   vm_tags        = ["BDD-MON", "vlan160"]
   # vm_bios = "seabios" par défaut
@@ -342,7 +342,7 @@ module "bdd_mon_node1" {
 
   vnic_model  = "virtio" # e1000 par défaut
   vnic_bridge = var.network_v1
-  vlan_tag    = var.environnement == "poc" ? 0 : 140
+  vlan_tag    = var.environnement == "poc" ? 0 : 160
 
   disks = [
     {
@@ -366,7 +366,7 @@ module "bdd_mon_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_mon
   ipv4_gateway = var.gateway_vlan160
 
   dns_domain  = "nuuk-medilab.lan"
@@ -383,8 +383,8 @@ module "bdd_mon_node2" {
 
   node_name      = var.node_name_2
   vm_name        = "DEB-BDD-MON-${each.key}"
-  vm_id          = 700 + tonumber(each.key)
-  vm_description = "BDD WEB"
+  vm_id          = 1600 + tonumber(each.key)
+  vm_description = "BDD-MON"
   vm_tags        = ["BDD-MON", "vlan160"]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
@@ -417,7 +417,7 @@ module "bdd_mon_node2" {
 
   vnic_model  = "virtio" # e1000 par défaut
   vnic_bridge = var.network_v1
-  vlan_tag    = var.environnement == "poc" ? 0 : 140
+  vlan_tag    = var.environnement == "poc" ? 0 : 160
 
   disks = [
     {
@@ -441,7 +441,7 @@ module "bdd_mon_node2" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_bdd_mon
   ipv4_gateway = var.gateway_vlan160
 
   dns_domain  = "nuuk-medilab.lan"
