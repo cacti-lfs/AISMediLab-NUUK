@@ -113,6 +113,10 @@ jobs:
       - name: Setup Terraform
         if: github.event.inputs.run_terraform == 'true'
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+      
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install -r ansible/requirements.yml
 
       # ==========================================
       # BLOC 01 : BASTION
