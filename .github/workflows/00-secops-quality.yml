@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # 0.34.2 utilisant la 0.69.2
+        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # v0.34.2
         with:
           scan-type: 'config'
           hide-progress: false
@@ -66,10 +66,15 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install ansible-lint
-          # On ne lance le linter que si des fichiers .yml existent
-          if ls ansible/playbooks/*.yml 1> /dev/null 2>&1; then
-            export ANSIBLE_ROLES_PATH=./ansible/roles
-            ansible-lint ansible/playbooks/*.yml
+          # On ne lance le linter que si des fichiers .yml/.yaml existent
+          if [ -d "ansible/playbooks" ]; then
+            PLAYBOOKS=$(find ansible/playbooks -maxdepth 1 -name "*.yml" -o -name "*.yaml" 2>/dev/null)
+            if [ -n "$PLAYBOOKS" ]; then
+              export ANSIBLE_ROLES_PATH=./ansible/roles
+              ansible-lint $PLAYBOOKS
+            else
+              echo "Aucun playbook trouvé, skip lint."
+            fi
           else
-            echo "Aucun playbook trouvé, skip lint."
+            echo "Répertoire ansible/playbooks non trouvé, skip lint."
           fi
