@@ -115,6 +115,7 @@ jobs:
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
       
       - name: Install Ansible collections
+        if: github.event.inputs.run_ansible == 'true'
         run: |
           ansible-galaxy collection install -r ansible/requirements.yml
 
