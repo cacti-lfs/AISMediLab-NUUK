@@ -83,9 +83,9 @@ module "bastion_node2" {
 
   node_name      = var.node_name_2
   vm_name        = "DEB-BAST-${each.key}"
-  vm_id          = 420 + tonumber(each.key)
+  vm_id          = 400 + tonumber(each.key)
   vm_description = "Bastion"
-  vm_tags        = ["bastion", "vlan40"]
+  vm_tags        = ["bastion", "vlan40", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -122,7 +122,7 @@ module "bastion_node2" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
