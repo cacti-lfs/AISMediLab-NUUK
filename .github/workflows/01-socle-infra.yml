@@ -64,7 +64,7 @@ on:
 jobs:
   deploy:
     name: "Provisionnement & Configuration"
-    runs-on: [self-hosted, poc-runner]
+    runs-on: [self-hosted, "${{ github.event.inputs.environment }}-runner"]
     environment: ${{ github.event.inputs.environment }}
 
     env:
