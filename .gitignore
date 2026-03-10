@@ -31,4 +31,4 @@ ansible.log
 !.github/
 .github/setup_vars_secrets/
 ansible/setup_env.sh
-packer/*
+packer/*!**/.terraform.lock.hcl
