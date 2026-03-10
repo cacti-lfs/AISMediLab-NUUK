@@ -1,12 +1,14 @@
 module "dhcp_node1" {
-  for_each = local.dhcp_node1
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.dhcp_vms : k => v if v.provider == "provider_node1"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_linux_1
+  node_name      = each.value.node_name
   vm_name        = "DEB-DHCP-${each.key}"
   vm_id          = 700 + tonumber(each.key)
   vm_description = "DHCP"
@@ -19,7 +21,7 @@ module "dhcp_node1" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_linux_1]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -74,14 +76,16 @@ module "dhcp_node1" {
 }
 
 module "dhcp_node2" {
-  for_each = local.dhcp_node2
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.dhcp_vms : k => v if v.provider == "provider_node2"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_linux_2
+  node_name      = each.value.node_name
   vm_name        = "DEB-DHCP-${each.key}"
   vm_id          = 700 + tonumber(each.key)
   vm_description = "DHCP"
@@ -94,7 +98,7 @@ module "dhcp_node2" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_linux_2]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -147,14 +151,16 @@ module "dhcp_node2" {
 }
 
 module "addns_node1" {
-  for_each = local.addns_node1
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.addns_vms : k => v if v.provider == "provider_node1"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_win_gui_1
+  node_name      = each.value.node_name
   vm_name        = "WIN-ADDNS-${each.key}"
   vm_id          = 710 + tonumber(each.key)
   vm_description = "ADDNS"
@@ -165,9 +171,9 @@ module "addns_node1" {
 
   vm_os_type = "win10"
 
-  # vm_agent_enabled = true par défaut
+  vm_agent_enabled = false
 
-  source_vm_id = local.node_template_map[var.node_name_win_gui_1]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -220,14 +226,16 @@ module "addns_node1" {
 }
 
 module "addns_node2" {
-  for_each = local.addns_node2
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.addns_vms : k => v if v.provider == "provider_node2"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_win_core_2
+  node_name      = each.value.node_name
   vm_name        = "WIN-ADDNS-${each.key}"
   vm_id          = 710 + tonumber(each.key)
   vm_description = "ADDNS"
@@ -238,9 +246,9 @@ module "addns_node2" {
 
   vm_os_type = "win10"
 
-  # vm_agent_enabled = true par défaut
+  vm_agent_enabled = false
 
-  source_vm_id = local.node_template_map[var.node_name_win_core_2]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
