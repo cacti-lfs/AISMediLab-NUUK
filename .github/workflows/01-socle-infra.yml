@@ -105,8 +105,8 @@ jobs:
       TF_VAR_network_v2: ${{ vars.TF_NETWORK_V2 }}
       TF_VAR_node_name_linux_1: ${{ vars.TF_NAME_NODE_UNIX_1 }}
       TF_VAR_node_name_linux_2: ${{ vars.TF_NAME_NODE_UNIX_2 }}
-      TF_VAR_node_name_win_1: ${{ vars.TF_NAME_NODE_WIN_1 }}
-      TF_VAR_node_name_win_2: ${{ vars.TF_NAME_NODE_WIN_2 }}
+      TF_VAR_node_name_win_gui_1: ${{ vars.TF_NAME_NODE_WIN_1 }}
+      TF_VAR_node_name_win_core_2: ${{ vars.TF_NAME_NODE_WIN_2 }}
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
