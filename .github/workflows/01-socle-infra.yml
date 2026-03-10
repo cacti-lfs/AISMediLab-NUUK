@@ -240,22 +240,27 @@ jobs:
       - name: "[CLEAN] Proxmox ADDNS (si fail)"
         if: failure() && steps.tf_addns.outcome == 'failure'
         run: |
-          for VMID in 702; do
+          for VMID in 711; do
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+          done
+          for VMID in 712; do
             ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
           done
 
       - name: "[HEALTHCHECK] ADDNS"
         id: healthcheck_addns
         if: |
-          success() &&
-          github.event.inputs.run_ansible == 'true' && (
-            github.event.inputs.target_scope_ans == 'Tous' ||
-            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_addns == 'true')
+          success() && github.event.inputs.run_terraform == 'true' && (
+            github.event.inputs.target_scope_tf == 'Tous' ||
+            (github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_addns == 'true')
           )
         run: |
-          IP1="${{ vars.TF_IP_ADDNS_02 }}"
+          IP1="${{ vars.TF_IP_ADDNS_01 }}"
+          IP2="${{ vars.TF_IP_ADDNS_02 }}"
 
-          echo "Attente du réseau sur $IP1..."
-          timeout 180s bash -c "until ping -c 1 -W 1 $IP1 > /dev/null; do echo 'Waiting for $IP1...'; sleep 5; done"
-          timeout 120s bash -c "until nc -zvw1 $IP1 22; do sleep 5; done"
-          echo "$IP1 est prêt pour SSH"
+          echo "Attente du réseau sur $IP1 et $IP2..."
+          for IP in $IP1 $IP2; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done

@@ -22,11 +22,11 @@ locals {
   addns_vm = {
     "01" = {
       ipv4_address = var.ip_addns_01
-      node_name    = var.node_name_linux_2
+      node_name    = var.node_name_win_gui_1
     }
     "02" = {
       ipv4_address = var.ip_addns_02
-      node_name    = var.node_name_linux_2
+      node_name    = var.node_name_win_core_2
     }
   }
 }
