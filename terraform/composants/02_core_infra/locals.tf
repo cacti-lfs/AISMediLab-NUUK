@@ -1,11 +1,11 @@
 # locals.tf
 locals {
   node_template_map = {
-    (var.node_name_linux_1) = var.template_linux_id_node1
-    (var.node_name_linux_2) = var.template_linux_id_node2
-    (var.node_name_win_gui_1) = var.template_win_gui_id_node1
+    (var.node_name_linux_1)    = var.template_linux_id_node1
+    (var.node_name_linux_2)    = var.template_linux_id_node2
+    (var.node_name_win_gui_1)  = var.template_win_gui_id_node1
     (var.node_name_win_core_2) = var.template_win_core_id_node2
-    
+
   }
 
   dhcp_vm = {
@@ -52,5 +52,5 @@ locals {
     k => v if v.node_name == var.node_name_win_core_2
   }
 
-  
+
 }
