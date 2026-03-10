@@ -1,0 +1,7 @@
+# roles/kea-dhcp/tasks/main.yml
+---
+- name: Installation Kea DHCP
+  import_tasks: install.yml
+
+- name: Configuration Kea DHCP
+  import_tasks: configure.yml
