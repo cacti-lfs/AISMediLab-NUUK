@@ -155,7 +155,7 @@ module "addns_node1" {
   }
 
   node_name      = var.node_name_win_gui_1
-  vm_name        = "DEB-ADDNS-${each.key}"
+  vm_name        = "WIN-ADDNS-${each.key}"
   vm_id          = 710 + tonumber(each.key)
   vm_description = "ADDNS"
   vm_tags        = ["addns", "vlan70"]
@@ -163,7 +163,7 @@ module "addns_node1" {
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
 
-  # vm_os_type = "l26" par défaut
+  vm_os_type = "win10"
 
   # vm_agent_enabled = true par défaut
 
@@ -228,7 +228,7 @@ module "addns_node2" {
   }
 
   node_name      = var.node_name_win_core_2
-  vm_name        = "DEB-ADDNS-${each.key}"
+  vm_name        = "WIN-ADDNS-${each.key}"
   vm_id          = 710 + tonumber(each.key)
   vm_description = "ADDNS"
   vm_tags        = ["addns", "vlan70"]
@@ -236,7 +236,7 @@ module "addns_node2" {
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
 
-  # vm_os_type = "l26" par défaut
+  vm_os_type = "win10"
 
   # vm_agent_enabled = true par défaut
 
