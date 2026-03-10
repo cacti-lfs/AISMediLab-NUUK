@@ -24,11 +24,11 @@ variable "node_name_1" {
 variable "node_name_2" {
   type = string
 }
-variable "template_id_node1" {
+variable "template_linux_id_node1" {
   type    = number
   default = 9001
 }
-variable "template_id_node2" {
+variable "template_linux_id_node2" {
   type    = number
   default = 9000
 }
