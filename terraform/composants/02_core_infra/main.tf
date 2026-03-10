@@ -268,7 +268,7 @@ module "addns_node2" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 20
+      disk_size        = 60
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
