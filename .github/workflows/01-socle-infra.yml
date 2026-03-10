@@ -31,8 +31,8 @@ on:
         description: "Bastion"
         type: boolean
         default: false
-      deploy_tf_core_infra:
-        description: "Core Infra"
+      deploy_tf_dhcp:
+        description: "DHCP (Node1 + Node2)"
         type: boolean
         default: false
       deploy_tf_addns:
@@ -58,6 +58,10 @@ on:
         default: false
       deploy_ans_dhcp:
         description: "Cible : DHCP"
+        type: boolean
+        default: false
+      deploy_ans_addns:
+        description: "Cible : ADDNS"
         type: boolean
         default: false
 
@@ -169,20 +173,22 @@ jobs:
           ansible-playbook -i inventory/inventory.proxmox.yml 01_deploy_bastions.yml
 
       # ==========================================
-      # BLOC 02 : CORE INFRA
+      # BLOC 02 : DHCP
       # ==========================================
-      - name: "[TF] CORE INFRA (ADDC1/2, DHCP, RODC)"
+      - name: "[TF] DHCP (Node1 + Node2)"
         if: |
-          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_core_infra == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_dhcp == 'true' ||
           github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
-        id: tf_core_infra
+        id: tf_dhcp
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
           terraform -chdir=terraform/composants/02_core_infra init
-          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
+            -target='module.dhcp_node1' \
+            -target='module.dhcp_node2'
 
-      - name: "[CLEAN] Proxmox Core Infra (si fail)"
-        if: failure() && steps.tf_core_infra.outcome == 'failure'
+      - name: "[CLEAN] Proxmox DHCP (si fail)"
+        if: failure() && steps.tf_dhcp.outcome == 'failure'
         run: |
           for VMID in 701 702; do
             ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
@@ -240,9 +246,9 @@ jobs:
         id: healthcheck_addns
         if: |
           success() &&
-          github.event.inputs.run_terraform == 'true' && (
-            github.event.inputs.target_scope_tf == 'Tous' ||
-            (github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_addns == 'true')
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_addns == 'true')
           )
         run: |
           IP1="${{ vars.TF_IP_ADDNS_02 }}"
