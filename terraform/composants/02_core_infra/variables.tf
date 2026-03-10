@@ -18,19 +18,33 @@ variable "proxmox_api_url_node_2" {
 variable "ssh_public_keys" {
   type = list(string)
 }
-variable "node_name_1" {
+variable "node_name_linux_1" {
   type = string
 }
-variable "node_name_2" {
+variable "node_name_linux_2" {
   type = string
 }
-variable "template_id_node1" {
+variable "node_name_win_gui_1" {
+  type = string
+}
+variable "node_name_win_core_2" {
+  type = string
+}
+variable "template_linux_id_node1" {
   type    = number
   default = 9001
 }
-variable "template_id_node2" {
+variable "template_linux_id_node2" {
   type    = number
   default = 9000
+}
+variable "template_win_gui_id_node1" {
+  type    = number
+  default = 101
+}
+variable "template_win_core_id_node2" {
+  type    = number
+  default = 103
 }
 variable "datastore_id" {
   type = string
