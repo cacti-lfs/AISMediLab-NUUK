@@ -171,10 +171,10 @@ module "addns_node1" {
 
   vm_os_type = "win10"
 
-  vm_agent_enabled = false
+  vm_agent_enabled = true
 
   source_vm_id = each.value.template_id
-  full_clone   = false
+  full_clone   = true
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
@@ -246,10 +246,10 @@ module "addns_node2" {
 
   vm_os_type = "win10"
 
-  vm_agent_enabled = false
+  vm_agent_enabled = true
 
   source_vm_id = each.value.template_id
-  full_clone   = false
+  full_clone   = true
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
