@@ -40,9 +40,9 @@ locals {
   rsys_vms = {
     "01" = {
       ipv4_address = var.ip_rsys_01
-      node_name = var.node_name_linux_1
-      template_id = var.template_linux_id_node3
-      provider = "provider_node3"
+      node_name    = var.node_name_linux_1
+      template_id  = var.template_linux_id_node3
+      provider     = "provider_node3"
     }
   }
 }
