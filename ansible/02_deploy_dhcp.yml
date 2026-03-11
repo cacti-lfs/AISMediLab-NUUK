@@ -13,5 +13,4 @@
 
   roles:
     - common
-    - keepalived
     - kea-dhcp
