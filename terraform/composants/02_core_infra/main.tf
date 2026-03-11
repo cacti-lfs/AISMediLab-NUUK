@@ -174,7 +174,7 @@ module "addns_node1" {
   vm_agent_enabled = true
 
   source_vm_id = each.value.template_id
-  full_clone   = true
+  full_clone   = false
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
@@ -249,7 +249,7 @@ module "addns_node2" {
   vm_agent_enabled = true
 
   source_vm_id = each.value.template_id
-  full_clone   = true
+  full_clone   = false
 
   vm_cpu_cores = 2
   # vm_cpu_type = "host" par défaut
