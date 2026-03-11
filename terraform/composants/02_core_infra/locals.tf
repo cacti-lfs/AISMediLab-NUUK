@@ -4,6 +4,7 @@ locals {
   template_by_node = {
     (var.node_name_linux_1) = var.template_linux_id_node1
     (var.node_name_linux_2) = var.template_linux_id_node2
+    (var.node_name_linux_2) = var.template_linux_id_node3
   }
 
   # Définition des VMs avec template et nœud explicites
