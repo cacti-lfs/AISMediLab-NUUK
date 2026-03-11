@@ -65,6 +65,9 @@ variable "network_v2" {
 variable "gateway_vlan70" {
   type = string
 }
+variable "gateway_vlan50" {
+  type = string
+}
 variable "ip_dhcp_01" {
   type = string
 }
@@ -84,9 +87,13 @@ variable "full_clone" {
   type    = bool
   default = false
 }
-variable "ipv4_cidr" {
+variable "ipv4_cidr_70" {
   type    = string
   default = "/26"
+}
+variable "ipv4_cidr_50" {
+  type    = string
+  default = "/27"
 }
 variable "environnement" {
   type    = string
