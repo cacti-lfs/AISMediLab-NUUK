@@ -263,10 +263,47 @@ jobs:
       - name: "[HEALTHCHECK] ADDNS"
         id: healthcheck_addns
         if: |
-          success() &&
-          github.event.inputs.run_terraform == 'true' && (
-            github.event.inputs.target_scope_tf == 'Tous' ||
-            (github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_addns == 'true')
+          success() && github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_addns == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_ADDNS_01 }}"
+          IP2="${{ vars.TF_IP_ADDNS_02 }}"
+
+          echo "Attente du réseau sur $IP1 et $IP2..."
+          for IP in $IP1 $IP2; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      # ==========================================
+      # BLOC 04 : RSYSLOG
+      # ==========================================
+      - name: "[TF] RSYSLOG"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_rsys == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_rsys
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_core_infra init
+          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -target='module.rsys_node1' -target='module.rsys_node2' -parallelism=1
+
+      - name: "[CLEAN] Proxmox RSYSLOG (si fail)"
+        if: failure() && steps.tf_rsys.outcome == 'failure'
+        run: |
+          for VMID in 501; do
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_3 }} "qm unlock $VMID || true"
+          done
+
+      - name: "[HEALTHCHECK] RSYSLOG"
+        id: healthcheck_rsys
+        if: |
+          success() && github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_rsys == 'true')
           )
         run: |
           IP1="${{ vars.TF_IP_RSYS_01 }}"
