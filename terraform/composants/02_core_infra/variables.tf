@@ -15,22 +15,46 @@ variable "proxmox_api_url_node_1" {
 variable "proxmox_api_url_node_2" {
   type = string
 }
+variable "proxmox_api_url_node_3" {
+  type = string
+}
 variable "ssh_public_keys" {
   type = list(string)
 }
-variable "node_name_1" {
+variable "node_name_linux_1" {
   type = string
 }
-variable "node_name_2" {
+variable "node_name_linux_2" {
   type = string
 }
-variable "template_id_node1" {
+variable "node_name_linux_3" {
+  type = string
+}
+variable "node_name_win_gui_1" {
+  type = string
+}
+variable "node_name_win_core_2" {
+  type = string
+}
+variable "template_linux_id_node1" {
   type    = number
   default = 9001
 }
-variable "template_id_node2" {
+variable "template_linux_id_node2" {
   type    = number
   default = 9000
+}
+variable "template_linux_id_node3" {
+  type    = number
+  default = 9003
+}
+variable "template_win_gui_id_node1" {
+  type    = number
+  default = 9021
+}
+variable "template_win_core_id_node2" {
+  type    = number
+  default = 9022
 }
 variable "datastore_id" {
   type = string
@@ -38,7 +62,13 @@ variable "datastore_id" {
 variable "network_v2" {
   type = string
 }
+variable "network_v1" {
+  type = string
+}
 variable "gateway_vlan70" {
+  type = string
+}
+variable "gateway_vlan50" {
   type = string
 }
 variable "ip_dhcp_01" {
@@ -53,13 +83,20 @@ variable "ip_addns_01" {
 variable "ip_addns_02" {
   type = string
 }
+variable "ip_rsys_01" {
+  type = string
+}
 variable "full_clone" {
   type    = bool
   default = false
 }
-variable "ipv4_cidr" {
+variable "ipv4_cidr_70" {
   type    = string
   default = "/26"
+}
+variable "ipv4_cidr_50" {
+  type    = string
+  default = "/27"
 }
 variable "environnement" {
   type    = string

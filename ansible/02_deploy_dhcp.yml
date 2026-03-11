@@ -5,7 +5,7 @@
   become: true
   vars:
     ha_service_name: "dhcp"
-    ha_vip_address: "{{ lookup('env', 'TF_VAR_ip_dhcp_vip') }}"
+    ha_vip_address: "{{ lookup('env', 'ip_dhcp_vip') }}"
     ha_router_id: 70
     ha_role: "{{ 'MASTER' if '01' in inventory_hostname else 'BACKUP' }}"
     ha_auth_pass: "{{ lookup('env', 'BASTION_PASS') }}"
@@ -13,5 +13,4 @@
 
   roles:
     - common
-    - keepalived
     - kea-dhcp

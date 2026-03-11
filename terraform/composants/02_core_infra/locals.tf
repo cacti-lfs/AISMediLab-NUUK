@@ -1,42 +1,49 @@
 # locals.tf
 locals {
-  node_template_map = {
-    (var.node_name_1) = var.template_id_node1
-    (var.node_name_2) = var.template_id_node2
+  # Mapping des templates par nœud Proxmox (clé = nom réel du nœud)
+  template_by_node = {
+    (var.node_name_linux_1) = var.template_linux_id_node1
+    (var.node_name_linux_2) = var.template_linux_id_node2
+    (var.node_name_linux_2) = var.template_linux_id_node3
   }
 
-  dhcp_vm = {
+  # Définition des VMs avec template et nœud explicites
+  dhcp_vms = {
     "01" = {
       ipv4_address = var.ip_dhcp_01
-      node_name    = var.node_name_1
+      node_name    = var.node_name_linux_1
+      template_id  = var.template_linux_id_node1
+      provider     = "provider_node1"
     }
     "02" = {
       ipv4_address = var.ip_dhcp_02
-      node_name    = var.node_name_2
+      node_name    = var.node_name_linux_2
+      template_id  = var.template_linux_id_node2
+      provider     = "provider_node2"
     }
   }
 
-  addns_vm = {
+  addns_vms = {
+    "01" = {
+      ipv4_address = var.ip_addns_01
+      node_name    = var.node_name_win_gui_1
+      template_id  = var.template_win_gui_id_node1
+      provider     = "provider_node1"
+    }
     "02" = {
       ipv4_address = var.ip_addns_02
-      node_name    = var.node_name_2
+      node_name    = var.node_name_win_core_2
+      template_id  = var.template_win_core_id_node2
+      provider     = "provider_node2"
     }
   }
-}
 
-locals {
-  dhcp_node1 = {
-    for k, v in local.dhcp_vm :
-    k => v if v.node_name == var.node_name_1
-  }
-
-  dhcp_node2 = {
-    for k, v in local.dhcp_vm :
-    k => v if v.node_name == var.node_name_2
-  }
-
-  addns_node2 = {
-    for k, v in local.addns_vm :
-    k => v if v.node_name == var.node_name_2
+  rsys_vms = {
+    "01" = {
+      ipv4_address = var.ip_rsys_01
+      node_name    = var.node_name_linux_3
+      template_id  = var.template_linux_id_node3
+      provider     = "provider_node3"
+    }
   }
 }

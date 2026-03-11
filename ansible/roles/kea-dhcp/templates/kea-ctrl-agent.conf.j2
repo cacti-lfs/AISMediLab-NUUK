@@ -1,0 +1,27 @@
+{
+  "Control-agent": {
+    "http-host": "{{ ansible_host }}",
+    "http-port": 8001,
+    "authentication": {
+      "type": "basic",
+      "realm": "kea-control-agent",
+      "clients": [
+        {
+          "user": "kea-api",
+          "password-file": "/etc/kea/kea-api-password"
+        }
+      ]
+    },
+    "control-sockets": {
+      "dhcp4": {
+        "socket-type": "unix",
+        "socket-name": "/run/kea/kea4-ctrl-socket"
+      }
+    },
+    "loggers": [{
+      "name": "kea-ctrl-agent",
+      "output_options": [{"output": "syslog"}],
+      "severity": "INFO"
+    }]
+  }
+}

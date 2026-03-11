@@ -1,0 +1,12 @@
+---
+- name: restart kea-dhcp4
+  service:
+    name: kea-dhcp4-server
+    state: restarted
+  become: true
+
+- name: restart kea-ctrl-agent
+  service:
+    name: kea-ctrl-agent
+    state: restarted
+  become: true
