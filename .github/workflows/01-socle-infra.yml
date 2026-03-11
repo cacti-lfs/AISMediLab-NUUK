@@ -297,7 +297,7 @@ jobs:
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
           terraform -chdir=terraform/composants/02_core_infra init
-          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -target='module.rsys_node1' -target='module.rsys_node2' -parallelism=1
+          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -target='module.rsys_node3' -parallelism=1
 
       - name: "[CLEAN] Proxmox RSYSLOG (si fail)"
         if: failure() && steps.tf_rsys.outcome == 'failure'

@@ -300,7 +300,7 @@ module "addns_node2" {
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
-module "rsyslog_node3" {
+module "rsys_node3" {
   for_each = {
     for k, v in local.rsys_vms : k => v if v.provider == "provider_node3"
   }
