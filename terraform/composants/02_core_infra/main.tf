@@ -68,7 +68,7 @@ module "dhcp_node1" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_70
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
@@ -143,7 +143,7 @@ module "dhcp_node2" {
   user_account_ssh_public_keys = var.ssh_public_keys
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_70
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
@@ -218,7 +218,7 @@ module "addns_node1" {
   user_account_ssh_public_keys = var.ssh_public_keys
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_70
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
@@ -293,7 +293,7 @@ module "addns_node2" {
   user_account_ssh_public_keys = var.ssh_public_keys
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_70
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
@@ -370,7 +370,7 @@ module "rsyslog_node3" {
 
 
   ipv4_address = each.value.ipv4_address
-  ipv4_cidr    = var.ipv4_cidr
+  ipv4_cidr    = var.ipv4_cidr_50
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
