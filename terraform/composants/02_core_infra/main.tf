@@ -180,7 +180,7 @@ module "addns_node1" {
   # vm_cpu_type = "host" par défaut
   # vm_cpu_numa = false par défaut
 
-  vm_memory_dedicated = 4096
+  vm_memory_dedicated = 2048
   # vm_memory_floating = false par défaut
 
   #numa = false par défaut
@@ -255,7 +255,7 @@ module "addns_node2" {
   # vm_cpu_type = "host" par défaut
   # vm_cpu_numa = false par défaut
 
-  vm_memory_dedicated = 2048
+  vm_memory_dedicated = 4096
   # vm_memory_floating = false par défaut
 
   #numa = false par défaut
