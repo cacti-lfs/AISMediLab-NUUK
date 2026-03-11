@@ -371,7 +371,7 @@ module "rsys_node3" {
 
   ipv4_address = each.value.ipv4_address
   ipv4_cidr    = var.ipv4_cidr_50
-  ipv4_gateway = var.gateway_vlan70
+  ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
