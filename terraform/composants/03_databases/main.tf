@@ -1,12 +1,14 @@
 module "bdd_web_node1" {
-  for_each = local.bdd_web_node1
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_1
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-WEB-${each.key}"
   vm_id          = 1400 + tonumber(each.key)
   vm_description = "BDD-WEB"
@@ -19,7 +21,7 @@ module "bdd_web_node1" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_1]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -74,14 +76,16 @@ module "bdd_web_node1" {
 }
 
 module "bdd_web_node2" {
-  for_each = local.bdd_web_node2
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_2
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-WEB-${each.key}"
   vm_id          = 1400 + tonumber(each.key)
   vm_description = "BDD WEB"
@@ -94,7 +98,7 @@ module "bdd_web_node2" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_2]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -149,14 +153,16 @@ module "bdd_web_node2" {
 }
 
 module "bdd_adm_node1" {
-  for_each = local.bdd_adm_node1
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_1
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-ADM-${each.key}"
   vm_id          = 1500 + tonumber(each.key)
   vm_description = "BDD-ADM"
@@ -169,7 +175,7 @@ module "bdd_adm_node1" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_1]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -224,14 +230,16 @@ module "bdd_adm_node1" {
 }
 
 module "bdd_adm_node2" {
-  for_each = local.bdd_adm_node2
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_2
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-ADM-${each.key}"
   vm_id          = 1500 + tonumber(each.key)
   vm_description = "BDD ADM"
@@ -244,7 +252,7 @@ module "bdd_adm_node2" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_2]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -299,14 +307,16 @@ module "bdd_adm_node2" {
 }
 
 module "bdd_mon_node1" {
-  for_each = local.bdd_mon_node1
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_1
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-MON-${each.key}"
   vm_id          = 1600 + tonumber(each.key)
   vm_description = "BDD-MON"
@@ -319,7 +329,7 @@ module "bdd_mon_node1" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_1]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2
@@ -374,14 +384,16 @@ module "bdd_mon_node1" {
 }
 
 module "bdd_mon_node2" {
-  for_each = local.bdd_mon_node2
+  for_each = {
+  for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+  }
   source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_2
+  node_name      = each.value.node_name
   vm_name        = "DEB-BDD-MON-${each.key}"
   vm_id          = 1600 + tonumber(each.key)
   vm_description = "BDD-MON"
@@ -394,7 +406,7 @@ module "bdd_mon_node2" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_2]
+  source_vm_id = each.value.template_id
   full_clone   = false
 
   vm_cpu_cores = 2

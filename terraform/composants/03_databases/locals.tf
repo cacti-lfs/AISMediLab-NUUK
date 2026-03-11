@@ -1,79 +1,80 @@
 # locals.tf
 locals {
   node_template_map = {
-    (var.node_name_1) = var.template_id_node1
-    (var.node_name_2) = var.template_id_node2
+    (var.node_name_linux_1) = var.template_linux_id_node1
+    (var.node_name_linux_2) = var.template_linux_id_node2
+    (var.node_name_linux_2) = var.template_linux_id_node3
   }
 
   bdd_web_vm = {
     "01" = {
       ipv4_address = var.ip_bdd_web_01
-      node_name    = var.node_name_1
+      node_name = var.node_name_linux_1
+      template_id = var.template_linux_id_node1
+      node_name    = var.node_name_linux_1
+      provider     = "provider_node1"
     }
     "02" = {
       ipv4_address = var.ip_bdd_web_02
-      node_name    = var.node_name_2
+      node_name = var.node_name_linux_2
+      template_id = var.template_linux_id_node2
+      node_name    = var.node_name_linux_2
+      provider     = "provider_node2"
     }
     "03" = {
       ipv4_address = var.ip_bdd_web_03
-      node_name    = var.node_name_2
+      node_name = var.node_name_linux_3
+      template_id = var.template_linux_id_node3
+      node_name    = var.node_name_linux_3
+      provider     = "provider_node3"
     }
   }
 
   bdd_adm_vm = {
     "01" = {
       ipv4_address = var.ip_bdd_adm_01
-      node_name    = var.node_name_1
+      node_name = var.node_name_linux_1
+      template_id = var.template_linux_id_node1
+      node_name    = var.node_name_linux_1
+      provider     = "provider_node1"
     }
     "02" = {
       ipv4_address = var.ip_bdd_adm_02
-      node_name    = var.node_name_2
+      node_name = var.node_name_linux_2
+      template_id = var.template_linux_id_node2
+      node_name    = var.node_name_linux_2
+      provider     = "provider_node2"
     }
     "03" = {
       ipv4_address = var.ip_bdd_adm_03
-      node_name    = var.node_name_1
+      node_name = var.node_name_linux_3
+      template_id = var.template_linux_id_node3
+      node_name    = var.node_name_linux_3
+      provider     = "provider_node3"
     }
   }
 
   bdd_mon_vm = {
     "01" = {
       ipv4_address = var.ip_bdd_mon_01
-      node_name    = var.node_name_1
+      node_name = var.node_name_linux_1
+      template_id = var.template_linux_id_node1
+      node_name    = var.node_name_linux_1
+      provider     = "provider_node1"
     }
     "02" = {
       ipv4_address = var.ip_bdd_mon_02
-      node_name    = var.node_name_2
+      node_name = var.node_name_linux_2
+      template_id = var.template_linux_id_node2
+      node_name    = var.node_name_linux_2
+      provider     = "provider_node2"
     }
     "03" = {
       ipv4_address = var.ip_bdd_mon_03
-      node_name    = var.node_name_2
+      node_name = var.node_name_linux_3
+      template_id = var.template_linux_id_node3
+      node_name    = var.node_name_linux_3
+      provider     = "provider_node3"
     }
-  }
-}
-
-locals {
-  bdd_web_node1 = {
-    for k, v in local.bdd_web_vm :
-    k => v if v.node_name == var.node_name_1
-  }
-  bdd_web_node2 = {
-    for k, v in local.bdd_web_vm :
-    k => v if v.node_name == var.node_name_2
-  }
-  bdd_adm_node1 = {
-    for k, v in local.bdd_adm_vm :
-    k => v if v.node_name == var.node_name_1
-  }
-  bdd_adm_node2 = {
-    for k, v in local.bdd_adm_vm :
-    k => v if v.node_name == var.node_name_2
-  }
-  bdd_mon_node1 = {
-    for k, v in local.bdd_mon_vm :
-    k => v if v.node_name == var.node_name_1
-  }
-  bdd_mon_node2 = {
-    for k, v in local.bdd_mon_vm :
-    k => v if v.node_name == var.node_name_2
   }
 }
