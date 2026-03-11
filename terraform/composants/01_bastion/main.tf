@@ -1,12 +1,14 @@
 module "bastion_node1" {
-  for_each = local.bastion_node1
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.bast_vms : k => v if v.provider == "provider_node1"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node1
   }
 
-  node_name      = var.node_name_1
+  node_name      = each.value.node_name
   vm_name        = "DEB-BAST-${each.key}"
   vm_id          = 400 + tonumber(each.key)
   vm_description = "Bastion"
@@ -19,7 +21,7 @@ module "bastion_node1" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_1]
+  source_vm_id = each.value.template_id
   full_clone   = false # false par défaut
 
   vm_cpu_cores = 2
@@ -74,14 +76,16 @@ module "bastion_node1" {
 }
 
 module "bastion_node2" {
-  for_each = local.bastion_node2
-  source   = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
+  for_each = {
+    for k, v in local.bast_vms : k => v if v.provider == "provider_node1"
+  }
+  source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   providers = {
     proxmox = proxmox.provider_node2
   }
 
-  node_name      = var.node_name_2
+  node_name      = each.value.node_name
   vm_name        = "DEB-BAST-${each.key}"
   vm_id          = 400 + tonumber(each.key)
   vm_description = "Bastion"
@@ -94,7 +98,7 @@ module "bastion_node2" {
 
   # vm_agent_enabled = true par défaut
 
-  source_vm_id = local.node_template_map[var.node_name_2]
+  source_vm_id = each.value.template_id
   full_clone   = false # false par défaut
 
   vm_cpu_cores = 2
