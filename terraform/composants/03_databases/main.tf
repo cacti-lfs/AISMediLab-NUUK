@@ -43,7 +43,7 @@ module "bdd_web_node1" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 140
 
   disks = [
@@ -120,7 +120,7 @@ module "bdd_web_node2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 140
 
   disks = [
@@ -274,7 +274,7 @@ module "bdd_adm_node1" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 150
 
   disks = [
@@ -351,7 +351,7 @@ module "bdd_adm_node2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 150
 
   disks = [
@@ -505,7 +505,7 @@ module "bdd_mon_node1" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 160
 
   disks = [
@@ -582,7 +582,7 @@ module "bdd_mon_node2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 160
 
   disks = [
