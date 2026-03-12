@@ -48,6 +48,9 @@ variable "datastore_id" {
 variable "network_v1" {
   type = string
 }
+variable "network_v2" {
+  type = string
+}
 variable "gateway_vlan140" {
   type        = string
   description = "VLAN BDD WEB"
