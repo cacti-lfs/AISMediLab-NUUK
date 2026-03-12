@@ -315,3 +315,11 @@ jobs:
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
             echo "$IP est prêt pour SSH"
           done
+
+      - name: "[ANS] Config RSYSLOG"
+        if: |
+          success() &&
+          steps.healthcheck_rsys.outcome == 'success'
+        run: |
+          cd ansible
+          ansible-playbook -i inventory/inventory.proxmox.yml 03_deploy_syslog.yml
