@@ -104,6 +104,7 @@ jobs:
       TF_VAR_network_v2: ${{ vars.TF_NETWORK_V2 }}
 
       BASTION_PASS: ${{ secrets.BASTION_PASS }}
+      WIN_PASSWORD: ${{ secrets.WIN_PASSWORD }}
 
       
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
