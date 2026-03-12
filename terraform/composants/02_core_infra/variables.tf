@@ -92,11 +92,11 @@ variable "full_clone" {
 }
 variable "ipv4_cidr_70" {
   type    = string
-  default = "/26"
+  default = "26"
 }
 variable "ipv4_cidr_50" {
   type    = string
-  default = "/27"
+  default = "27"
 }
 variable "environnement" {
   type    = string
