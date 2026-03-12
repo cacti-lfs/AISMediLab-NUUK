@@ -1,0 +1,13 @@
+---
+- name: Install rsyslog
+  apt:
+    name: rsyslog
+    state: present
+    update_cache: yes
+
+- name: Create fortigate log directory
+  file:
+    path: "{{ rsyslog_log_dir }}"
+    state: directory
+    mode: '0755'
+    
