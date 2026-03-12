@@ -99,22 +99,36 @@ dhcp_subnets:
     pool_start: "192.168.35.130"
     pool_end: "192.168.35.185"
 
-  # --- VLAN 140 : BDD (SQL) ---
+  # --- VLAN 140 : BDD WEB (SQL) ---
   - id: 140
-    subnet: "192.168.35.192/26"
-    router: "192.168.35.254"
-    pool_start: "192.168.35.200"
-    pool_end: "192.168.35.250"
+    subnet: "192.168.35.192/28"
+    router: "192.168.35.206"
+    pool_start: "192.168.35.193"
+    pool_end: "192.168.35.204"
 
-  # --- VLAN 150 : TOIP (Téléphonie) ---
+    # --- VLAN 150 : BDD ADM (Téléphonie) ---
   - id: 150
+    subnet: "192.168.35.208/28"
+    router: "192.168.35.222"
+    pool_start: "192.168.35.209"
+    pool_end: "192.168.35.220"
+  
+    # --- VLAN 160 : BDD MON (Téléphonie) ---
+  - id: 160
+    subnet: "192.168.35.224/28"
+    router: "192.168.35.238"
+    pool_start: "192.168.35.225"
+    pool_end: "192.168.35.235"
+
+  # --- VLAN 170 : USERS (Téléphonie) ---
+  - id: 170
     subnet: "192.168.36.0/27"
     router: "192.168.36.30"
     pool_start: "192.168.36.2"
     pool_end: "192.168.36.25"
 
   # --- VLAN 160 : Poubelle (Quarantaine) ---
-  - id: 160
+  - id: 180
     subnet: "192.168.36.32/27"
     router: "192.168.36.62"
     pool_start: "192.168.36.35"
