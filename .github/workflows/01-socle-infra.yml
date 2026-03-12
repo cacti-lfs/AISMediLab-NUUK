@@ -156,8 +156,9 @@ jobs:
         if: failure() && steps.tf_bastion.outcome == 'failure'
         run: |
           for VMID in 401 402; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
           done
       
       - name: "[HEALTHCHECK] Bastion"

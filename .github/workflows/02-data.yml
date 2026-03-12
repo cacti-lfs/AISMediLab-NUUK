@@ -100,24 +100,44 @@ jobs:
       TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
       TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
       TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+      
+      # NETWORK
+      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
+      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
+      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
+      TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
+      TF_VAR_ip_addns_01: ${{ vars.TF_IP_ADDNS_01 }}
+      TF_VAR_ip_addns_02: ${{ vars.TF_IP_ADDNS_02 }}
+      TF_VAR_ip_rsys_01: ${{ vars.TF_IP_RSYS_01 }}
+      TF_VAR_gateway_vlan70: ${{ vars.TF_GATEWAY_VLAN70 }}
+      TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
+      TF_VAR_gateway_vlan50: ${{ vars.TF_GATEWAY_VLAN50 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+      TF_VAR_ip_node_3: ${{ vars.TF_IP_NODE_3 }}
+      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
+      TF_VAR_network_v2: ${{ vars.TF_NETWORK_V2 }}
+
+      BASTION_PASS: ${{ secrets.BASTION_PASS }}
+
+      
       ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
       ANSIBLE_CONFIG: "${{ github.workspace }}/ansible/ansible.cfg"
-      # --- TF VARS ---
+      # --- TF_VARS ---
       TF_VAR_environnement: ${{ github.event.inputs.environment }}
       TF_VAR_ssh_public_keys: "${{ vars.SSH_PUBLIC_KEYS }}"
-      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       TF_VAR_gateway_vlan140: ${{ vars.TF_VAR_gateway_vlan140 }}
       TF_VAR_gateway_vlan150: ${{ vars.TF_VAR_gateway_vlan150 }}
       TF_VAR_gateway_vlan160: ${{ vars.TF_VAR_gateway_vlan160 }}
       vip_galera_web: ${{ vars.vip_galera_web }}
       vip_galera_adm: ${{ vars.vip_galera_adm }}
       vip_galera_mon: ${{ vars.vip_galera_mon }}
-      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
-      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
-      TF_VAR_network_v1: ${{ vars.TF_NETWORK_V1 }}
-      TF_VAR_node_name_1: ${{ vars.TF_NAME_NODE_1 }}
-      TF_VAR_node_name_2: ${{ vars.TF_NAME_NODE_2 }}
+      TF_VAR_node_name_linux_1: ${{ vars.TF_NAME_NODE_UNIX_1 }}
+      TF_VAR_node_name_linux_2: ${{ vars.TF_NAME_NODE_UNIX_2 }}
+      TF_VAR_node_name_linux_3: ${{ vars.TF_NAME_NODE_UNIX_3 }}
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -156,9 +176,9 @@ jobs:
         if: failure() && steps.tf_web.outcome == 'failure'
         run: |
           for VMID in 1401 1402 1403; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_3 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
           done
 
       # ==========================================
@@ -181,9 +201,9 @@ jobs:
         if: failure() && steps.tf_adm.outcome == 'failure'
         run: |
           for VMID in 1501 1502 1503; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_3 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
           done
 
       
@@ -207,7 +227,7 @@ jobs:
         if: failure() && steps.tf_mon.outcome == 'failure'
         run: |
           for VMID in 1601 1602 1603; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_3 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
           done
