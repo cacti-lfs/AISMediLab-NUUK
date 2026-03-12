@@ -49,7 +49,7 @@ module "bdd_web_node1" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -126,7 +126,7 @@ module "bdd_web_node2" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -203,7 +203,7 @@ module "bdd_web_node3" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -280,7 +280,7 @@ module "bdd_adm_node1" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -357,7 +357,7 @@ module "bdd_adm_node2" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -434,7 +434,7 @@ module "bdd_adm_node3" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -511,7 +511,7 @@ module "bdd_mon_node1" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -588,7 +588,7 @@ module "bdd_mon_node2" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
@@ -665,7 +665,7 @@ module "bdd_mon_node3" {
   disks = [
     {
       disk_interface   = "scsi0"
-      disk_size        = 15
+      disk_size        = 20
       disk_storage_id  = var.datastore_id
       disk_type        = "disk"
       disk_file_format = "raw"
