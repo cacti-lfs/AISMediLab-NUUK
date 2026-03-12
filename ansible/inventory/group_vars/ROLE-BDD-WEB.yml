@@ -1,4 +1,4 @@
-# ROLE-RSYS.yml
+# ROLE-BDD-WEB.yml
 ansible_ssh_common_args: >-
   -o ProxyCommand="ssh -W %h:%p -q cloudadm@192.168.32.51
   -o StrictHostKeyChecking=no"
