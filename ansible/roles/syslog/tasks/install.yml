@@ -10,4 +10,12 @@
     path: "{{ rsyslog_log_dir }}"
     state: directory
     mode: '0755'
-    
+
+- name: Deploy rsyslog fortigate config
+  template:
+    src: fortigate.conf.j2
+    dest: /etc/rsyslog.d/fortigate.conf
+    owner: root
+    group: root
+    mode: '0644'
+    notify: restart rsyslog

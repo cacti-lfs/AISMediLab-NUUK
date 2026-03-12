@@ -1,6 +1,6 @@
 ---
 - name: "Deployment Core Infra : Syslog"
-  hosts: ROLE_SYSLOG
+  hosts: ROLE_RSYS
   remote_user: cloudadm
   become: true
   vars:
@@ -9,6 +9,4 @@
     rsyslog_port: 514
   roles:
     - common
-    - Syslog
-
-  
+    - syslog
