@@ -50,11 +50,11 @@ variable "template_linux_id_node3" {
 }
 variable "template_win_gui_id_node1" {
   type    = number
-  default = 9021
+  default = 9011
 }
 variable "template_win_core_id_node2" {
   type    = number
-  default = 9022
+  default = 9012
 }
 variable "datastore_id" {
   type = string
