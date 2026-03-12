@@ -54,17 +54,17 @@ variable "network_v2" {
 variable "gateway_vlan140" {
   type        = string
   description = "VLAN BDD WEB"
-  default = "null"
+  default     = "null"
 }
 variable "gateway_vlan150" {
   type        = string
   description = "VLAN BDD ADM"
-  default = "null"
+  default     = "null"
 }
 variable "gateway_vlan160" {
   type        = string
   description = "VLAN BDD MON"
-  default = "null"
+  default     = "null"
 }
 variable "ip_bdd_web_01" {
   type    = string
