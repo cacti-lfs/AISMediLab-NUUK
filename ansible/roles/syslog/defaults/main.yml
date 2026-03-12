@@ -1,4 +1,4 @@
 ---
-rsyslog_fortigate_ip: "192.168.32.30"
+rsyslog_fortigate_ip: "192.168.32.94"
 rsyslog_log_dir: "/var/log/fortigate"
 rsyslog_port: 514
