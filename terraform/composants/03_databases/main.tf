@@ -77,7 +77,7 @@ module "bdd_web_node1" {
 
 module "bdd_web_node2" {
   for_each = {
-    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node2"
   }
   source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
@@ -308,7 +308,7 @@ module "bdd_adm_node1" {
 
 module "bdd_adm_node2" {
   for_each = {
-    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node2"
   }
   source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
@@ -539,7 +539,7 @@ module "bdd_mon_node1" {
 
 module "bdd_mon_node2" {
   for_each = {
-    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node1"
+    for k, v in local.bdd_web_vm : k => v if v.provider == "provider_node2"
   }
   source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
