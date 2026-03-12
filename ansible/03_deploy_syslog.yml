@@ -4,7 +4,6 @@
   remote_user: cloudadm
   become: true
   vars:
-    rsyslog_fortigate_ip: "192.168.32.30"
     rsyslog_log_dir: "/var/log/fortigate"
     rsyslog_port: 514
   roles:
