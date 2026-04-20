@@ -106,14 +106,14 @@ dhcp_subnets:
     pool_start: "192.168.35.193"
     pool_end: "192.168.35.204"
 
-    # --- VLAN 150 : BDD ADM (Téléphonie) ---
+    # --- VLAN 150 : BDD ADM ---
   - id: 150
     subnet: "192.168.35.208/28"
     router: "192.168.35.222"
     pool_start: "192.168.35.209"
     pool_end: "192.168.35.220"
   
-    # --- VLAN 160 : BDD MON (Téléphonie) ---
+    # --- VLAN 160 : BDD MON ---
   - id: 160
     subnet: "192.168.35.224/28"
     router: "192.168.35.238"
@@ -127,7 +127,7 @@ dhcp_subnets:
     pool_start: "192.168.36.2"
     pool_end: "192.168.36.25"
 
-  # --- VLAN 160 : Poubelle (Quarantaine) ---
+  # --- VLAN 180 : Poubelle (Quarantaine) ---
   - id: 180
     subnet: "192.168.36.32/27"
     router: "192.168.36.62"
