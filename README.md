@@ -28,7 +28,10 @@
 ---
 
 ## 📐 Architecture
-<img src="docs/schema_architecture_infra.gif" alt="AISMediLab Architecture" width="80%"/>
+
+<div align="center">
+  <img src="docs/schema_architecture_infra.gif" alt="AISMediLab Architecture" width="80%" />
+</div>
 
 ---
 
