@@ -28,8 +28,7 @@
 ---
 
 ## 📐 Architecture
-
-[![Architecture](docs/schema_architecture_infra.drawio)](docs/schema_architecture_infra.gif)
+<img src="docs/schema_architecture_infra.gif" alt="AISMediLab Architecture" width="80%"/>
 
 ---
 
