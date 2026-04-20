@@ -29,7 +29,7 @@
 
 ## 📐 Architecture
 
-[![Architecture](docs/schema_architecture_infra.drawio)](docs/schema_architecture_infra.drawio)
+[![Architecture](docs/schema_architecture_infra.drawio)](docs/schema_architecture_infra.drawio.gif)
 
 ---
 
