@@ -31,16 +31,20 @@ on:
         description: "Bastion"
         type: boolean
         default: false
+      deploy_tf_ntp:
+        description: "NTP"
+        type: boolean
+        default: false
+      deploy_tf_dns:
+        description: "DNS"
+        type: boolean
+        default: false
       deploy_tf_dhcp:
-        description: "DHCP (Node1 + Node2)"
+        description: "DHCP (Failover)"
         type: boolean
         default: false
       deploy_tf_addns:
-        description: "ADDNS"
-        type: boolean
-        default: false
-      deploy_tf_rsys:
-        description: "RSYSLOG"
+        description: "AD"
         type: boolean
         default: false
       
@@ -150,8 +154,8 @@ jobs:
         continue-on-error: false
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
-          terraform -chdir=terraform/composants/01_bastion init
-          terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+          terraform -chdir=terraform/composants/01-socle-infra init
+          terraform -chdir=terraform/composants/01-socle-infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
 
       - name: "[CLEAN] Proxmox Bastion (si fail)"
         if: failure() && steps.tf_bastion.outcome == 'failure'
