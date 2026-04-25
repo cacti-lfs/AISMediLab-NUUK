@@ -5,13 +5,13 @@ module "bastion" {
   source = "git::https://github.com/cacti-lfs/terraform-module-proxmox.git//vm-clone?ref=main"
 
   #Node CIBLE
-  node_name      = var.node_name_linux_2
+  node_name = var.node_name_linux_2
 
   #Template SOURCE
-  source_vm_id = var.template_linux_id
-  source_node_name = var.node_name_linux_1
+  source_vm_id       = var.template_linux_id
+  source_node_name   = var.node_name_linux_1
   clone_datastore_id = var.datastore_id
-  full_clone   = var.full_clone
+  full_clone         = var.full_clone
 
   vm_name        = "DEB-BAST-01"
   vm_id          = 441
