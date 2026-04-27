@@ -152,7 +152,7 @@ jobs:
         continue-on-error: false
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
-          terraform -chdir=terraform/composants/01_core_infra init
+          terraform -chdir=terraform/composants/01_core_infra init -upgrade
 
           TF_ACTION="${{ github.event.inputs.terraform_action }}"
           ARGS="-target=module.bastion -parallelism=1"
