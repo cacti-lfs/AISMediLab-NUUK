@@ -155,7 +155,7 @@ jobs:
           terraform -chdir=terraform/composants/01_core_infra init
 
           TF_ACTION="${{ github.event.inputs.terraform_action }}"
-          ARGS="-target='module.bastion' -parallelism=1"
+          ARGS="-target=module.bastion -parallelism=1"
 
           if [ "$TF_ACTION" != "plan" ]; then
             ARGS="$ARGS -auto-approve"
