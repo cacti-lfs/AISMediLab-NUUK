@@ -153,7 +153,15 @@ jobs:
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
           terraform -chdir=terraform/composants/01_core_infra init
-          terraform -chdir=terraform/composants/01_core_infra ${{ github.event.inputs.terraform_action }} -target='module.bastion' -auto-approve -parallelism=1
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target='module.bastion' -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/01_core_infra $TF_ACTION $ARGS
 
       - name: "[CLEAN] Proxmox Bastion (si fail)"
         if: failure() && steps.tf_bastion.outcome == 'failure'
