@@ -90,9 +90,7 @@ jobs:
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       
       # NETWORK
-      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
-      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
-      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_ip_bastion: ${{ vars.TF_IP_BASTION }}
       TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
       TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
       TF_VAR_ip_addns_01: ${{ vars.TF_IP_ADDNS_01 }}
