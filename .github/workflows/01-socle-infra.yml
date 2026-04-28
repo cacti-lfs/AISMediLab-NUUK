@@ -263,7 +263,7 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
       
-          for IP in "${{ vars.TF_IP_DHCP_01 }} ${{ vars.TF_IP_DHCP_02 }}"; do
+          for IP in "${{ vars.TF_IP_DHCP_01 }}" "${{ vars.TF_IP_DHCP_02 }}"; do
             ssh-keygen -R "$IP" || true
             ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
           done
