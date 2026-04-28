@@ -63,6 +63,10 @@ module "bastion" {
   ci_vendor_data_file_id  = ""
   ci_user_data_file_id    = ""
 
+  ha_enabled = true
+  ha_group   = "grp-core"
+  ha_state   = "started"
+
 
   user_account_username        = "cloudadm"
   user_account_ssh_public_keys = var.ssh_public_keys
@@ -75,3 +79,4 @@ module "bastion" {
   dns_domain  = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
+
