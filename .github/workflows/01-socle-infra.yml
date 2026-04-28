@@ -222,19 +222,19 @@ jobs:
           github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
         id: tf_dhcp
         run: |
-          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
-          terraform -chdir=terraform/composants/02_core_infra init
-          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
-            -target='module.dhcp_node1' \
-            -target='module.dhcp_node2'
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+          terraform -chdir=terraform/composants/01_core_infra init
+          terraform -chdir=terraform/composants/01_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
+            -target='module.dhcp_1' \
+            -target='module.dhcp_2'
 
-      - name: "[CLEAN] Proxmox DHCP (si fail)"
-        if: failure() && steps.tf_dhcp.outcome == 'failure'
-        run: |
-          for VMID in 701 702; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
-          done
+      # - name: "[CLEAN] Proxmox DHCP (si fail)"
+      #   if: failure() && steps.tf_dhcp.outcome == 'failure'
+      #   run: |
+      #     for VMID in 701 702; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+      #     done
 
       - name: "[HEALTHCHECK] DHCP"
         id: healthcheck_dhcp
@@ -254,6 +254,22 @@ jobs:
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
             echo "$IP est prêt pour SSH"
           done
+
+      - name: "[SSH] Trust DHCP host keys"
+        if: |
+          success() &&
+          steps.healthcheck_bastion.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_DHCP_01 }} ${{ vars.TF_IP_DHCP_02 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
 
       - name: "[ANS] Config DHCP"
         if: |
