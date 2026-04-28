@@ -258,7 +258,7 @@ jobs:
       - name: "[SSH] Trust DHCP host keys"
         if: |
           success() &&
-          steps.healthcheck_bastion.outcome == 'success'
+          steps.healthcheck_dhcp.outcome == 'success'
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
