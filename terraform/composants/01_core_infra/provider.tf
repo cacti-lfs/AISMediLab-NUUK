@@ -20,7 +20,7 @@ provider "proxmox" {
 }
 
 provider "proxmox" {
-  alias    = "provider_node1"
+  alias     = "provider_node1"
   endpoint  = "https://192.168.32.132:8006"
   api_token = "${var.proxmox_api_user}!${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
   insecure  = true
@@ -31,7 +31,7 @@ provider "proxmox" {
 }
 
 provider "proxmox" {
-  alias    = "provider_node2"
+  alias     = "provider_node2"
   endpoint  = "https://192.168.32.132:8006"
   api_token = "${var.proxmox_api_user}!${var.proxmox_api_token_id}=${var.proxmox_api_token_secret}"
   insecure  = true
