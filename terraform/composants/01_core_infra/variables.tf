@@ -31,7 +31,13 @@ variable "datastore_id" {
 variable "network_v1" {
   type = string
 }
+variable "network_v2" {
+  type = string
+}
 variable "gateway_vlan40" {
+  type = string
+}
+variable "gateway_vlan70" {
   type = string
 }
 variable "ip_bastion" {
@@ -45,7 +51,14 @@ variable "ipv4_cidr_vlan40" {
   type    = string
   default = "28"
 }
+variable "ipv4_cidr_vlan70" {
+  type    = string
+  default = "26"
+}
 variable "environnement" {
   type    = string
-  default = "poc"
+  default = "nuuk"
+}
+variable "ip_dhcp_01" {
+  type = string
 }
