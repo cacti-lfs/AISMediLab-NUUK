@@ -64,7 +64,6 @@ module "bastion" {
   ci_user_data_file_id    = ""
 
   ha_enabled = true
-  ha_group   = "grp-core"
   ha_state   = "started"
 
 
