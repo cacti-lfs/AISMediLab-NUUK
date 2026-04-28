@@ -54,15 +54,19 @@
               "mode": "hot-standby",
               "heartbeat-delay": 10,
               "max-response-delay": 60,
+              "control-socket": {
+                "socket-type": "unix",
+                "socket-name": "/run/kea/kea4-ctrl-socket"
+              },
               "peers": [
                 {
                   "name": "{{ kea_peer_primary }}",
-                  "url": "http://{{ kea_primary_ip }}:{{ kea_ha_port }}/",
+                  "url": "http://{{ kea_primary_ip }}:{{ kea_ctrl_agent_port }}/",
                   "role": "primary"
                 },
                 {
                   "name": "{{ kea_peer_standby }}",
-                  "url": "http://{{ kea_secondary_ip }}:{{ kea_ha_port }}/",
+                  "url": "http://{{ kea_secondary_ip }}:{{ kea_ctrl_agent_port }}/",
                   "role": "standby"
                 }
               ]
