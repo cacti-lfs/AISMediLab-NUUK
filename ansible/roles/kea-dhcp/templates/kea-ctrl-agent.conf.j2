@@ -1,7 +1,7 @@
 {
   "Control-agent": {
     "http-host": "{{ ansible_host }}",
-    "http-port": 8000,
+    "http-port": {{ kea_ctrl_agent_port }},
     "authentication": {
       "type": "basic",
       "realm": "kea-control-agent",
