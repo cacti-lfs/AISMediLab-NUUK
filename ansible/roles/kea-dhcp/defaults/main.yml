@@ -3,7 +3,7 @@
 kea_interface: "eth0"
 dns_servers: ["8.8.8.8", "1.1.1.1"]
 domain_name: "nuuk-medilab.lan"
-kea_ctrl_agent_port: 8001
+kea_ctrl_agent_port: 8000
 kea_ha_port: 8000
 
 kea_peer_primary: "{{ groups['ROLE_DHCP'][0] }}"
