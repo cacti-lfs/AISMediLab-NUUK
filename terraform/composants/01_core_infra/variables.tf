@@ -62,3 +62,6 @@ variable "environnement" {
 variable "ip_dhcp_01" {
   type = string
 }
+variable "ip_dhcp_01" {
+  type = string
+}
