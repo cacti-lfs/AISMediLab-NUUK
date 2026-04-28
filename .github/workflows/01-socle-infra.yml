@@ -163,14 +163,14 @@ jobs:
 
           terraform -chdir=terraform/composants/01_core_infra $TF_ACTION $ARGS
 
-      - name: "[CLEAN] Proxmox Bastion (si fail)"
-        if: failure() && steps.tf_bastion.outcome == 'failure'
-        run: |
-          for VMID in 401 402; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
-          done
+      # - name: "[CLEAN] Proxmox Bastion (si fail)"
+      #   if: failure() && steps.tf_bastion.outcome == 'failure'
+      #   run: |
+      #     for VMID in 401 402; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
+      #     done
       
       - name: "[HEALTHCHECK] Bastion"
         id: healthcheck_bastion
@@ -181,15 +181,29 @@ jobs:
             (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_bastion == 'true')
           )
         run: |
-          IP1="${{ vars.TF_IP_BASTION_01 }}"
-          IP2="${{ vars.TF_IP_BASTION_02 }}"
+          IP1="${{ vars.TF_IP_BASTION }}"
 
-          echo "Attente du réseau sur $IP1 et $IP2..."
-          for IP in $IP1 $IP2; do
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
             timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
             echo "$IP est prêt pour SSH"
           done
+
+      - name: "[SSH] Trust Bastion host keys"
+        if: |
+          success() &&
+          steps.healthcheck_bastion.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_BASTION }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
 
       - name: "[ANS] Config Bastion"
         if: |
