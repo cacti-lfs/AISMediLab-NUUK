@@ -119,8 +119,8 @@ jobs:
 
       # NETWORK
 
-      TF_VAR_ip_dns_1: ${{ vars.TF_IP_HAPROXY_1 }}
-      TF_VAR_ip_dns_2: ${{ vars.TF_IP_HAPROXY_2 }}
+      TF_VAR_ip_haproxy_1: ${{ vars.TF_IP_HAPROXY_1 }}
+      TF_VAR_ip_haproxy_2: ${{ vars.TF_IP_HAPROXY_2 }}
       TF_VAR_gateway_vlan120: ${{ vars.TF_GATEWAY_VLAN120 }}
       TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
