@@ -65,3 +65,6 @@ variable "gateway_vlan50" {
 variable "ip_zabbix" {
   type = string
 }
+variable "phpipam" {
+  type = string
+}
