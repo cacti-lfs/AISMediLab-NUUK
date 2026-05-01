@@ -68,6 +68,18 @@ on:
         description: "Cible : DHCP"
         type: boolean
         default: false
+      deploy_ans_dns:
+        description: "Cible : DNS"
+        type: boolean
+        default: false
+      deploy_ans_ntp:
+        description: "Cible : NTP"
+        type: boolean
+        default: false
+      deploy_ans_addns:
+        description: "Cible : AD"
+        type: boolean
+        default: false
 
 jobs:
   deploy:
@@ -95,7 +107,7 @@ jobs:
       TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
       TF_VAR_ip_dns_01: ${{ vars.TF_IP_DNS_01 }}
       TF_VAR_ip_dns_02: ${{ vars.TF_IP_DNS_02 }}
-      TF_VAR_ip_ntp_1: ${{ vars.TF_IP_NTP_1 }}
+      TF_VAR_ip_ntp_01: ${{ vars.TF_IP_NTP_01 }}
       TF_VAR_ip_addns_01: ${{ vars.TF_IP_ADDNS_01 }}
       TF_VAR_ip_addns_02: ${{ vars.TF_IP_ADDNS_02 }}
       # TF_VAR_ip_rsys_01: ${{ vars.TF_IP_RSYS_01 }}
