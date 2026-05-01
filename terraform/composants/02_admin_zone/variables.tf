@@ -52,3 +52,13 @@ variable "ip_haproxy_1" {
 variable "ip_haproxy_2" {
   type = string
 }
+variable "ip_grafana" {
+  type = string
+}
+variable "ipv4_cidr_vlan50" {
+  type = string
+  default = "27"
+}
+variable "gateway_vlan50" {
+  type = string
+}
