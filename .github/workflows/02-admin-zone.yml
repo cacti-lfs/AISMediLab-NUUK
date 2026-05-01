@@ -1,0 +1,233 @@
+name: "02. Admin Zone"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environnement (poc ou nuuk)"
+        required: true
+        type: choice
+        options: [poc, nuuk]
+        default: nuuk
+
+      # --- CONTRÔLE TERRAFORM ---
+      run_terraform:
+        description: "Exécuter Terraform ?"
+        type: boolean
+        default: true
+      terraform_action:
+        description: "Action Terraform (apply/plan/destroy)"
+        type: choice
+        options: [apply, plan, destroy]
+        default: apply
+      target_scope_tf:
+        description: "Composants à traiter"
+        type: choice
+        options: [Tous, Sélection]
+        default: Sélection
+
+      # --- SÉLECTION MANUELLE ---
+      deploy_tf_haadmin:
+        description: "HA Admin"
+        type: boolean
+        default: false
+      deploy_tf_grafana:
+        description: "Grafana"
+        type: boolean
+        default: false
+      deploy_tf_zabbix:
+        description: "Zabbix"
+        type: boolean
+        default: false
+      deploy_tf_phpipam:
+        description: "phpIPAM"
+        type: boolean
+        default: false
+      deploy_tf_bookstack:
+        description: "BookStack"
+        type: boolean
+        default: false
+      deploy_tf_glpi:
+        description: "GLPI"
+        type: boolean
+        default: false
+      deploy_tf_galera_admin:
+        description: "Galera Admin"
+        type: boolean
+        default: false
+    
+      # --- CONTRÔLE ANSIBLE ---
+      run_ansible:
+        description: "Exécuter Ansible ?"
+        type: boolean
+        default: true
+      target_scope_ans:
+        description: "Composants à traiter"
+        type: choice
+        options: [Tous, Sélection]
+        default: Sélection
+
+      # --- SÉLECTION MANUELLE ---
+      deploy_ans_haadmin:
+        description: "Cible: HA Admin"
+        type: boolean
+        default: false
+      deploy_ans_grafana:
+        description: "Cible: Grafana"
+        type: boolean
+        default: false
+      deploy_ans_zabbix:
+        description: "Cible: Zabbix"
+        type: boolean
+        default: false
+      deploy_ans_phpipam:
+        description: "Cible: phpIPAM"
+        type: boolean
+        default: false
+      deploy_ans_bookstack:
+        description: "Cible: BookStack"
+        type: boolean
+        default: false
+      deploy_ans_glpi:
+        description: "Cible: GLPI"
+        type: boolean
+        default: false
+      deploy_ans_galera_admin:
+        description: "Cible: Galera Admin"
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    name: "Provisionnement & Configuration Admin Zone"
+    runs-on: [self-hosted, "${{ github.event.inputs.environment }}-runner"]
+    environment: ${{ github.event.inputs.environment }}
+
+    env:
+      # --- SECRETS ---
+      TF_CLOUD_ORGANIZATION: "nuuk"
+
+      # PROXMOX
+      TF_VAR_proxmox_api_url_node_1: ${{ secrets.PVE_API_URL_NODE_1 }}
+      TF_VAR_proxmox_api_url_node_2: ${{ secrets.PVE_API_URL_NODE_2 }}
+      TF_VAR_proxmox_api_url_node_3: ${{ secrets.PVE_API_URL_NODE_3 }}
+      TF_VAR_proxmox_api_url_vip: ${{ secrets.PVE_API_URL_VIP }}
+      TF_VAR_proxmox_api_user: ${{ secrets.PVE_API_USER }}
+      TF_VAR_proxmox_api_token_id: ${{ secrets.PVE_TOKEN_ID }}
+      TF_VAR_proxmox_api_token_secret: ${{ secrets.PVE_TOKEN_SECRET }}
+      TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
+
+      # NETWORK
+
+      TF_VAR_ip_dns_1: ${{ vars.TF_IP_HAPROXY_1 }}
+      TF_VAR_ip_dns_2: ${{ vars.TF_IP_HAPROXY_2 }}
+      TF_VAR_gateway_vlan120: ${{ vars.TF_GATEWAY_VLAN120 }}
+      TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
+      TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
+      TF_VAR_ip_node_3: ${{ vars.TF_IP_NODE_3 }}
+      TF_VAR_network_v2: ${{ vars.TF_NETWORK_V2 }}
+
+      
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      ANSIBLE_CONFIG: "${{ github.workspace }}/ansible/ansible.cfg"
+  
+      # --- TF_VARS ---
+      TF_VAR_environnement: ${{ github.event.inputs.environment }}
+      BASTION_IFACE: ${{ vars.BASTION_IFACE }}
+      BASTION_ROUTER_ID: ${{ vars.BASTION_ROUTER_ID }}
+      TF_VAR_ssh_public_keys: "${{ vars.SSH_PUBLIC_KEYS }}"
+
+      TF_VAR_node_name_linux_1: ${{ vars.TF_NAME_NODE_UNIX_1 }}
+      TF_VAR_node_name_linux_2: ${{ vars.TF_NAME_NODE_UNIX_2 }}
+      TF_VAR_node_name_linux_3: ${{ vars.TF_NAME_NODE_UNIX_3 }}
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: SSH Agent Setup
+        uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Terraform
+        if: github.event.inputs.run_terraform == 'true'
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+      
+      - name: Install Ansible collections
+        if: github.event.inputs.run_ansible == 'true'
+        run: |
+          ansible-galaxy collection install -r ansible/requirements.yml
+
+      # ==========================================
+      # BLOC 01 : HAPROXY ADMIN
+      # ==========================================
+      - name: "[TF] HAPROXY ADMIN"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_haadmin == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_haadmin
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.haproxy_1 -target=module.haproxy_2 -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+
+      # - name: "[CLEAN] Proxmox HAPROXY ADMIN (si fail)"
+      #   if: failure() && steps.tf_haadmin.outcome == 'failure'
+      #   run: |
+      #     for VMID in 401 402; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
+      #     done
+      
+      - name: "[HEALTHCHECK] HA Admin"
+        id: healthcheck_haadmin
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_haadmin == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_HAPROXY_1 }}"
+          IP2="${{ vars.TF_IP_HAPROXY_2 }}"
+
+          echo "Attente du réseau sur $IP1 $IP2..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust HA Admin host keys"
+        if: |
+          success() &&
+          steps.healthcheck_haadmin.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_HAPROXY_1 }}" "${{ vars.TF_IP_HAPROXY_2 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # - name: "[ANS] Config HA Admin"
+      #   if: |
+      #     success() &&
+      #     steps.healthcheck_haadmin.outcome == 'success'
+      #   run: |
+      #     cd ansible
+      #     ansible-playbook -i inventory/inventory.proxmox.yml 10_deploy_haadmin.yml
