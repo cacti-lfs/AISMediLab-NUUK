@@ -257,7 +257,7 @@ module "dns_1" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-DNS-01"
-  vm_id          = 775
+  vm_id          = 773
   vm_description = "DNS"
   vm_tags        = ["kea", "vlan70", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -419,7 +419,7 @@ module "ntp_1" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-NTP-01"
-  vm_id          = 774
+  vm_id          = 775
   vm_description = "NTP"
   vm_tags        = ["ntp", "vlan70", var.environnement]
   # vm_bios = "seabios" par défaut
