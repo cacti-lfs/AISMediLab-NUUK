@@ -403,7 +403,7 @@ module "dns_2" {
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
-module "ntp" {
+module "ntp_1" {
   providers = {
     proxmox = proxmox.provider_node_vip
   }
