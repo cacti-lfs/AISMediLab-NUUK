@@ -38,7 +38,7 @@ variable "full_clone" {
   type    = bool
   default = true
 }
-variable "ipv4_cidr_120" {
+variable "ipv4_cidr_vlan120" {
   type    = string
   default = "28"
 }

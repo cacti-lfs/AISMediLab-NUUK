@@ -45,7 +45,7 @@ module "haproxy_1" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 120
 
   disks = [
@@ -127,7 +127,7 @@ module "haproxy_2" {
   # efi_disk_pre_enrolled_keys = false par défaut
 
   vnic_model  = "virtio" # e1000 par défaut
-  vnic_bridge = var.network_v1
+  vnic_bridge = var.network_v2
   vlan_tag    = var.environnement == "poc" ? 0 : 120
 
   disks = [
