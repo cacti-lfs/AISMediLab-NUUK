@@ -107,7 +107,7 @@ jobs:
       TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
       TF_VAR_ip_dns_1: ${{ vars.TF_IP_DNS_01 }}
       TF_VAR_ip_dns_2: ${{ vars.TF_IP_DNS_02 }}
-      TF_VAR_ip_ntp_01: ${{ vars.TF_IP_NTP_01 }}
+      TF_VAR_ip_ntp_1: ${{ vars.TF_IP_NTP_01 }}
       TF_VAR_ip_addns_01: ${{ vars.TF_IP_ADDNS_01 }}
       TF_VAR_ip_addns_02: ${{ vars.TF_IP_ADDNS_02 }}
       # TF_VAR_ip_rsys_01: ${{ vars.TF_IP_RSYS_01 }}
