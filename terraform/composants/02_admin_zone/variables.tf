@@ -71,3 +71,6 @@ variable "ip_phpipam" {
 variable "ip_bookstack" {
   type = string
 }
+variable "ip_glpi" {
+  type = string
+}
