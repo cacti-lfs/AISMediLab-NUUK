@@ -56,9 +56,12 @@ variable "ip_grafana" {
   type = string
 }
 variable "ipv4_cidr_vlan50" {
-  type = string
+  type    = string
   default = "27"
 }
 variable "gateway_vlan50" {
+  type = string
+}
+variable "ip_zabbix" {
   type = string
 }
