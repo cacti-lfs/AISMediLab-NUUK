@@ -653,6 +653,7 @@ module "bdd_adm_1" {
   dns_domain  = "nuuk-medilab.lan"
   dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
+
 module "bdd_adm_2" {
   providers = {
     proxmox = proxmox.provider_node_vip
