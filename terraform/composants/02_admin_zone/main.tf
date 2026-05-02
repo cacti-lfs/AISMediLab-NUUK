@@ -178,7 +178,7 @@ module "grafana" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-GRAFANA-1"
-  vm_id          = 51
+  vm_id          = 501
   vm_description = "VM Grafana"
   vm_tags        = ["supervision", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -260,7 +260,7 @@ module "zabbix" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-ZABBIX-1"
-  vm_id          = 52
+  vm_id          = 502
   vm_description = "VM Zabbix"
   vm_tags        = ["supervision", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -342,8 +342,8 @@ module "phpipam" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-PHPIPAM-1"
-  vm_id          = 53
-  vm_description = "VM Zabbix"
+  vm_id          = 503
+  vm_description = "VM phpIPAM"
   vm_tags        = ["supervision", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
@@ -424,7 +424,7 @@ module "bookstack" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-BOOKSTACK-1"
-  vm_id          = 54
+  vm_id          = 504
   vm_description = "VM Bookstack"
   vm_tags        = ["supervision", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -506,7 +506,7 @@ module "glpi" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-GLPI-1"
-  vm_id          = 55
+  vm_id          = 505
   vm_description = "VM GLPI"
   vm_tags        = ["supervision", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -588,7 +588,7 @@ module "bdd_adm_1" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-BDDADM-1"
-  vm_id          = 151
+  vm_id          = 1501
   vm_description = "VM Base de Données Administrateur"
   vm_tags        = ["supervision", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -670,7 +670,7 @@ module "bdd_adm_2" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-BDDADM-2"
-  vm_id          = 152
+  vm_id          = 1502
   vm_description = "VM Base de Données Administrateur"
   vm_tags        = ["supervision", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
@@ -752,7 +752,7 @@ module "bdd_adm_3" {
   full_clone         = var.full_clone
 
   vm_name        = "DEB-BDDADM-3"
-  vm_id          = 153
+  vm_id          = 1503
   vm_description = "VM Base de Données Administrateur"
   vm_tags        = ["supervision", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
