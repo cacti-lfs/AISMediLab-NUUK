@@ -89,4 +89,5 @@ variable "ipv4_cidr_vlan150" {
 }
 variable "gateway_vlan150" {
   type = string
+  default = "28"
 }
