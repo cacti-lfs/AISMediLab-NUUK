@@ -74,3 +74,22 @@ variable "ip_bookstack" {
 variable "ip_glpi" {
   type = string
 }
+variable "ip_bdd_adm_1" {
+  type = string
+}
+variable "ip_bdd_adm_2" {
+  type = string
+}
+variable "ip_bdd_adm_3" {
+  type = string
+}
+variable "ipv4_cidr_vlan150" {
+  type    = string
+  default = "28"
+}
+variable "gateway_vlan150" {
+  type = string
+}
+variable "gateway_vlan150" {
+  type = string
+}
