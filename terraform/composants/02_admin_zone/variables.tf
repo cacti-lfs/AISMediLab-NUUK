@@ -90,6 +90,3 @@ variable "ipv4_cidr_vlan150" {
 variable "gateway_vlan150" {
   type = string
 }
-variable "gateway_vlan150" {
-  type = string
-}
