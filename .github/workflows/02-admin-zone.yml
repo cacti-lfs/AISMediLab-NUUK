@@ -527,3 +527,58 @@ jobs:
           done
 
           chmod 600 ~/.ssh/known_hosts
+
+      # ==========================================
+      # BLOC 07 : BDD ADMIN (GALERA)
+      # ==========================================
+      - name: "[TF] BDD ADMIN (GALERA)"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_galera_admin == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_galera_admin
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.galera_admin -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] BDD ADMIN (GALERA)"
+        id: healthcheck_galera_admin
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_galera_admin == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_GALERA_ADMIN }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust BDD ADMIN (GALERA) host keys"
+        if: |
+          success() &&
+          steps.healthcheck_galera_admin.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_GALERA_ADMIN }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
