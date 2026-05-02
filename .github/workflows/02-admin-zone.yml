@@ -130,9 +130,9 @@ jobs:
       TF_VAR_ip_phpipam: ${{ vars.TF_IP_PHPIPAM }}
       TF_VAR_ip_bookstack: ${{ vars.TF_IP_BOOKSTACK }}
       TF_VAR_ip_glpi: ${{ vars.TF_IP_GLPI }}
-      TF_VAR_ip_ip_bdd_adm_1: ${{ vars.TF_IP_GALERA_ADMIN_1 }}
-      TF_VAR_ip_ip_bdd_adm_2: ${{ vars.TF_IP_GALERA_ADMIN_2 }}
-      TF_VAR_ip_ip_bdd_adm_3: ${{ vars.TF_IP_GALERA_ADMIN_3 }}
+      TF_VAR_ip_bdd_adm_1: ${{ vars.TF_IP_GALERA_ADMIN_1 }}
+      TF_VAR_ip_bdd_adm_2: ${{ vars.TF_IP_GALERA_ADMIN_2 }}
+      TF_VAR_ip_bdd_adm_3: ${{ vars.TF_IP_GALERA_ADMIN_3 }}
       TF_VAR_gateway_vlan150: ${{ vars.TF_GATEWAY_VLAN150 }}
       TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
