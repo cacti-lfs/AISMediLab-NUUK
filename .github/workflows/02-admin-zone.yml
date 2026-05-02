@@ -126,6 +126,14 @@ jobs:
       TF_VAR_ipv4_cidr_vlan50: ${{ vars.TF_IPV4_CIDR_VLAN50 }}
       TF_VAR_ip_grafana: ${{ vars.TF_IP_GRAFANA }}
       TF_VAR_gateway_vlan120: ${{ vars.TF_GATEWAY_VLAN120 }}
+      TF_VAR_ip_zabbix: ${{ vars.TF_IP_ZABBIX }}
+      TF_VAR_ip_phpipam: ${{ vars.TF_IP_PHPIPAM }}
+      TF_VAR_ip_bookstack: ${{ vars.TF_IP_BOOKSTACK }}
+      TF_VAR_ip_glpi: ${{ vars.TF_IP_GLPI }}
+      TF_VAR_ip_ip_bdd_adm_1: ${{ vars.TF_IP_GALERA_ADMIN_1 }}
+      TF_VAR_ip_ip_bdd_adm_2: ${{ vars.TF_IP_GALERA_ADMIN_2 }}
+      TF_VAR_ip_ip_bdd_adm_3: ${{ vars.TF_IP_GALERA_ADMIN_3 }}
+      TF_VAR_gateway_vlan150: ${{ vars.TF_GATEWAY_VLAN150 }}
       TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_ip_node_3: ${{ vars.TF_IP_NODE_3 }}
@@ -542,7 +550,7 @@ jobs:
           terraform -chdir=terraform/composants/02_admin_zone init -upgrade
 
           TF_ACTION="${{ github.event.inputs.terraform_action }}"
-          ARGS="-target=module.galera_admin -parallelism=1"
+          ARGS="-target=module.bdd_adm_1 -target=module.bdd_adm_2 -target=module.bdd_adm_3 -parallelism=1"
 
           if [ "$TF_ACTION" != "plan" ]; then
             ARGS="$ARGS -auto-approve"
@@ -559,10 +567,12 @@ jobs:
             (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_galera_admin == 'true')
           )
         run: |
-          IP1="${{ vars.TF_IP_GALERA_ADMIN }}"
+          IP1="${{ vars.TF_IP_GALERA_ADMIN_1 }}"
+          IP2="${{ vars.TF_IP_GALERA_ADMIN_2 }}"
+          IP3="${{ vars.TF_IP_GALERA_ADMIN_3 }}"
 
-          echo "Attente du réseau sur $IP1..."
-          for IP in $IP1; do
+          echo "Attente du réseau sur $IP1, $IP2 et $IP3..."
+          for IP in $IP1 $IP2 $IP3; do
             timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
             echo "$IP est prêt pour SSH"
@@ -576,7 +586,7 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
       
-          for IP in "${{ vars.TF_IP_GALERA_ADMIN }}"; do
+          for IP in "${{ vars.TF_IP_GALERA_ADMIN_1 }}" "${{ vars.TF_IP_GALERA_ADMIN_2 }}" "${{ vars.TF_IP_GALERA_ADMIN_3 }}"; do
             ssh-keygen -R "$IP" || true
             ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
           done
