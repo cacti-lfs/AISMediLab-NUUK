@@ -121,7 +121,19 @@ jobs:
 
       TF_VAR_ip_haproxy_1: ${{ vars.TF_IP_HAPROXY_1 }}
       TF_VAR_ip_haproxy_2: ${{ vars.TF_IP_HAPROXY_2 }}
+      TF_VAR_ipv4_cidr_vlan120: ${{ vars.TF_IPV4_CIDR_VLAN120 }}
+      TF_VAR_gateway_vlan50: ${{ vars.TF_GATEWAY_VLAN50 }}
+      TF_VAR_ipv4_cidr_vlan50: ${{ vars.TF_IPV4_CIDR_VLAN50 }}
+      TF_VAR_ip_grafana: ${{ vars.TF_IP_GRAFANA }}
       TF_VAR_gateway_vlan120: ${{ vars.TF_GATEWAY_VLAN120 }}
+      TF_VAR_ip_zabbix: ${{ vars.TF_IP_ZABBIX }}
+      TF_VAR_ip_phpipam: ${{ vars.TF_IP_PHPIPAM }}
+      TF_VAR_ip_bookstack: ${{ vars.TF_IP_BOOKSTACK }}
+      TF_VAR_ip_glpi: ${{ vars.TF_IP_GLPI }}
+      TF_VAR_ip_ip_bdd_adm_1: ${{ vars.TF_IP_GALERA_ADMIN_1 }}
+      TF_VAR_ip_ip_bdd_adm_2: ${{ vars.TF_IP_GALERA_ADMIN_2 }}
+      TF_VAR_ip_ip_bdd_adm_3: ${{ vars.TF_IP_GALERA_ADMIN_3 }}
+      TF_VAR_gateway_vlan150: ${{ vars.TF_GATEWAY_VLAN150 }}
       TF_VAR_ip_node_1: ${{ vars.TF_IP_NODE_1 }}
       TF_VAR_ip_node_2: ${{ vars.TF_IP_NODE_2 }}
       TF_VAR_ip_node_3: ${{ vars.TF_IP_NODE_3 }}
@@ -231,3 +243,352 @@ jobs:
       #   run: |
       #     cd ansible
       #     ansible-playbook -i inventory/inventory.proxmox.yml 10_deploy_haadmin.yml
+
+      # ==========================================
+      # BLOC 02 : GRAFANA
+      # ==========================================
+      - name: "[TF] GRAFANA"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_grafana == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_grafana
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.grafana -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+
+      # - name: "[CLEAN] Proxmox GRAFANA (si fail)"
+      #   if: failure() && steps.tf_grafana.outcome == 'failure'
+      #   run: |
+      #     for VMID in 401 402; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
+      #     done
+      
+      - name: "[HEALTHCHECK] GRAFANA"
+        id: healthcheck_grafana
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_grafana == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_GRAFANA }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust GRAFANA host keys"
+        if: |
+          success() &&
+          steps.healthcheck_grafana.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_GRAFANA }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # - name: "[ANS] Config GRAFANA"
+      #   if: |
+      #     success() &&
+      #     steps.healthcheck_grafana.outcome == 'success'
+      #   run: |
+      #     cd ansible
+      #     ansible-playbook -i inventory/inventory.proxmox.yml 11_deploy_grafana.yml
+
+      # ==========================================
+      # BLOC 03 : ZABBIX
+      # ==========================================
+      - name: "[TF] ZABBIX"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_zabbix == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_zabbix
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.zabbix -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] ZABBIX"
+        id: healthcheck_zabbix
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_zabbix == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_ZABBIX }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust ZABBIX host keys"
+        if: |
+          success() &&
+          steps.healthcheck_zabbix.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_ZABBIX }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # ==========================================
+      # BLOC 04 : PHPIPAM
+      # ==========================================
+      - name: "[TF] PHPIPAM"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_phpipam == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_phpipam
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.phpipam -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] PHPIPAM"
+        id: healthcheck_phpipam
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_phpipam == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_PHPIPAM }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust PHPIPAM host keys"
+        if: |
+          success() &&
+          steps.healthcheck_phpipam.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_PHPIPAM }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # ==========================================
+      # BLOC 05 : BOOKSTACK
+      # ==========================================
+      - name: "[TF] BOOKSTACK"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_bookstack == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_bookstack
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.bookstack -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] BOOKSTACK"
+        id: healthcheck_bookstack
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_bookstack == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_BOOKSTACK }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust BOOKSTACK host keys"
+        if: |
+          success() &&
+          steps.healthcheck_bookstack.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_BOOKSTACK }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # ==========================================
+      # BLOC 06 : GLPI
+      # ==========================================
+      - name: "[TF] GLPI"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_glpi == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_glpi
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.glpi -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] GLPI"
+        id: healthcheck_glpi
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_glpi == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_GLPI }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust GLPI host keys"
+        if: |
+          success() &&
+          steps.healthcheck_glpi.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_GLPI }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+      # ==========================================
+      # BLOC 07 : BDD ADMIN (GALERA)
+      # ==========================================
+      - name: "[TF] BDD ADMIN (GALERA)"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_galera_admin == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_galera_admin
+        continue-on-error: false
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
+          terraform -chdir=terraform/composants/02_admin_zone init -upgrade
+
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.bdd_adm_1 -target=module.bdd_adm_2 -target=module.bdd_adm_3 -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/02_admin_zone $TF_ACTION $ARGS
+      
+      - name: "[HEALTHCHECK] BDD ADMIN (GALERA)"
+        id: healthcheck_galera_admin
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_galera_admin == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_GALERA_ADMIN_1 }}"
+          IP2="${{ vars.TF_IP_GALERA_ADMIN_2 }}"
+          IP3="${{ vars.TF_IP_GALERA_ADMIN_3 }}"
+
+          echo "Attente du réseau sur $IP1, $IP2 et $IP3..."
+          for IP in $IP1 $IP2 $IP3; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust BDD ADMIN (GALERA) host keys"
+        if: |
+          success() &&
+          steps.healthcheck_galera_admin.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_GALERA_ADMIN_1 }}" "${{ vars.TF_IP_GALERA_ADMIN_2 }}" "${{ vars.TF_IP_GALERA_ADMIN_3 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
