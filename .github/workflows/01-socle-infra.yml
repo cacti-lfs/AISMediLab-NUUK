@@ -32,15 +32,19 @@ on:
         type: boolean
         default: false
       deploy_tf_dhcp:
-        description: "DHCP (Node1 + Node2)"
+        description: "DHCP (Failover)"
+        type: boolean
+        default: false
+      deploy_tf_dns:
+        description: "DNS"
+        type: boolean
+        default: false
+      deploy_tf_ntp:
+        description: "NTP"
         type: boolean
         default: false
       deploy_tf_addns:
-        description: "ADDNS"
-        type: boolean
-        default: false
-      deploy_tf_rsys:
-        description: "RSYSLOG"
+        description: "AD"
         type: boolean
         default: false
       
@@ -62,6 +66,18 @@ on:
         default: false
       deploy_ans_dhcp:
         description: "Cible : DHCP"
+        type: boolean
+        default: false
+      deploy_ans_dns:
+        description: "Cible : DNS"
+        type: boolean
+        default: false
+      deploy_ans_ntp:
+        description: "Cible : NTP"
+        type: boolean
+        default: false
+      deploy_ans_addns:
+        description: "Cible : AD"
         type: boolean
         default: false
 
@@ -86,14 +102,15 @@ jobs:
       TF_VAR_datastore_id: ${{ vars.TF_DATASTORE_ID }}
       
       # NETWORK
-      TF_VAR_ip_bastion_01: ${{ vars.TF_IP_BASTION_01 }}
-      TF_VAR_ip_bastion_02: ${{ vars.TF_IP_BASTION_02 }}
-      TF_VAR_bastion_vip: ${{ vars.TF_IP_BASTION_VIP }}
+      TF_VAR_ip_bastion: ${{ vars.TF_IP_BASTION }}
       TF_VAR_ip_dhcp_02: ${{ vars.TF_IP_DHCP_02 }}
       TF_VAR_ip_dhcp_01: ${{ vars.TF_IP_DHCP_01 }}
+      TF_VAR_ip_dns_1: ${{ vars.TF_IP_DNS_01 }}
+      TF_VAR_ip_dns_2: ${{ vars.TF_IP_DNS_02 }}
+      TF_VAR_ip_ntp_1: ${{ vars.TF_IP_NTP_01 }}
       TF_VAR_ip_addns_01: ${{ vars.TF_IP_ADDNS_01 }}
       TF_VAR_ip_addns_02: ${{ vars.TF_IP_ADDNS_02 }}
-      TF_VAR_ip_rsys_01: ${{ vars.TF_IP_RSYS_01 }}
+      # TF_VAR_ip_rsys_01: ${{ vars.TF_IP_RSYS_01 }}
       TF_VAR_gateway_vlan70: ${{ vars.TF_GATEWAY_VLAN70 }}
       TF_VAR_gateway_vlan40: ${{ vars.TF_GATEWAY_VLAN40 }}
       TF_VAR_gateway_vlan50: ${{ vars.TF_GATEWAY_VLAN50 }}
@@ -150,17 +167,25 @@ jobs:
         continue-on-error: false
         run: |
           export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
-          terraform -chdir=terraform/composants/01_bastion init
-          terraform -chdir=terraform/composants/01_bastion ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1
+          terraform -chdir=terraform/composants/01_core_infra init -upgrade
 
-      - name: "[CLEAN] Proxmox Bastion (si fail)"
-        if: failure() && steps.tf_bastion.outcome == 'failure'
-        run: |
-          for VMID in 401 402; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
-          done
+          TF_ACTION="${{ github.event.inputs.terraform_action }}"
+          ARGS="-target=module.bastion -parallelism=1"
+
+          if [ "$TF_ACTION" != "plan" ]; then
+            ARGS="$ARGS -auto-approve"
+          fi
+
+          terraform -chdir=terraform/composants/01_core_infra $TF_ACTION $ARGS
+
+      # - name: "[CLEAN] Proxmox Bastion (si fail)"
+      #   if: failure() && steps.tf_bastion.outcome == 'failure'
+      #   run: |
+      #     for VMID in 401 402; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_2 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_NAME_NODE_UNIX_3 }} "qm unlock $VMID || true"
+      #     done
       
       - name: "[HEALTHCHECK] Bastion"
         id: healthcheck_bastion
@@ -171,15 +196,29 @@ jobs:
             (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_bastion == 'true')
           )
         run: |
-          IP1="${{ vars.TF_IP_BASTION_01 }}"
-          IP2="${{ vars.TF_IP_BASTION_02 }}"
+          IP1="${{ vars.TF_IP_BASTION }}"
 
-          echo "Attente du réseau sur $IP1 et $IP2..."
-          for IP in $IP1 $IP2; do
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
             timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
             timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
             echo "$IP est prêt pour SSH"
           done
+
+      - name: "[SSH] Trust Bastion host keys"
+        if: |
+          success() &&
+          steps.healthcheck_bastion.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_BASTION }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
 
       - name: "[ANS] Config Bastion"
         if: |
@@ -198,19 +237,19 @@ jobs:
           github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
         id: tf_dhcp
         run: |
-          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-02-core-infra"
-          terraform -chdir=terraform/composants/02_core_infra init
-          terraform -chdir=terraform/composants/02_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
-            -target='module.dhcp_node1' \
-            -target='module.dhcp_node2'
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+          terraform -chdir=terraform/composants/01_core_infra init
+          terraform -chdir=terraform/composants/01_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
+            -target='module.dhcp_1' \
+            -target='module.dhcp_2'
 
-      - name: "[CLEAN] Proxmox DHCP (si fail)"
-        if: failure() && steps.tf_dhcp.outcome == 'failure'
-        run: |
-          for VMID in 701 702; do
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
-            ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
-          done
+      # - name: "[CLEAN] Proxmox DHCP (si fail)"
+      #   if: failure() && steps.tf_dhcp.outcome == 'failure'
+      #   run: |
+      #     for VMID in 701 702; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+      #     done
 
       - name: "[HEALTHCHECK] DHCP"
         id: healthcheck_dhcp
@@ -231,6 +270,22 @@ jobs:
             echo "$IP est prêt pour SSH"
           done
 
+      - name: "[SSH] Trust DHCP host keys"
+        if: |
+          success() &&
+          steps.healthcheck_dhcp.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_DHCP_01 }}" "${{ vars.TF_IP_DHCP_02 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+
       - name: "[ANS] Config DHCP"
         if: |
           success() &&
@@ -238,6 +293,136 @@ jobs:
         run: |
           cd ansible
           ansible-playbook -i inventory/inventory.proxmox.yml 02_deploy_dhcp.yml
+
+      # ==========================================
+      # BLOC 03 : DNS
+      # ==========================================
+      - name: "[TF] DNS (Node1 + Node2)"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_dns == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_dns
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+          terraform -chdir=terraform/composants/01_core_infra init
+          terraform -chdir=terraform/composants/01_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
+            -target='module.dns_1' \
+            -target='module.dns_2'
+
+      # - name: "[CLEAN] Proxmox DHCP (si fail)"
+      #   if: failure() && steps.tf_dhcp.outcome == 'failure'
+      #   run: |
+      #     for VMID in 701 702; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+      #     done
+
+      - name: "[HEALTHCHECK] DNS"
+        id: healthcheck_dns
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_dns == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_DNS_01 }}"
+          IP2="${{ vars.TF_IP_DNS_02 }}"
+
+          echo "Attente du réseau sur $IP1 et $IP2..."
+          for IP in $IP1 $IP2; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust DNS host keys"
+        if: |
+          success() &&
+          steps.healthcheck_dns.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_DNS_01 }}" "${{ vars.TF_IP_DNS_02 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+
+      - name: "[ANS] Config DNS"
+        if: |
+          success() &&
+          steps.healthcheck_dns.outcome == 'success'
+        run: |
+          cd ansible
+          ansible-playbook -i inventory/inventory.proxmox.yml 03_deploy_dns.yml
+
+      # ==========================================
+      # BLOC 04 : NTP
+      # ==========================================
+      - name: "[TF] NTP"
+        if: |
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Sélection' && github.event.inputs.deploy_tf_ntp == 'true' ||
+          github.event.inputs.run_terraform == 'true' && github.event.inputs.target_scope_tf == 'Tous'
+        id: tf_ntp
+        run: |
+          export TF_WORKSPACE="nuuk-medilab-${{ github.event.inputs.environment }}-01-bastion"
+          terraform -chdir=terraform/composants/01_core_infra init
+          terraform -chdir=terraform/composants/01_core_infra ${{ github.event.inputs.terraform_action }} -auto-approve -parallelism=1 \
+            -target='module.ntp_1'
+
+      # - name: "[CLEAN] Proxmox NTP (si fail)"
+      #   if: failure() && steps.tf_ntp.outcome == 'failure'
+      #   run: |
+      #     for VMID in 701 702; do
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_1 }} "qm unlock $VMID || true"
+      #       ssh -o StrictHostKeyChecking=no root@${{ vars.TF_IP_NODE_2 }} "qm unlock $VMID || true"
+      #     done
+
+      - name: "[HEALTHCHECK] NTP"
+        id: healthcheck_ntp
+        if: |
+          success() &&
+          github.event.inputs.run_ansible == 'true' && (
+            github.event.inputs.target_scope_ans == 'Tous' ||
+            (github.event.inputs.target_scope_ans == 'Sélection' && github.event.inputs.deploy_ans_ntp == 'true')
+          )
+        run: |
+          IP1="${{ vars.TF_IP_NTP_01 }}"
+
+          echo "Attente du réseau sur $IP1..."
+          for IP in $IP1; do
+            timeout 180s bash -c "until ping -c 1 -W 1 $IP > /dev/null; do echo 'Waiting for $IP...'; sleep 5; done"
+            timeout 120s bash -c "until nc -zvw1 $IP 22; do sleep 5; done"
+            echo "$IP est prêt pour SSH"
+          done
+
+      - name: "[SSH] Trust NTP host keys"
+        if: |
+          success() &&
+          steps.healthcheck_ntp.outcome == 'success'
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+      
+          for IP in "${{ vars.TF_IP_NTP_01 }}"; do
+            ssh-keygen -R "$IP" || true
+            ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts
+          done
+
+          chmod 600 ~/.ssh/known_hosts
+
+
+      - name: "[ANS] Config NTP"
+        if: |
+          success() &&
+          steps.healthcheck_ntp.outcome == 'success'
+        run: |
+          cd ansible
+          ansible-playbook -i inventory/inventory.proxmox.yml 02_deploy_ntp.yml
 
       # ==========================================
       # BLOC 03 : ADDNS

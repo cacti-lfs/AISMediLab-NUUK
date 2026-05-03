@@ -12,7 +12,7 @@ jobs:
   # --- SCAN SECRETS ---
   gitleaks:
     name: Gitleaks Scan
-    runs-on: [self-hosted, poc-runner]
+    runs-on: [self-hosted, nuuk-runner]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
@@ -25,7 +25,7 @@ jobs:
   # --- ANALYSE DE SÉCURITÉ IAC ---
   trivy-iac:
     name: Trivy IaC Scan
-    runs-on: [self-hosted, poc-runner]
+    runs-on: [self-hosted, nuuk-runner]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Run Trivy vulnerability scanner in IaC mode
@@ -40,7 +40,7 @@ jobs:
   # --- QUALITÉ TERRAFORM & ANSIBLE ---
   lint-and-validate:
     name: Lints & Validation
-    runs-on: [self-hosted, poc-runner]
+    runs-on: [self-hosted, nuuk-runner]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
