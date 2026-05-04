@@ -76,7 +76,7 @@ module "bastion" {
   ipv4_gateway = var.gateway_vlan40
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "dhcp_1" {
@@ -157,7 +157,7 @@ module "dhcp_1" {
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "dhcp_2" {
@@ -238,7 +238,7 @@ module "dhcp_2" {
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "dns_1" {
@@ -319,7 +319,7 @@ module "dns_1" {
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "dns_2" {
@@ -400,7 +400,7 @@ module "dns_2" {
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "ntp_1" {
@@ -481,7 +481,7 @@ module "ntp_1" {
   ipv4_gateway = var.gateway_vlan70
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 # AD 1 + 2 + RODC

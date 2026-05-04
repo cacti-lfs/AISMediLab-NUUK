@@ -16,7 +16,7 @@ module "haproxy_1" {
   vm_name        = "DEB-HAADMIN-1"
   vm_id          = 1201
   vm_description = "VM HAProxy 1 pour la zone admin"
-  vm_tags        = ["admin", "vlan120", var.environnement]
+  vm_tags        = ["ha_admin", "vlan120", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -77,7 +77,7 @@ module "haproxy_1" {
   ipv4_gateway = var.gateway_vlan120
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "haproxy_2" {
@@ -159,7 +159,7 @@ module "haproxy_2" {
   ipv4_gateway = var.gateway_vlan120
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "grafana" {
@@ -180,7 +180,7 @@ module "grafana" {
   vm_name        = "DEB-GRAFANA-1"
   vm_id          = 551
   vm_description = "VM Grafana"
-  vm_tags        = ["supervision", "vlan50", var.environnement]
+  vm_tags        = ["grafana", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -241,7 +241,7 @@ module "grafana" {
   ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "zabbix" {
@@ -262,7 +262,7 @@ module "zabbix" {
   vm_name        = "DEB-ZABBIX-1"
   vm_id          = 552
   vm_description = "VM Zabbix"
-  vm_tags        = ["supervision", "vlan50", var.environnement]
+  vm_tags        = ["zabbix", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -323,7 +323,7 @@ module "zabbix" {
   ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "phpipam" {
@@ -344,7 +344,7 @@ module "phpipam" {
   vm_name        = "DEB-PHPIPAM-1"
   vm_id          = 553
   vm_description = "VM phpIPAM"
-  vm_tags        = ["supervision", "vlan50", var.environnement]
+  vm_tags        = ["phpipam", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -405,7 +405,7 @@ module "phpipam" {
   ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "bookstack" {
@@ -426,7 +426,7 @@ module "bookstack" {
   vm_name        = "DEB-BOOKSTACK-1"
   vm_id          = 554
   vm_description = "VM Bookstack"
-  vm_tags        = ["supervision", "vlan50", var.environnement]
+  vm_tags        = ["bookstack", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -487,7 +487,7 @@ module "bookstack" {
   ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "glpi" {
@@ -508,7 +508,7 @@ module "glpi" {
   vm_name        = "DEB-GLPI-1"
   vm_id          = 555
   vm_description = "VM GLPI"
-  vm_tags        = ["supervision", "vlan50", var.environnement]
+  vm_tags        = ["glpi", "vlan50", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -569,7 +569,7 @@ module "glpi" {
   ipv4_gateway = var.gateway_vlan50
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "bdd_adm_1" {
@@ -590,7 +590,7 @@ module "bdd_adm_1" {
   vm_name        = "DEB-BDDADM-1"
   vm_id          = 1501
   vm_description = "VM Base de Données Administrateur"
-  vm_tags        = ["supervision", "vlan150", var.environnement]
+  vm_tags        = ["bdd_admin", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -651,7 +651,7 @@ module "bdd_adm_1" {
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "bdd_adm_2" {
@@ -672,7 +672,7 @@ module "bdd_adm_2" {
   vm_name        = "DEB-BDDADM-2"
   vm_id          = 1502
   vm_description = "VM Base de Données Administrateur"
-  vm_tags        = ["supervision", "vlan150", var.environnement]
+  vm_tags        = ["bdd_admin", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -733,7 +733,7 @@ module "bdd_adm_2" {
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
 
 module "bdd_adm_3" {
@@ -754,7 +754,7 @@ module "bdd_adm_3" {
   vm_name        = "DEB-BDDADM-3"
   vm_id          = 1503
   vm_description = "VM Base de Données Administrateur"
-  vm_tags        = ["supervision", "vlan150", var.environnement]
+  vm_tags        = ["bdd_admin", "vlan150", var.environnement]
   # vm_bios = "seabios" par défaut
   # vm_machine = "q35" par défaut
   # vm_tablet_device = false par défaut
@@ -815,5 +815,5 @@ module "bdd_adm_3" {
   ipv4_gateway = var.gateway_vlan150
 
   dns_domain  = "nuuk-medilab.lan"
-  dns_servers = ["1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
+  dns_servers = ["192.168.32.195", "1.1.1.1", "8.8.8.8"] # Temporaire avant de mettre les IPs de nos DNS interne
 }
