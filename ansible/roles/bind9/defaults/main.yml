@@ -1,0 +1,60 @@
+---
+bind9_domain: "nuuk-medilab.lan"
+
+bind9_forwarders:
+  - 1.1.1.1
+  - 8.8.8.8
+
+bind9_dns_servers:
+  - 192.168.32.195
+  - 192.168.32.196
+
+bind9_allowed_networks:
+  - 192.168.32.0/19
+
+bind9_reverse_zone: "32.168.192.in-addr.arpa"
+
+bind9_records:
+  # 01_core_infra
+  - { name: "dns1", ip: "192.168.32.195" }
+  - { name: "dns2", ip: "192.168.32.196" }
+  - { name: "chrony1", ip: "192.168.32.197" }
+  - { name: "ntp1", ip: "192.168.32.197" }
+  - { name: "dhcp1", ip: "192.168.32.193" }
+  - { name: "ad1", ip: "192.168.32.194" }
+  - { name: "rodc1", ip: "192.168.32.194" }
+  - { name: "bastion", ip: "192.168.32.49" }
+
+  # 02_admin_zone
+  - { name: "haadmin1", ip: "192.168.35.97" }
+  - { name: "haadmin2", ip: "192.168.35.98" }
+  - { name: "grafana", ip: "192.168.32.65" }
+  - { name: "zabbix", ip: "192.168.32.66" }
+  - { name: "phpipam", ip: "192.168.32.67" }
+  - { name: "bookstack", ip: "192.168.32.68" }
+  - { name: "glpi", ip: "192.168.32.69" }
+  - { name: "bdd-admin1", ip: "192.168.35.209" }
+  - { name: "bdd-admin2", ip: "192.168.35.210" }
+  - { name: "bdd-admin3", ip: "192.168.35.211" }
+
+  # 03_salaries_zone
+  - { name: "ha-salaries1", ip: "192.168.35.99" }
+  - { name: "ha-salaries2", ip: "192.168.35.100" }
+  - { name: "web-internal1", ip: "192.168.35.129" }
+  - { name: "web-internal2", ip: "192.168.35.130" }
+  - { name: "app-internal1", ip: "192.168.35.129" }
+  - { name: "app-internal2", ip: "192.168.35.130" }
+  - { name: "bdd-web1", ip: "192.168.35.193" }
+  - { name: "bdd-web2", ip: "192.168.35.194" }
+  - { name: "bdd-web3", ip: "192.168.35.195" }
+
+  # 04_patients_zone
+  - { name: "ha-patients1", ip: "192.168.35.101" }
+  - { name: "ha-patients2", ip: "192.168.35.102" }
+
+bind9_cnames:
+  - { name: "dns", target: "dns1" }
+  - { name: "ntp", target: "chrony1" }
+  - { name: "dhcp", target: "dhcp1" }
+  - { name: "pve", target: "pve1" }
+  - { name: "admin-lb", target: "haadmin1" }

@@ -1,0 +1,72 @@
+---
+- name: Installer Bind9
+  apt:
+    name:
+      - bind9
+      - bind9utils
+      - dnsutils
+    state: present
+    update_cache: true
+  become: true
+
+- name: Déployer named.conf.options
+  template:
+    src: named.conf.options.j2
+    dest: /etc/bind/named.conf.options
+    owner: root
+    group: bind
+    mode: "0644"
+  become: true
+  notify: restart bind9
+
+- name: Déployer named.conf.local
+  template:
+    src: named.conf.local.j2
+    dest: /etc/bind/named.conf.local
+    owner: root
+    group: bind
+    mode: "0644"
+  become: true
+  notify: restart bind9
+
+- name: Déployer zone directe
+  template:
+    src: db.zone.j2
+    dest: "/etc/bind/db.{{ bind9_domain }}"
+    owner: root
+    group: bind
+    mode: "0644"
+  become: true
+  notify: restart bind9
+
+- name: Déployer zone reverse
+  template:
+    src: db.reverse.j2
+    dest: "/etc/bind/db.{{ bind9_reverse_zone }}"
+    owner: root
+    group: bind
+    mode: "0644"
+  become: true
+  notify: restart bind9
+
+- name: Vérifier la configuration Bind9
+  command: named-checkconf
+  become: true
+  changed_when: false
+
+- name: Vérifier la zone directe
+  command: "named-checkzone {{ bind9_domain }} /etc/bind/db.{{ bind9_domain }}"
+  become: true
+  changed_when: false
+
+- name: Vérifier la zone reverse
+  command: "named-checkzone {{ bind9_reverse_zone }} /etc/bind/db.{{ bind9_reverse_zone }}"
+  become: true
+  changed_when: false
+
+- name: Activer et démarrer Bind9
+  service:
+    name: bind9
+    state: started
+    enabled: true
+  become: true

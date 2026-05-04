@@ -1,0 +1,19 @@
+$TTL 86400
+@   IN  SOA dns1.{{ bind9_domain }}. admin.{{ bind9_domain }}. (
+        {{ ansible_date_time.epoch }}
+        3600
+        1800
+        604800
+        86400
+)
+
+@       IN  NS      dns1.{{ bind9_domain }}.
+@       IN  NS      dns2.{{ bind9_domain }}.
+
+{% for record in bind9_records %}
+{{ "%-20s" | format(record.name) }} IN A {{ record.ip }}
+{% endfor %}
+
+{% for cname in bind9_cnames %}
+{{ "%-20s" | format(cname.name) }} IN CNAME {{ cname.target }}.{{ bind9_domain }}.
+{% endfor %}

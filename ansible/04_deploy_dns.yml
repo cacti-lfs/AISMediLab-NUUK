@@ -1,0 +1,6 @@
+---
+- name: Déploiement DNS Bind9
+  hosts: ROLE_DNS
+  roles:
+    - common
+    - bind9
