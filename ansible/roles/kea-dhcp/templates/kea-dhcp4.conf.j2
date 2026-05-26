@@ -3,6 +3,10 @@
     "interfaces-config": {
       "interfaces": ["{{ kea_interface }}"]
     },
+    "control-socket": {
+      "socket-type": "unix",
+      "socket-name": "/run/kea/kea4-socket"
+    },
     "lease-database": {
       "type": "memfile",
       "lfc-interval": 3600
@@ -47,7 +51,7 @@
             "peers": [
               {
                 "name": "{{ kea_peer_primary }}",
-                "url": "http://{{ kea_primary_ip }}:8000/",
+                "url": "http://{{ kea_primary_ip }}:{{ kea_ctrl_agent_port }}/",
                 "role": "primary"
               },
               {
