@@ -1,16 +1,22 @@
 ---
-
 kea_interface: "eth0"
-dns_servers: ["8.8.8.8", "1.1.1.1"]
+
+dns_servers:
+  - "8.8.8.8"
+  - "1.1.1.1"
+
 domain_name: "nuuk-medilab.lan"
-kea_ctrl_agent_port: 8001
-kea_ha_port: 8000
+
+kea_ctrl_agent_port: 8000
+
+kea_api_user: "kea-api"
+kea_api_password: "password"
 
 kea_peer_primary: "{{ groups['ROLE_DHCP'][0] }}"
 kea_peer_standby: "{{ groups['ROLE_DHCP'][1] }}"
+
 kea_primary_ip: "{{ hostvars[kea_peer_primary]['ansible_host'] }}"
 kea_secondary_ip: "{{ hostvars[kea_peer_standby]['ansible_host'] }}"
-
 dhcp_subnets:
 
   # --- VLAN 10 : Management ---
